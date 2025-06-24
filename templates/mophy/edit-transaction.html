@@ -1,0 +1,58 @@
+{% extends 'mophy/elements/layouts/admin.html' %}
+{% load static widget_tweaks %}
+
+
+{% block additional_css %}
+
+{% endblock %}
+
+{% block message %}
+{% include 'mophy/elements/alert.html' %}
+{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center h-100 align-items-center">
+<div class="col-xl-12 col-lg-12">
+<div class="card">
+<div class="card-header">
+</div>
+<div class="card-body">
+<div class="basic-form">
+<form  method='post' enctype='multipart/form-data' novalidate autocomplete='off'>
+{% csrf_token %}
+<div class="row col-md-12">
+
+    <div class="mb-3 col-md-4">
+      <label class="form-label"><b>Status</b></label>
+      {% if form.status.value %}
+        {{ form.status|attr:"type:text"|attr:"class:form-control"|attr:"placeholder:status" }}
+      {% else %}
+        {{ form.status|attr:"type:text"|attr:"class:form-control"|attr:"placeholder:" }}
+      {% endif %}
+      </div>
+
+</div>
+  
+<button type="submit" class="btn btn-primary mt-4 mb-5 ">Save</button>
+<a href="{% url 'mophy:transactions' %}" class="btn btn-primary mt-4 mb-5">Cancel</a>
+</form>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+
+{% endblock %}
+
+
+{% block additional_js %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
+
+{% endblock %}
+

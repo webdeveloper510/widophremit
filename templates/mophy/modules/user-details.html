@@ -1,0 +1,939 @@
+{% extends 'mophy/elements/layouts/admin.html' %}
+{% load static %}
+
+{% block additional_css %}
+{% endblock %}
+
+{% block message %}
+{% include 'mophy/elements/alert.html' %}
+{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="/static/mophy/vendor/datatables/css/jquery.dataTables.min.css" >
+<link rel="stylesheet" href="/static/mophy/css/style.css">
+
+<div class="row mx-0">
+    <div class="col-sm-8 p-md-0">
+     <div class="card-header">
+       <h4 class="fw-bold text-black card-title">Customer Profile &nbsp&nbsp
+           <span class="text-black fw-bold fs-4 custom-span customer-id" >(Cust ID- {{user_obj.customer_id}})</span> </h4>
+     </div>
+    </div>
+ <div class="col-sm-4 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex fw-bold">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'mophy:users' %}"><u class="fw-bold">Back</u></a></li>
+  </ol>
+ </div>
+</div>
+
+<!-- Summary -->
+<div class="row">
+  <div class="col-md-12">
+    <div class="card corridore_card">
+        
+      <div class="card-header">
+        {% comment %} <h4 class="card-title"> {% endcomment %}
+        <h4 class="fw-bold mb-0">Summary
+      </div>
+      <div class="card-body"> 
+        <div class="row">
+            <div class="col-xl-12">
+               <div class="row">
+                    <div class="d-flex col-xl-3 col-xxl-3  col-md-3 col-sm-6 mb-4 ">
+                        <svg class="me-3" width="14" height="54" viewBox="0 0 14 54" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="-6.10352e-05" width="14" height="54" rx="7" fill="#AC39D4"/>
+                        </svg>
+                        <div>
+                            <p class="fs-14 mb-2">Total Recipients</p>
+                            <span class="fs-16 font-w500"><span class="text-black me-2">
+                                {% if total_recipients %}
+                                    <h>{{total_recipients}}</h>
+                                {% else %}
+                                    <h>None</h>
+                                {% endif %}
+                        </div>
+                    </div>
+                    <div class="d-flex col-xl-3 col-xxl-3  col-md-3 col-sm-6 mb-4">
+                        <svg class="me-3" width="14" height="54" viewBox="0 0 14 54" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="-6.10352e-05" width="14" height="54" rx="7" fill="#40D4A8"/>
+                        </svg>
+                        <div>
+                            <p class="fs-14 mb-2">No. of Transactions</p>
+                            <span class="fs-16 font-w500"><span class="text-black me-2">
+                                {% if total_transactions %}
+                                    <h>{{total_transactions}}</h>
+                                {% else %}
+                                    <h>None</h>
+                                {% endif %}
+                        </div>
+                    </div>
+                    <div class="d-flex col-xl-3 col-xxl-3  col-md-3 col-sm-6 mb-4">
+                        <svg class="me-3" width="14" height="54" viewBox="0 0 14 54" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="-6.10352e-05" width="14" height="54" rx="7" fill="#1EB6E7"/>
+                        </svg>
+                        <div>
+                            <p class="fs-14 mb-2">Total Payin (AUD)</p>
+                            <span class="fs-16 font-w500"><span class="text-black me-2">
+                                {% if aud_amount %}
+                                    <h class="comma-values">AUD {{aud_amount}}</h>
+                                {% else %}
+                                    <h class="comma-values">None</h>
+                                {% endif %}
+                        </div>
+                    </div>
+                    <div class="d-flex col-xl-3 col-xxl-3  col-md-3 col-sm-6 mb-4">
+                        <svg class="me-3" width="14" height="54" viewBox="0 0 14 54" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="-6.10352e-05" width="14" height="54" rx="7" fill="#461EE7"/>
+                        </svg>
+                        <div>
+                            <p class="fs-14 mb-2">Total Payin (NZD)</p>
+                            <span class="fs-16 font-w500"><span class="text-black me-2">
+                                {% if nzd_amount %}
+                                    <h class="comma-values">NZD {{nzd_amount}}</h>
+                                {% else %}
+                                    <h class="comma-values">None</h>
+                                {% endif %}                        </div>
+                    </div>
+               </div>
+            </div>
+        </div>	
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--  Customer Details -->
+<div class="row">
+ <div class="col-xl-6">
+  <div class="card corridore_card">
+    <div class="card-header">
+        <h4 class="fw-bold mb-0">Personal Details </h4>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive table-hover fs-14 card-table">
+        <table class="table display mb-4 dataTablesCard user_details">
+          <tbody>
+            <tr>
+            <td  class="text-black font-w600 mb-0">First Name</td>
+            {% if user_obj.First_name %}
+                <td><span class="text-black text-nowrap">{{user_obj.First_name}}</span></td>
+            {% else %}
+                <td><span class="text-black text-nowrap">None</span></td>
+            {% endif %}
+            </tr>
+            <tr>
+                <td  class="text-black font-w600 mb-0">Last Name</td>
+                {% if user_obj.Last_name %}
+                    <td><span class="text-black text-nowrap">{{user_obj.Last_name}}</span></td>
+                {% else %}
+                    <td><span class="text-black text-nowrap">None</span></td>
+                {% endif %}
+            </tr>
+            <tr>
+                <td  class="text-black font-w600 mb-0">Mobile</td>
+                {% if user_obj.mobile %}
+                    <td><span class="text-black text-nowrap">{{user_obj.mobile}}</span></td>
+                {% else %}
+                    <td><span class="text-black text-nowrap">None</span></td>
+                {% endif %}
+            </tr>
+            <tr>
+                <td  class="text-black font-w600 mb-0">Email</td>
+                {% if user_obj.email %}
+                    <td><span class="text-black text-nowrap">{{user_obj.email}}</span></td>
+                {% else %}
+                    <td><span class="text-black text-nowrap">None</span></td>
+                {% endif %}
+            </tr>
+            <tr>
+                <td  class="text-black font-w600 mb-0">Date of Birth</td>
+                {% if user_obj.Date_of_birth %}
+                    <td><span class="text-black text-nowrap">{{user_obj.Date_of_birth}}</span></td>
+                {% else %}
+                    <td><span class="text-black text-nowrap">None</span></td>
+                {% endif %}
+            </tr>
+            <tr>
+                <td  class="text-black font-w600 mb-0">Occupation</td>
+                {% if user_obj.occupation %}
+                    <td><span class="text-black text-nowrap">{{user_obj.occupation}}</span></td>
+                {% else %}
+                    <td><span class="text-black text-nowrap">None</span></td>
+                {% endif %}
+            </tr>
+            <tr>
+                <td class="text-black font-w600 mb-0">Documents</td>
+                {% if user_obj.documents %}
+                    <td>
+                        <span class="text-black text-nowrap" id="current_document_value">
+                            {% if user_obj.documents == 'not_required' %}
+                                Not required
+                            {% elif user_obj.documents == 'verification_pending' %}
+                                Verification Pending
+                            {% else %}
+                                {{user_obj.documents}}
+                            {% endif %}
+                            <button type="button" class="btn pull-right" data-bs-toggle="modal" data-bs-target="#documents_modal">
+                                <i class="fas fa-pencil-alt text-primary pull-right"></i>
+                            </button>
+                        </span>
+                    </td>
+                {% else %}
+                    <td>
+                        <span class="text-black text-nowrap">
+                            None
+                            <button type="button" class="btn pull-right" data-bs-toggle="modal" data-bs-target="#documents_modal">
+                                <i class="fas fa-pencil-alt text-primary pull-right"></i>
+                            </button>
+                        </span>
+                    </td>
+                {% endif %}
+            </tr>
+            <tr>
+                <td class="text-black font-w600 mb-0">Payment Per Annum</td>
+                {% if user_obj.payment_per_annum %}
+                    <td>
+                        <span class="text-black text-nowrap" id="payment_per_annum_old_value">
+                            {{user_obj.payment_per_annum}}
+                            <button type="button" class="btn pull-right" data-bs-toggle="modal" data-bs-target="#payment_per_annum_modal">
+                                <i class="fas fa-pencil-alt text-primary pull-right"></i>
+                            </button>
+                        </span>
+                    </td>
+                {% else %}
+                    <td>
+                        <span class="text-black text-nowrap" id="payment_per_annum_old_value">
+                            None
+                            <button type="button" class="btn pull-right" data-bs-toggle="modal" data-bs-target="#payment_per_annum_modal">
+                                <i class="fas fa-pencil-alt text-primary pull-right"></i>
+                            </button>
+                        </span>
+                    </td>
+                {% endif %}
+            </tr>
+            <tr>
+                <td  class="text-black font-w600 mb-0">Value Per Annum</td>
+                {% if user_obj.value_per_annum %}
+                    <td>
+                        <span class="text-black text-nowrap" id="value_per_annum_old_value">
+                            {{user_obj.value_per_annum}}
+                            <button type="button" class="btn pull-right" data-bs-toggle="modal" data-bs-target="#value_per_annum_modal">
+                                <i class="fas fa-pencil-alt text-primary pull-right"></i>
+                            </button>
+                        </span>
+                    </td>
+                {% else %}
+                    <td>
+                        <span class="text-black text-nowrap" id="value_per_annum_old_value">
+                            None
+                            <button type="button" class="btn pull-right" data-bs-toggle="modal" data-bs-target="#value_per_annum_modal">
+                                <i class="fas fa-pencil-alt text-primary pull-right"></i>
+                            </button>
+                        </span>
+                    </td>
+                {% endif %}
+            </tr>
+
+            {% if old_payment_tier %}
+            <tr>
+                <td class="text-black font-w600 mb-0">Last Updated Payment Per Annum</td>
+                    <td>
+                        <span class="text-black text-nowrap"> {{old_payment_tier.old_tier}}</span>
+                        <br><i>{{old_payment_tier.updated_at.date}}</i>
+                   </td>        
+            </tr>    
+            {% endif %}
+
+            {% if old_value_tier %}
+            <tr>
+                <td class="text-black font-w600 mb-0">Last Updated Value Per Annum</td>
+                <td>
+                    <span class="text-black text-nowrap">{{old_value_tier.old_tier}}</span>
+                    <br><i>{{old_value_tier.updated_at.date}}</i>
+                </td> 
+            </tr>    
+            {% endif %}
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+ </div>
+ <div class="col-xl-6">
+   <div class="card corridore_card">
+     <div class="card-header">
+        <h4 class="fw-bold">Address </h4>
+     </div>
+<div class="card-body">
+
+<div class="table-responsive table-hover fs-14 card-table">
+<table class="table display mb-4 dataTablesCard user_details">
+<thead>
+
+<tr>
+
+</th>
+</tr>
+</thead>
+<tbody>
+
+<tr>
+    <td class="text-black font-w600 mb-0">Flat</td>
+    {% if address.flat %}
+        <td><span class="text-black text-nowrap">{{address.flat}}</span></td>
+    {% else %}
+        <td><span class="text-black text-nowrap">None</span></td>
+    {% endif %}
+</tr>
+<tr>
+    <td class="text-black font-w600 mb-0">Building</td>
+    {% if address.building %}
+        <td><span class="text-black text-nowrap">{{address.building}}</span></td>
+    {% else %}
+        <td><span class="text-black text-nowrap">None</span></td>
+    {% endif %}
+</tr>
+<tr>
+    <td class="text-black font-w600 mb-0">Street</td>
+    {% if address.street %}
+        <td><span class="text-black text-nowrap">{{address.street}}</span></td>
+    {% else %}
+        <td><span class="text-black text-nowrap">None</span></td>
+    {% endif %}
+</tr>
+<tr>
+    <td class="text-black font-w600 mb-0">Suburb</td>
+    {% if address.city %}
+        <td><span class="text-black text-nowrap">{{address.city}}</span></td>
+    {% else %}
+        <td><span class="text-black text-nowrap">None</span></td>
+    {% endif %}
+</tr>
+<tr>
+    <td class="text-black font-w600 mb-0">Region</td>
+    {% if address.state %}
+        <td><span class="text-black text-nowrap">{{address.state}}</span></td>
+    {% else %}
+        <td><span class="text-black text-nowrap">None</span></td>
+    {% endif %}
+</tr>
+<tr>
+    <td class="text-black font-w600 mb-0">Country</td>
+    {% if address.country %}
+        <td><span class="text-black text-nowrap">{{address.country}}</span></td>
+    {% else %}
+        <td><span class="text-black text-nowrap">None</span></td>
+    {% endif %}
+
+</tr>
+<tr>
+    <td class="text-black font-w600 mb-0">Postcode</td>
+    {% if address.postcode %}
+        <td><span class="text-black text-nowrap">{{address.postcode}}</span></td>
+    {% else %}
+        <td><span class="text-black text-nowrap">None</span></td>
+    {% endif %}
+</tr>
+
+</tbody>
+</table>
+</div>
+</div>
+   </div>
+ </div>
+</div>
+
+<!-- Payment Details -->
+{% if payto != None or payid != None%}
+<div class="row">
+    <div class="col-xl-6">
+     <div class="card corridore_card">
+       <div class="card-header">
+           <h4 class="fw-bold mb-0">PayTo Agreement Details </h4>
+       </div>
+       <div class="card-body">
+         <div class="table-responsive table-hover fs-14 card-table">
+           <table class="table display mb-4 dataTablesCard user_details">
+            <tbody>
+                    {% if payto.payid == 'BBAN' or payto.payid == 'none'  %}
+                    <tr>
+                        <td  class="text-black font-w600 mb-0">BSB</td>
+                        {% if payto.bsb_code %}
+                            <td><span class="text-black text-nowrap"> {{payto.bsb_code}}</span></td>
+                        {% else %}
+                            <td><span class="text-black text-nowrap">None</span></td>
+                        {% endif %}
+                    </tr>
+                    <tr>
+                        <td  class="text-black font-w600 mb-0">Account Number</td>
+                        {% if payto.account_number %}
+                            <td><span class="text-black text-nowrap"> {{payto.account_number}}</span></td>
+                        {% else %}
+                            <td><span class="text-black text-nowrap">None</span></td>
+                        {% endif %}
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td  class="text-black font-w600 mb-0">PayID Type</td>
+                        {% if payto.payid_type %}
+                            <td><span class="text-black text-nowrap">{{payto.payid_type}}</span></td>
+                        {% else %}
+                            <td><span class="text-black text-nowrap">None</span></td>
+                        {% endif %}
+                    </tr>
+                    <tr>
+                        <td  class="text-black font-w600 mb-0">PayID</td>
+                        {% if payto.payid %}
+                            <td><span class="text-black text-nowrap">{{payto.payid}}</span></td>
+                        {% else %}
+                            <td><span class="text-black text-nowrap">None</span></td>
+                        {% endif %}
+                    </tr>
+                {% endif %}
+               <tr>
+                    <td  class="text-black font-w600 mb-0">Status</td>
+                    {% if payto.status %}
+                        <td><span class="text-black text-nowrap">{{payto.status}}</span></td>
+                    {% else %}
+                        <td><span class="text-black text-nowrap">None</span></td>
+                    {% endif %}
+                </tr>
+                <tr>
+                    <td  class="text-black font-w600 mb-0">Start Date</td>
+                    {% if payto.agreement_start_date %}
+                        <td><span class="text-black text-nowrap">{{payto.agreement_start_date}}</span></td>
+                    {% else %}
+                        <td><span class="text-black text-nowrap">None</span></td>
+                    {% endif %}
+                </tr>
+                <tr>
+                    <td  class="text-black font-w600 mb-0">Max. Amount Limit</td>
+                    {% if payto.max_amount %}
+                        <td><span class="text-black text-nowrap">{{payto.max_amount}}</span></td>
+                    {% else %}
+                        <td><span class="text-black text-nowrap">None</span></td>
+                    {% endif %}
+                </tr>
+    
+    
+    
+            </tbody>
+           </table>
+         </div>
+       </div>
+     </div>
+    </div>
+    <div class="col-xl-6">
+      <div class="card corridore_card">
+        <div class="card-header">
+           <h4 class="fw-bold">PayID Details</h4>
+        </div>
+   <div class="card-body">
+   
+   <div class="table-responsive table-hover fs-14 card-table">
+    <table class="table display mb-4 dataTablesCard user_details" id="example5">
+        <tbody>
+            <tr>
+                <td  class="text-black font-w600 mb-0">Email</td>
+                {% if payid.zai_email %}
+                    <td><span class="text-black text-nowrap">{{payid.zai_email}}</span></td>
+                {% else %}
+                    <td><span class="text-black text-nowrap">None</span></td>
+                {% endif %}
+            </tr>
+            <tr>
+                <td  class="text-black font-w600 mb-0">PayID</td>
+                {% if payid.payid %}
+                    <td><span class="text-black text-nowrap"> {{payid.payid}}</span></td>
+                {% else %}
+                    <td><span class="text-black text-nowrap">None</span></td>
+                {% endif %}
+            </tr>                
+        </tbody>
+        </table>
+   </div>
+   </div>
+      </div>
+    </div>
+</div>
+{% endif %}   
+
+<!-- Recipient Details -->
+<div class="row newlayout-table">
+ <div class="col-xl-12">
+  <div class="card corridore_card">
+    <div class="card-header">
+        {% comment %} <h4 class="card-title">{{ user_obj.groups.all }}</h4> {% endcomment %}
+        <h4 class="fw-bold">Recipient Details</h4> 
+        <!-- <span>
+            <a href="{% url 'mophy:add-recipient' id=user_obj.id %}"><button class="btn btn-primary fw-bold" style="width: 100%;;">Add</button></a>
+        </span> -->
+    </div>
+    <div class="card-body">
+      <div class="table-hover fs-14 card-table" id="custom-search1" style="position: relative;">
+        <table class="table style-1 custom-tbl table-responsive-md card-table previous-transactions" id="example2"  style="width: 100% !important;">
+            <thead>
+                <tr class="header-row">
+                    <th>S/N</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <!-- <th>Email</th> -->
+                    <th>Mobile</th>
+                    <th>Flat</th>
+                    <th>Building</th>
+                    <th>Street</th>
+                    <th>Postcode</th>
+                    <th>Suburb</th>
+                    <th>Region</th>
+                    <th>Country</th>
+                    <th>Bank Details</th>
+                    <!-- <th class="recipient_th">Action</th> -->
+                </tr>
+            </thead>
+            <tbody>
+            {% for r in recipients %}
+            <tr> 
+                <td><h6 class="text-black font-w400 mb-0">{{forloop.counter}}</h6></td>
+                {% if r.recipient_id__first_name %}
+                <td><h6 class="text-black font-w400 mb-0">{{ r.recipient_id__first_name }}</h6></td>
+                {% else %} <td> None </td> {% endif %}
+
+                {% if r.recipient_id__last_name %}
+                <td><h6 class="text-black font-w400 mb-0">{{ r.recipient_id__last_name }}</h6></td>
+                {% else %}  <td>None</td>  {% endif %}
+
+                <!-- {% if r.recipient_id__email %}
+                <td><h6 class="text-black font-w400 mb-0">{{ r.recipient_id__email }}</h6></td>
+                {% else %} <td>None</td> {% endif %} -->
+
+                {% if r.recipient_id__mobile %}
+                <td><h6 class="text-black font-w400 mb-0">{{ r.recipient_id__mobile}}</h6> </td>
+                {% else %} <td>None</td> {% endif %}
+
+                {% if r.recipient_id__flat %}
+                <td><h6 class="text-black font-w400 mb-0">{{ r.recipient_id__flat}}</h6> </td>
+                {% else %} <td>None</td> {% endif %}
+
+                {% if r.recipient_id__building %}
+                <td> <h6 class="text-black font-w400 mb-0">{{ r.recipient_id__building }}</h6> </td>
+                {% else %} <td>None</td> {% endif %}
+
+                {% if r.recipient_id__street %}
+                <td><h6 class="text-black font-w400 mb-0">{{ r.recipient_id__street }}</h6></td>
+                {% else %} <td>None</td> {% endif %}
+
+                {% if r.recipient_id__postcode %}
+                <td><h6 class="text-black font-w400 mb-0">{{ r.recipient_id__postcode }}</h6> </td>
+                {% else %}  <td>None</td>  {% endif %}
+
+                {% if r.recipient_id__city %}
+                <td> <h6 class="text-black font-w400 mb-0">{{ r.recipient_id__city }}</h6></td>
+                {% else %}   <td>None</td> {% endif %}
+
+                {% if r.recipient_id__state %}
+                <td> <h6 class="text-black font-w400 mb-0">{{ r.recipient_id__state }}</h6></td>
+                {% else %} <td>None</td> {% endif %}
+
+                {% if r.recipient_id__country %}
+                <td> <h6 class="text-black font-w400 mb-0">{{ r.recipient_id__country }}</h6></td>
+                {% else %} <td>None</td> {% endif %}
+
+                <td>
+                    <div class="d-flex action-button">
+                        <button class="btn btn-light btn sweet-html" style="margin-left:20px;" data-account-number = "{{ r.account_number }}" data-account-name = "{{ r.account_name }}" data-bank-name = "{{ r.bank_name }}"><i class="fa fa-bank text-primary" style="font-size:20px;" aria-hidden="true"></i></button>
+                    </div>
+                </td>
+                <!-- <td>
+                    <div class="sweetalert">
+                        <a id="recipient_delete_btn"  href="{% url 'mophy:delete-recipient' id=r.id %}" class="btn btn-danger shadow btn-xs sharp sweet-success-cancel p-5" data-bs-toggle="tooltip" data-placement="top" title="Delete"><i class="fa fa-trash"></i></a>
+                    </div>
+                </td> -->
+            </tr>
+            {% endfor %}    
+            </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+ </div>
+</div>
+
+
+<div class="row newlayout-table">
+ <div class="col-xl-12">
+  <div class="card corridore_card">
+    <div class="card-header">
+        <h4 class="fw-bold">Transaction History </h4>
+    </div>
+    <div class="card-body">
+      <div class="table-hover fs-14 card-table" id="custom-search1" style="position: relative;">
+        <table class="table dataTablesCard style-1 custom-tbl card-table previous-transactions display" id="example6"  style="width: 100% !important;">
+            <thead>
+                <tr class="header-row">
+                    <th>S/N</th>
+                    <th>Transaction Id</th>
+                    <th>TM Status</th>
+                    <th>Payment Status</th>
+                    <th>Date</th>
+                    <th>Payin Amount</th>
+                    <th>FX Rate</th>
+                    <th>Recipient</th>
+                    <th>Payout Amount</th>
+                    <th>PEP/AML</th>
+                    <th>TM Label</th>
+                    <th>TM Rule Name</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for t in transaction_array %}
+            <tr> 
+                <td> <h6 class="text-black font-w400 mb-0">{{forloop.counter}}</h6></td>
+                <td>  <a href="{% url 'mophy:transactions-details' id=t.id %}"><h6 class="text-black font-w400 mb-0"><u>{{t.transaction_id}}</u></h6></a></td>
+                <td> <h6 class="text-black font-w400 mb-0">{{t.tm_status}}</h6></td>
+                <td> <h6 class="text-black font-w400 mb-0">{{t.payment_status}}</h6></td>
+                <td> <h6 class="text-black font-w400 mb-0">{{t.date}}</h6></td>
+                <td> <h6 class="comma-values text-black font-w400 mb-0">{{t.send_currency}} {{t.amount}}</h6></td>
+                <td> <h6 class="text-black font-w400 mb-0">{{t.exchange_rate}}</h6></td>
+                {% if t.recipient_name != '' and t.recipient_name != None %}
+                    <td> <h6 class="text-black font-w400 mb-0">{{t.recipient_name}}</h6></td>
+                {% else %}
+                    <td> <h6 class="text-black font-w400 mb-0">None</h6></td>
+                {% endif %}
+                <td> <h6 class="comma-values text-black font-w400 mb-0">{{t.receive_currency}} {{t.receive_amount}}</h6></td>
+                {% if t.aml_pep_status == False or t.aml_pep_status == "False" %} 
+                    <td><a href="{% url 'mophy:transactions-details' id=t.id  %}"><i class="fa fa-check text-success " style="font-size:20px;" aria-hidden="true"></i></a></td> 
+                {% elif t.aml_pep_status == True or t.aml_pep_status == "True" %} 
+                    <td><a href="{% url 'mophy:transactions-details' id=t.id  %}"><i class="fa fa-times text-danger" style="font-size:20px;" aria-hidden="true"></i></a></td>
+                {% elif t.payment_status == "incomplete" or t.payment_status == "Incomplete" %} 
+                    <td><a href="{% url 'mophy:transactions-details' id=t.id %}"><span class="text-black font-w400 mb-0"> Pending</span></a></td>
+                {% else %}
+                    <td><a href="{% url 'mophy:transactions-details' id=t.id  %}"><i class="fa fa-check text-success " style="font-size:20px;" aria-hidden="true"></i></a></td> 
+                {% endif %}
+                <td> <h6 class="text-black font-w400 mb-0">{{t.tm_label}}</h6></td>
+                <td><a href="{% url 'mophy:transactions-details' id=t.id  %}"><span class="text-black font-w400 mb-0"> {{t.rule}}</span></a></td>    
+                
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+ </div>
+</div>
+
+
+<!-- Tier Modal Start For Payment Per Annum -->
+<div class="modal fade" id="payment_per_annum_modal">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Update Payment Per Annum</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal">
+                </button>
+            </div>
+            <div class="modal-body select-row">
+                <select class="form-control" id="payment_per_annum_new_value">
+                    <option value="" selected disabled>Choose Tier</option>
+                    {% for i in payment_per_annum_list %}
+                        {% for key in i %}
+                            <option value="{{key}}">{{key}} </option>
+                        {% endfor %}
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="modal-footer">
+                    <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary tier_save_btn">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Tier Modal End For Payment Per Annum -->
+
+
+<!-- Tier Modal Start For Value Per Annum -->
+<div class="modal fade" id="value_per_annum_modal">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Update Value Per Annum</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal">
+                </button>
+            </div>
+            <div class="modal-body select-row">
+                <select class="form-control" id="value_per_annum_new_value">
+                    <option value="" selected disabled>Choose Tier</option>
+                    {% for i in value_per_annum_list %}
+                        {% for key in i %}
+                            <option value="{{key}}">{{key}} </option>
+                        {% endfor %}
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="modal-footer">
+                    <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary tier_save_btn">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Tier Modal End For Value Per Annum -->
+
+
+
+<!-- Documents status update Start -->
+<div class="modal fade" id="documents_modal">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Update Payment Per Annum</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal">
+                </button>
+            </div>
+            <div class="modal-body select-row">
+                <select class="form-control" id="documents_value">
+                    <option value="" selected disabled>Choose Status</option>
+                    {% for i in documents_list %}
+                        {% for key, value in i.items %}
+                            <option value="{{value}}">{{key}} </option>
+                        {% endfor %}
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="modal-footer">
+                    <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary documents_save_btn">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Documents status update Modal End -->
+
+
+{% endblock %}
+
+{% block additional_js %}
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- Documentts status update -->
+<script>
+    $(document).ready(function () {
+        $(".documents_save_btn").click(function (el) {
+            var status = $(this).attr('data-status');
+            Swal.fire({
+                title: "Are you sure to update?",
+                text: '',
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#4BB543",
+                confirmButtonText: "Confirm",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    var customerIDText = $(".customer-id").text(); 
+                    var customer_id = customerIDText.match(/\(Cust ID- (.+?)\)/)[1]; 
+                    var documents_value = $('#documents_value').val();
+
+                    $.ajax({
+                        url: "{% url 'mophy:update-documents-status' %}",
+                        type: 'POST',
+                        data: {customer_id:customer_id, status:documents_value, csrfmiddlewaretoken: '{{ csrf_token }}'},
+                        success: function (response) {
+                            if (response.success){
+                                Swal.fire({
+                                    title: 'Updated!',
+                                    text: response.message,
+                                    icon: 'success',
+                                    confirmButtonText: 'OK'
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        $('#documents_modal').hide();
+                                        window.location.reload();
+                                    }
+                                });
+                            }
+                            else{
+                                Swal.fire(
+                                'Failed!', response.message, 'error'
+                                );
+                            }                            
+                        },
+                        error: function (error) {
+                            Swal.fire(
+                                'Failed!','Something went wrong. Please try again later', 'error'
+                            );
+                        }
+                    });
+                    resetFieldsAndValues();
+                }
+            });
+        });
+        function resetFieldsAndValues() {
+            $('#documents_value').val('');
+            documents_value = '';
+        }
+    });
+</script>
+
+
+<!-- Tier update -->
+<script>
+    $(document).ready(function () {
+        $(".tier_save_btn").click(function (el) {
+            var status = $(this).attr('data-status');
+            Swal.fire({
+                title: "Are you sure to update?",
+                text: '',
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#4BB543",
+                confirmButtonText: "Confirm",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    var old_value = null
+                    var new_value = null
+                    var type = null
+                    var customerIDText = $(".customer-id").text(); 
+                    var customer_id = customerIDText.match(/\(Cust ID- (.+?)\)/)[1]; 
+                    var $documentsElement = $('#current_document_value');
+                    var documentsValue = $documentsElement.text().trim();
+
+                    var payment_per_annum_new_value = $('#payment_per_annum_new_value').val();
+                    var payment_per_annum_old_value = $('#payment_per_annum_old_value').text().trim();
+
+                    var value_per_annum_new_value = $('#value_per_annum_new_value').val();
+                    var value_per_annum_old_value = $('#value_per_annum_old_value').text().trim();
+
+                    if (payment_per_annum_new_value === null || payment_per_annum_new_value === undefined || payment_per_annum_new_value.trim() === '') {
+                        old_value = value_per_annum_old_value
+                        new_value = value_per_annum_new_value
+                        type = 'value_per_annum'
+                    }
+                    else{
+                        old_value = payment_per_annum_old_value
+                        new_value = payment_per_annum_new_value
+                        type = 'payment_per_annum'
+                    }
+
+                    $.ajax({
+                        url: "{% url 'mophy:update-tier' %}",
+                        type: 'POST',
+                        data: {documents_value:documentsValue, customer_id:customer_id, old_value:old_value, new_value:new_value, type:type, csrfmiddlewaretoken: '{{ csrf_token }}'},
+                        success: function (response) {
+                            if (response.success){
+                                Swal.fire({
+                                    title: 'Updated!',
+                                    text: response.message,
+                                    icon: 'success',
+                                    confirmButtonText: 'OK'
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        $('#value_per_annum_modal').hide();
+                                        $('#payment_per_annum_modal').hide();
+                                        window.location.reload();
+                                    }
+                                });
+                            }
+                            else{
+                                Swal.fire(
+                                'Failed!', response.message, 'error'
+                                );
+                            }                            
+                        },
+                        error: function (error) {
+                            Swal.fire(
+                                'Failed!','Something went wrong. Please try again later', 'error'
+                            );
+                        }
+                    });
+                    resetFieldsAndValues();
+                }
+            });
+        });
+        function resetFieldsAndValues() {
+            $('#payment_per_annum_new_value').val('');
+            $('#payment_per_annum_old').text('');
+            $('#value_per_annum_new_value').val('');
+            $('#value_per_annum_old').text('');
+            old_value = '';
+            new_value = '';
+            type = '';
+        }
+    });
+</script>
+    
+
+<script>
+    $(".status-btn").click(function (el) {
+    var status = $(this).attr('data-status');
+    Swal.fire({
+    title: "Bank Details",
+    html: "<input type='text' class='form-control' placeholder="+status +"> <b>Status:</b> "+status+"</span> </br> <button type='submit' class=btn btn-primary mt-4 mb-5>Save</button>",
+    })
+    });
+</script>
+
+<script>
+    $(".sweet-html").click(function (el) {
+    var bank_name = $(this).attr('data-bank-name');
+    var account_name = $(this).attr('data-account-name');
+    var account_number = $(this).attr('data-account-number');
+    Swal.fire({
+    title: "Bank Details",
+    html: "<span><b>Bank Name:</b> "+bank_name+"<br></span><br>  <span><b>Account Name: </b>"+account_name+"<br></span> <br> <span><b>Account Number: </b>"+account_number+"<br></span><br>",
+    })
+    });
+</script>
+
+
+<!-- Recipients -->
+<script>
+    $(document).ready(function() {
+        new DataTable('#example2', {
+            scrollX: true,
+            scrollCollapse: true,
+            scrollY: '530px',
+            pageLength: 20,
+            fixedHeader: true,
+            lengthChange: false,
+            responsive: true,
+            order: [], 
+        });
+    });
+</script>
+
+<!-- Transaction History -->
+<script>
+    $(document).ready(function() {
+        new DataTable('#example6', {
+            scrollX: true,
+            scrollCollapse: true,
+            scrollY: '530px',
+            pageLength: 20,
+            fixedHeader: true,
+            lengthChange: false,
+            responsive: true,
+            order: [], 
+        });
+    });
+</script>
+
+<style>
+    .dataTables_scrollHeadInner{
+        width: 100% !important;
+    }
+    table.table.dataTablesCard.style-1.custom-tbl.card-table.previous-transactions.display.dataTable.no-footer {
+        width: 100% !important;
+    }
+    table.table.dataTablesCard.style-1.custom-tbl.card-table.previous-transactions.display.dataTable.no-footer {
+        width: 100% !important;
+    }
+    </style>
+
+
+
+{% endblock %}
+

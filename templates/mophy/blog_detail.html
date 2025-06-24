@@ -1,0 +1,64 @@
+{% extends 'mophy/elements/layouts/admin.html' %}
+
+{% load static %}
+
+{% block additional_css %}
+{% endblock %}
+
+{% block content %}
+
+
+<link rel="stylesheet" href="/static/mophy/vendor/datatables/css/jquery.dataTables.min.css" >
+<link rel="stylesheet" href="/static/mophy/css/style.css">
+
+
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="card corridore_card">
+
+      <div class="card-header">
+        <h4 class="card-title">Blog Detail</h4>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item "><a class="text-black fw-bold" href="{% url 'mophy:blogs-list' %}" ><u >Back</u></a></li>
+          </ol>
+    </div>
+
+    <hr>
+    
+      <div class="card-body"> 
+        <div class="row">
+            <div class="col-xl-12">
+                
+                    <div class="row blog-details">
+                        <h1>{{data.name}}</h1>
+                        <br>
+                        <br>
+                        <p>{{data.short_description}}</p>
+                       <img src="{{data.path}}">
+                       <br>
+                       <p>
+                        {{ data.description|safe }}
+                      </p>
+                    </div>
+              
+               
+            </div>
+        </div>	
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+{% endblock %}
+
+{% block additional_js %}
+
+
+
+   
+{% endblock %}
+

@@ -1,0 +1,180 @@
+{% extends 'mophy/elements/layouts/admin.html' %}
+{% load static widget_tweaks %}
+
+
+{% block additional_css %}
+
+{% endblock %}
+
+{% block message %}
+{% include 'mophy/elements/alert.html' %}
+{% endblock %}
+
+{% block content %}
+
+<div class="alert alert-danger" role="alert" style="display: none;"></div>
+
+<div class="row justify-content-center h-100 align-items-center">
+  <div class="col-xl-12 col-lg-12">
+    <div class="card">
+        <div class="card-header">
+            <h4 class="card-title">New Admin User Form</h4>
+        </div>
+        <div class="card-body">
+          <div class="basic-form">
+                <div class="row">
+                    <div class="row col-md-12">
+                        <div class="mb-4 col-md-4">
+                            <label class="form-label">First Name</label> <span class="text-danger"> *</span> 
+                            <input class="form-control" type="text" id="first_name" name="first_name" placeholder="First Name" maxlength="50" required>
+                        </div>
+                        <div class="mb-4 col-md-4">
+                            <label class="form-label">Middle Name</label> 
+                            <input class="form-control" type="text" id="middle_name" name="first_name" placeholder="Middle Name" maxlength="50" required>
+                        </div>
+                        <div class="mb-4 col-md-4">
+                            <label class="form-label">Last Name</label><span class="text-danger"> *</span> 
+                            <input class="form-control" type="text" id="last_name" name="last_name" placeholder="Last Name" maxlength="50" required>
+                        </div>
+                    </div>  
+
+                    <div class="row col-md-12">                           
+                        <div class="mb-4 col-md-4">
+                            <label class="form-label">Email</label><span class="text-danger"> *</span> 
+                            <input class="form-control" type="email" id="email" name="email" placeholder="abc@example.com" maxlength="50" required>
+                        </div>
+                        <div class="mb-4 col-md-4">
+                            <label class="form-label">Mobile</label><span class="text-danger"> *</span> 
+                            <input class="form-control" type="text" id="mobile" name="mobile"  maxlength="50" required>
+                        </div>
+                        <div class="mb-4 col-md-4">
+                            <label class="form-label">Password</label><span class="text-danger"> *</span> 
+                            <div class="input-group">
+                                <input class="form-control" type="password" id="password" name="password" id="password" maxlength="25" placeholder="Password" required>
+                                <span class="input-group-text" id="togglePassword">
+                                    <i class="fa fa-eye" aria-hidden="true"></i>
+                                </span>
+                            </div>
+                            <div class="error-message" style="display: none;"></div>
+                        </div>                       
+                        <div class="mb-4 col-md-4">
+                            <label class="form-label">Confirm Password</label><span class="text-danger"> *</span> 
+                            <div class="input-group">
+                                <input class="form-control" type="password" id="password2" name="password2" id="confirmPassword" maxlength="25" placeholder="Confirm Password" required>
+                                <span class="input-group-text" id="toggleConfirmPassword">
+                                    <i class="fa fa-eye" aria-hidden="true"></i>
+                                </span>
+                            </div>
+                            <div class="error-message" style="display: none;"></div>
+                        </div>
+                       
+                    </div>  
+        
+                    <div class="row col-md-12">
+                        <div class="col-2">
+                            <button type="submit" onclick="add_admin_user()" class="btn btn-primary mt-4 mb-5 " style="width:80%;">Save</button>
+                        </div>
+                        <div class="col-2 ">
+                            <a href="{% url 'mophy:admin-users' %}" style="width:80%;" class="btn btn-primary mt-4 mb-5">Cancel</a>
+                        </div>
+                        <div class="col-10"></div>
+                    </div>
+                </div>
+          </div>
+        </div>
+    </div>
+  </div>
+</div>
+
+
+
+{% endblock %}
+
+
+{% block additional_js %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css">
+
+<script>
+    document.getElementById('first_name').addEventListener('input', function() {
+      this.value = this.value.replace(/[0-9]/g, ''); // Remove numbers from the input
+    });
+    document.getElementById('last_name').addEventListener('input', function() {
+      this.value = this.value.replace(/[0-9]/g, ''); // Remove numbers from the input
+    });
+  </script>
+
+<script>
+    $(document).ready(function() {
+        // Toggle password visibility
+        $("#togglePassword, #toggleConfirmPassword").on("click", function() {
+            var inputField = $(this).prev("input");
+            var type = inputField.attr("type") === "password" ? "text" : "password";
+            inputField.attr("type", type);
+            $(this).find("i").toggleClass("fa-eye fa-eye-slash");
+        });
+    });
+</script>
+
+<script>
+    function add_admin_user(){
+    var first_name = $('#first_name').val();
+    var last_name = $('#last_name').val();
+    var email = $('#email').val();
+    var role = $('#role').val();
+    var password = $('#password').val();
+    var password2 = $('#password2').val();
+    var error_flag = false;
+    first_name = first_name.trim();
+    last_name = last_name.trim();
+    var fields = ["first_name", "last_name", "email", "role", "password", "password2"];
+    for (var i = 0; i < fields.length; i++) {
+        var field = fields[i];
+        var value = $("#" + field).val();
+        if (!value || value.trim() === '') {
+            error_flag =true;
+            $("#" + field).addClass("is-invalid");
+            event.preventDefault(); 
+        } else {
+            $("#" + field).removeClass("is-invalid");
+        }
+    }
+    regexPattern = /^(?=.*[-\#\$\.\%\&\@\!\+\=\\*])(?=.*[a-zA-Z])(?=.*\d).{8,12}$/;
+    if (password === "" || password === null){ error_flag = true; $("#" + password).addClass("is-invalid"); }
+    else if (password.match(regexPattern)){
+        if (password !== password2) {
+            error_flag = true;
+            var $passwordParent = $('#password').parent();
+            var $password2Parent = $('#password2').parent();
+            if (password2 !== '' && !$passwordParent.has('.error-message').length) {error_flag = true; $('.error-message').html('Passwords do not match!'); $('.error-message').show();}
+            if (password2 !== '' && !$password2Parent.has('.error-message').length) { error_flag = true; $('.error-message').html('Passwords do not match!'); $('.error-message').show(); }
+        }
+    }
+    else{error_flag = true; $('.error-message').html('Password must contain uppercase, lowercase, symbols and digits'); $('.error-message').show();}
+    console.log(error_flag, "error flag")
+    if (error_flag === false) {        
+    $('#loader').show();
+         $.ajax({
+            type: "POST",
+            url : "{% url 'mophy:add-admin-user' %}",
+            data: {first_name:first_name, last_name:last_name, email:email, role:role, password:password,csrfmiddlewaretoken: '{{ csrf_token }}'},         
+            success: function(data){
+               if(data.success){
+                $('#loader').hide();
+                console.log("redirect")
+                window.location.href = "{% url 'mophy:admin-users'  %}";
+                }
+                else{$('.alert').html(data.message); $('.alert').show();}
+                    setTimeout(function () {
+                        $('.alert').hide();
+                    }, 3000);
+                }            
+         });     
+    }
+}
+</script>
+
+
+
+{% endblock %}
+

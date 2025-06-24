@@ -1,0 +1,336 @@
+{% extends 'mophy/elements/layouts/admin.html' %}
+
+{% load static %}
+
+{% block additional_css %}
+{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="/static/mophy/vendor/datatables/css/jquery.dataTables.min.css" >
+<link rel="stylesheet" href="/static/mophy/css/style.css">
+<script src="{% static 'mophy/js/permissions.js' %}"></script>
+
+
+
+<!-- heading -->
+<!-- <div class="row page-titles mx-0">
+    <div class="col-sm-6 p-md-0">
+        <div class="welcome-text">
+            <h4 class="text-black fw-bold">Forex Details</h4>
+        </div>
+    </div>
+    <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex fw-bold">
+        <ol class="breadcrumb">
+        <li class="breadcrumb-item "><a class="text-black fw-bold" href="{% url 'mophy:index' %}" ><u >Back</u></a></li>
+        </ol>
+    </div>
+</div> -->
+
+<div class="card corridore_card">
+    <div class="card-header">
+        <h4 class="card-title">Forex Details</h4>
+        
+        <button id="forex_create_btn" class="btn btn-primary btn-xs content-justify-right add_data" data-bs-toggle="modal" data-bs-target="#changestatus"type="submit" name="submit">ADD FOREX  
+            <span class="btn-icon-end"><i class="fa fa-plus"></i></span>                             
+        </button>
+    </div>
+ <div class="card-body">
+  <div class="row newlayout-table mt-3">
+       
+
+    <div class="row">
+    <div class="col-lg-12">
+      <div class="table-hover fs-14 card-table" style="position:relative;">  
+        <table class="table dataTablesCard style-1 custom-tbl card-table previous-transactions display" id="example22" style="width: 100% !important;">
+            <thead>
+                <tr>       
+                    <th>S No.</th>
+                    <th>Currency Pair</th>
+                    <th>Rate</th>
+                    <th>Source</th>
+                    <th>Enabled</th>
+                    <th>Markup</th>
+                    <th class="forex_th">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in table_data %}
+                <tr class="data-row">                 
+                    <td><span id="itemid" hidden="true" class="text-black font-w400 mb-0">{{item.id}}</span></a><h>{{forloop.counter}}</h> </td>
+                    <td><span class="text-black font-w400 mb-0 currency_pair">{{item.source_currency}} -> {{item.destination_currency}}</span></a></td>
+                    <td><span class="comma-values text-black font-w400 mb-0"> {{item.rate}}</span></a></td>
+                    <td><span class="text-black font-w400 mb-0"> {{item.source}} </span></a></td>
+                    <td><span class="text-black font-w400 mb-0">
+                        {% if item.is_enabled %}   Yes   {% else %}  No {% endif %}
+                    </span></td>
+                    <td><span class="comma-values text-black font-w400 mb-0"> {{item.markup }}</span></a></td>
+                    <td id="forex_td">
+                        <button id="forex_edit_btn" class="form-control btn btn-primary" style="width:auto;" data-bs-toggle="modal" data-bs-target="#edit-model" onclick="openEditModel('{{item.id}}')"><h class="text-white">Edit</h></button>
+                        <span id="forex_delete_btn" class="text-black font-w400 mb-0"><a class="btn btn-danger" href="{% url 'mophy:delete-forex' id=item.id %}"><i class="fa-sharp fa-solid fa-trash"  ></i></a>
+                    </span></td>
+                </tr>
+                {% endfor %} 
+              </tbody>
+        </table>
+        
+
+<!---- View media Modal end ------->
+
+
+    <!----------  Add button Modal  ---------->
+        <div class="modal fade" id="changestatus">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Add New Currency Pair</h4>
+                        <button type="button" class="close"  data-bs-dismiss="modal"><span>&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body"> 
+                        <form method="post" class="change_status-form" action="{% url 'mophy:forex-details' %}">
+                            {% csrf_token %}
+                            <div class="row">
+                            <div class="col-md-6">
+                            <div class="row custom_change_status">
+                            <label>Source Currency</label>
+                            <select id="source_currency_dropdown" onchange="select_Currency('source',this)" class="form-control" name="source_currency">
+                            <option disabled selected>Choose source...</option>
+                            {% for x in payin_list %}
+                                <option value={{x.currency}}>{{x.currency}}</option>
+                            {% endfor %}
+                            </select>
+                            </div> 
+
+                            <div class="row custom_change_status">
+                            <label>Markup</label>
+                            <input type="number" class="form-control" name="markup" id="markup" placeholder="Enter Markup" > 
+                            </div>
+
+                            <!-- <div class="row custom_change_status">
+                            <label>Markup</label>
+                            <input type="text" class="form-control" name="markup" placeholder="Enter Markup"> 
+                            </div>  -->
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="row custom_change_status">
+                                    <label>Destination Currency</label>
+                                    <select id="destination_currency_dropdown" onchange="select_Currency('destination',this)" class="form-control" name="destination_currency">
+                                    <option disabled selected>Choose destination...</option>
+                                    {% for x in payout_list %}
+                                        <option value={{x.currency}}>{{x.currency}}</option>
+                                    {% endfor %}
+                                    </select>
+                                    </div> 
+                            <div class="row custom_change_status">
+                            <label>Rate</label>
+                            <input type="number" class="form-control" name="rate" id="rate" placeholder="Enter Rate"> 
+                            </div> 
+                            <!-- <div class="row custom_change_status">
+                            <label>Enabled</label>
+                            <input class="form-check-input" type="checkbox" name="is_enabled" value="on">
+                            </div>  -->
+                            </div>
+
+                            <div class="modal-footer">
+                            <div class="row">
+                                <div col="2">
+                                    <div id="error_message" style="display: none;" class="alert alert-danger alert-dismissable fw-bold">
+                                        Currency Pair already exists!
+                                    </div>
+                                </div>
+
+                                <div col="10">
+                                    <button type="button" class="btn btn-danger light" data-bs-dismiss="modal" onclick="clear_values()">Close</button>
+                                    <button type="submit" class="btn btn-primary" id="ifExistsButton">Save changes</button>
+                                </div>
+                            </div>
+
+                            </div>  
+                            </form>          
+                    </div>
+                            
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+</div>
+  </div>
+ </div>
+</div>
+
+<!-- edit model start-->
+<div class="modal fade" id="edit-model">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Currency Pair</h5>
+                <button type="button" class="close" data-bs-dismiss="modal"><span>&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+
+                <form method="post" class="change_status-form" action="{% url 'mophy:edit-forex' %}">
+                    {% csrf_token %}
+                    <input type="hidden" id="edit-model-id" name="row-id">
+                    <div class="row">
+                    <div class="col-md-6">
+
+                    <div class="row custom_change_status">
+                    <label>Source Currency</label>
+                    <input type="text" class="form-control" id="edit-model-country" name="source_currency" disabled> 
+                    </div> 
+
+                    <div class="row custom_change_status">
+                        <label>Markup</label>
+                        <input type="text" class="form-control" id="edit-model-markup" name="markup" placeholder="Enter Markup"> 
+                    </div> 
+    
+
+                    <!-- <div class="row custom_change_status">
+                    <label>Markup</label>
+                    <input type="text" class="form-control" id="edit-model-markup" name="markup" placeholder="Enter Markup"> 
+                    </div>  -->
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="row custom_change_status">
+                            <label>Destination Currency</label>
+                            <input type="text" class="form-control" id="edit-destination-model-curency" name="destination_currency" disabled> 
+                        </div> 
+                    <div class="row custom_change_status">
+                    <label>Rate</label>
+                    <input type="text" class="form-control" id="edit-model-rate" name="rate" placeholder="Enter Rate"> 
+                    </div> 
+
+                    <!-- <div class="row custom_change_status">
+                    <label>Enabled</label>
+                    <input class="form-check-input" id="edit-model-is-enabled" type="checkbox" name="is_enabled" value="on">
+                    </div>  -->
+
+                    </div>
+                    
+                    <div class="modal-footer">
+                    <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                    </div>
+                    </form>
+                    
+                    
+            </div>
+                    
+                </div>
+            </div>
+</div>
+<!-- edit model end-->
+{% endblock %}
+{% block additional_js %}
+
+
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        new DataTable('#example22', {
+            scrollX: true,
+            scrollCollapse: true,
+            scrollY: '530px',
+            pageLength: 20,
+            fixedHeader: true,
+            lengthChange: false,
+            responsive: true,
+            order: [], 
+        });
+    });
+</script>
+
+<script>
+    var source = $('#source_currency_dropdown').val();
+    var destination = $('#destination_currency_dropdown').val();
+    var exist = false;
+    select_Currency('source', $('#source_currency_dropdown'));
+
+    function select_Currency(type, elem){
+        if(type === 'source'){
+            source = $(elem).val();
+        }
+        else{
+            destination = $(elem).val();
+        }
+        if(source === null && destination === null ){
+            document.getElementById('error_message').style.display = "block";
+            document.getElementById('ifExistsButton').setAttribute("disabled",true);
+        }
+        else{
+            if(source != null && destination != null ){
+                var all_pairs = document.getElementsByClassName('currency_pair');
+                exist = false;
+                for(var i=0; i<all_pairs.length;i++){
+                    if(all_pairs[i].innerHTML == source+' -&gt; '+destination){
+                        exist = true;
+                    }
+                }
+                if(exist){
+                document.getElementById('error_message').style.display = "block";
+                document.getElementById('ifExistsButton').setAttribute("disabled",true);
+                }
+                else{
+                    document.getElementById('error_message').style.display = "none";
+                    document.getElementById('ifExistsButton').removeAttribute("disabled");
+                
+                }
+            }
+        }
+}
+ $(document).ready(function(){
+
+    $('.alert').hide()
+    $('.save-button').click(function(){
+        $('.alert').show()
+    }) 
+});
+</script>
+
+<script>
+    const spanData = document.getElementById('itemid'); 
+    const itemid = spanData.textContent;
+
+    function openEditModel(id){
+        let find_data =  JSON.parse('{{ json_context|safe }}').table_data.filter(data => data.id == id);
+
+        if(find_data.length > 0) {
+            $("#edit-model-id").val(id);
+            $("#edit-model-country").val(find_data[0]['source_currency']);
+            $("#edit-destination-model-curency").val(find_data[0]['destination_currency']);
+            $("#edit-model-markup").val(find_data[0]['markup']);
+            $("#edit-model-source").val(find_data[0]['source']);
+            $("#edit-model-rate").val(find_data[0]['rate']);
+            $("#edit-model-is-enabled").prop('checked', find_data[0]['is_enabled'])
+        }
+    }
+
+</script>
+
+<style>
+.dataTables_scrollHeadInner{
+    width: 100% !important;
+}
+table.table.dataTablesCard.style-1.custom-tbl.card-table.previous-transactions.display.dataTable.no-footer {
+    width: 100% !important;
+}
+table.table.dataTablesCard.style-1.custom-tbl.card-table.previous-transactions.display.dataTable.no-footer {
+    width: 100% !important;
+}
+</style>
+
+<script>
+    function clear_values(){
+        location.reload()
+}
+</script>
+
+{% endblock %}
+

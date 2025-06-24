@@ -1,0 +1,776 @@
+{% extends 'mophy/elements/layouts/admin.html' %}
+
+{% load static %}
+
+{% block additional_css %}
+{% endblock %}
+
+{% block content %}
+<link rel="icon" type="image/png" sizes="16x16" href="/static/mophy/images/footer-logo.svg" />   
+<link rel="stylesheet" href="/static/mophy/vendor/jqvmap/css/jqvmap.min.css" >
+<link rel="stylesheet" href="/static/mophy/vendor/chartist/css/chartist.min.css" >
+<link rel="stylesheet" href="/static/mophy/vendor/datatables/css/jquery.dataTables.min.css" >
+<link rel="stylesheet" href="/static/mophy/vendor/bootstrap-select/dist/css/bootstrap-select.min.css">
+<link rel="stylesheet" href="/static/mophy/css/style.css">
+
+<!-- Start Title row-->
+<div class="row mx-0">
+    <div class="col-sm-6 p-md-0">
+        <div class="welcome-text mb-4">
+            <h2 class="text-black fw-bold">Zai</h2>
+        </div>
+    </div>
+    <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex fw-bold">
+        <ol class="breadcrumb">
+        <li class="breadcrumb-item "><a class="text-black fw-bold" href="{% url 'mophy:index' %}" ><u >Back</u></a></li>
+        </ol>
+    </div>
+</div>
+<!-- End Title row-->
+
+<!-- Start Error and Succes Messages -->
+<div style="display: none;" class="alert alert-danger alert-dismissible fade show" id="alert" role="alert">
+    <strong id="error_message"></strong> 
+</div>
+    
+<div style="display: none;" class="alert alert-success alert-dismissible fade show" id="alert" role="alert">
+    <strong id="success_message"></strong> 
+</div>
+<!-- End Error and Succes Messages -->
+
+<div class="row">
+<div class="col-xl-12">
+    <div class="card stacked-2" id="zai-card-header">
+    <div class="card-header flex-wrap border-0 pb-0 align-items-end">
+        <div class="row">
+            <div class="col-4" style="padding-left: 0;">
+            <div class="my-wallet-div">
+                <h5 class="text-black font-w600" style="width: 65%; padding: 0;">My Wallet</h5>
+                <a href="{% url 'mophy:my-wallets' %}"><button name="submit" onclick="$('#loader').show();" class="btn-view">View All</button></a>
+                </div>
+                <div class="mb-3 me-3 my-wallet-inner">
+                    <img class="wallet-icon" src="{% static 'mophy/images/wallet-bg.png' %}"> 
+                    <div class="me-auto wallet-bal">                                       
+                        <span class="comma-values text-num wallet-blance">{{wallet_balance }} AUD</span>
+                        <br>
+                        <p class="bank-name text-num fw-bolder zai_email">{{zai_email}}</p>
+                    </div>
+                                                
+                </div>
+            </div>
+
+            <div class="col-4" id="zai_create_btn">
+                <!-- <form  method="post" action="{% url 'mophy:zai' %}" > -->
+                <div class="row">
+                    <div class="col-12 withdraw-amount" >
+                    <h5 class="text-black font-w600">Withdraw Amount</h5>
+                        {% csrf_token %}
+                        <!-- <label for="inputAddress"><b>Amount</b></label> -->
+                        <div class="with-balnc"><input type="number" onchange="check_amount()" name="amount" min="1" step=1 onkeypress="return !(event.charCode == 46)" class="form-control" id="inputAddress" placeholder="Enter Amount" required> 
+                        <input type="text" id="subdomaintwo" value="AUD" disabled/> </div>               
+                    <div class="withdraw-btn">
+                        <button  onclick="withdraw_zai_funds(true)" name="submit" id="withdraw_amount" onclick="check_amount()"  class="btn btn-primary btn-lg fw-bold">Withdraw Funds</button>
+                        <!-- <button  onclick="zai(true)" name="submit" id="withdraw_amount" onclick="check_amount()"  class="btn btn-primary btn-lg fw-bold">Withdraw Funds</button> -->
+                    </div>  
+                </div>
+
+                    
+
+                </div>
+                <!-- </form> -->
+            </div>  
+
+            <div class="col-4" style="padding-right: 0;">
+                        <div class="bank-outer">
+                        <div class="d-flex align-items-center mb-3 me-3 bank-account">
+
+                            <div class="bank-inner">
+                                
+                                <h5>Bank Account</h4>
+                                <div class="dropdown-menu-list">
+                                    <select onchange="get_wallet_balance()" id="zai_user_id" name="bankname" class="form-control" required>
+                                    <!-- <select onchange="zai()" id="zai_user_id" name="bankname" class="form-control" required> -->
+                                    {% for i in bank_list %}
+                                    <option value={{i.zai_user_id}}>{{i.bank_name}} ({{i.zai_email}})</option>
+                                    {% endfor %}
+                                    </select>
+                                </div>
+                                <br>
+                                <br>
+                                <!-- <button onclick="get_account_no()" name="submit" style="width:100%;" class="btn btn-primary mt-1 fw-bold">submit</button> -->
+                            </div>
+                                    
+                        </div>
+                    </div>						
+                
+            </div>
+        </div>
+        <div class="clear" style="clear: both;"></div>    
+
+        <div class="row" style="border: 1px solid #6414E9; border-radius: 10px; box-shadow: 0rem 0.3125rem 0.3125rem 0rem rgba(82, 63, 105, 0.05);  margin-top: 13px; padding: 10px 0;">
+            <div class="col-7 d-flex" style="align-items: center;">
+                <div class="pending-payout" style="display: flex; align-items: center;">
+                    <h4 class="text-black" style="margin-bottom: 0; font-weight: bold;">Pending Payouts:</h4>
+                    <span class="comma-values" style="color:#000;  font-size: 24px; padding-left: 10px;" id="pending_payouts"><b>{{pending_payout}} AUD</b></span>
+                </div>
+            </div>
+
+            <div class="col-2"></div>
+
+            <div class="col-3 filter">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <select onchange="get_graph_data()" class="form-control" id="graph_time" name="graph_time">                                                           
+                    <!-- <select onchange="zai()" class="form-control" id="graph_time" name="graph_time">                                                            -->
+                        <option value="1">Today</option>     
+                        <option value="7">Last 7 Days</option>     
+                        <option value="30">Last 30 Days</option>                                   
+                        <option value="90">Last 90 Days</option>                                                               
+                    </select>
+                </div>
+            </div>
+        </div>         
+
+        <div class="card-body bank-details-outer">    
+        <!-- <form method="post" action="{% url 'mophy:zai' %}">
+            {% csrf_token %}  -->                        
+        <div class="row">                       
+            <div class="col-xl-6 mb-6 col-xxl-6 col-sm-6" style="border: 1px solid #6414E9; border-radius: 10px; box-shadow: 0rem 0.3125rem 0.3125rem 0rem rgba(82, 63, 105, 0.05);">                            
+                <div class="media align-items-center bgl-success rounded p-2">
+                    <div class="media-body">                                    
+                        <div class="card">                                          
+                            <div class="row">
+                                <div class="col-12 text-black fw-bold m-2" >Total Payins Volume: &nbsp;<span class="comma-values" style="color:#6414E9" id="total_payins">{{payin}} AUD</span></div>
+                                <!-- <div class="col-5">
+                                    <div class="form-group">
+                                        <select onchange="zai()" class="form-control" id="payin_time" name="payin_time">                                                           
+                                            <option value="1">Today</option>     
+                                            <option value="7">Last 7 Days</option>     
+                                            <option value="30">Last 30 Days</option>                                   
+                                            <option value="90">Last 90 Days</option>                                                               
+                                        </select>
+                                    </div>
+                                </div> -->
+                            </div>
+                            <canvas id="myChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-6 col-xxl-6 col-sm-6" style="padding-right: 0;">
+                <div class="payout" style="border: 1px solid #6414E9; border-radius: 10px; box-shadow: 0rem 0.3125rem 0.3125rem 0rem rgba(82, 63, 105, 0.05);"> 
+                    <div class="media-body">
+                    <div class="card payin">   
+                        <div class="row" >
+                            <div class="col-12 text-black fw-bold m-2">Total Payouts Volume: &nbsp;<span class="comma-values" style="color:#6414E9" id="total_payouts">{{payout}} AUD</span></div>
+                            <!-- <div class="col-5" style="padding:0;">
+                                <div class="form-group">
+                                    <select onchange="zai()" class="form-control" id="payout_time" name="payout_time">                                                           
+                                        <option value="1">Today</option>     
+                                        <option value="7">Last 7 Days</option>     
+                                        <option value="30">Last 30 Days</option>                                   
+                                        <option value="90">Last 90 Days</option>                                                          
+                                    </select>
+                                </div>
+                            </div> -->
+                        </div>
+                        <canvas id="mypayoutChart"></canvas>
+                    </div>
+                </div></div>
+                
+            </div>
+        </div>
+        </form>
+        </div>            
+    </div>
+    </div>
+</div>
+</div>
+
+<!-- Start Withdraw Funds Transaction History -->
+<div class="row newlayout-table">
+<div class="col-lg-12">
+<div class="card m-2">
+    <div class="card-header">
+        <h4 class="fw-bold" style="color: #1F1E30;">Transaction History </h4>
+    </div>
+    <div class="card-body">
+    <div class="table-hover fs-14 card-table" style="position: relative;">    
+        <table class="table dataTablesCard style-1 custom-tbl card-table previous-transactions display" id="example22" style="width: 100% !important;">
+        <thead>
+            <tr>       
+                <th>S/N</th>
+                <th>Type</th>
+                <th>Source</th>
+                <th>Destination</th>
+                <th>Date</th>
+                <th>Amount</th>
+                <th>Wallet Balance</th>
+            </tr>
+        </thead>
+        <tbody>               
+            {% for t in data %}
+            <tr class="data-row">
+                <td><span class="text-black text-center font-w400 mb-0">{{forloop.counter}}</span></td>
+                <td><span class="text-black text-capitalize font-w400 mb-0">{{t.type}}</span></td>
+                <td><span class="text-black text-capitalize font-w400 mb-0">{{t.source_id}}</span></td>
+                <td><span class="text-black text-capitalize font-w400 mb-0">{{t.destination_id}}</span></td>
+                <td><span class="text-black font-w400 mb-0">{{t.date}}</span></td>
+                <td><span class="comma-values text-black font-w400 mb-0">AUD {{t.amount}}</span></td>
+                <td><span class="comma-values text-black font-w400 mb-0">AUD {{t.wallet_balance}}</span></td>
+            {% endfor %}         
+        </tbody>
+        </table>
+    </div>
+    </div>
+</div>
+</div>
+</div>
+<!-- End Withdraw Funds Transaction History -->
+
+<div id="loader" style="display:none" class="loader-overly" ><div class="loader" ></div>
+
+{% endblock %}
+
+{% block additional_js %}
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Start DataTable  -->
+<script>
+$(document).ready(function() {
+    new DataTable('#example22', {
+        scrollX: true,
+        scrollCollapse: true,
+        scrollY: '530px',
+        pageLength: 20,
+        fixedHeader: true,
+        lengthChange: false,
+        responsive: true,
+        order: [], // Disable initial sorting
+    });
+});
+</script>
+<!-- End DataTable  -->
+
+<!-- Start Withdraw Funds and set Graph data-->
+<script>
+    let errorText = false;
+    function check_amount(){
+        var amount = $('#inputAddress').val();
+        if(isNaN(parseInt(amount))){
+            errorText = true
+            $('#error_message').html("Please enter an amount");
+            $('#error_message').parent().show();
+            setTimeout(function () {
+            $('#error_message').parent().hide();
+            }, 3000);
+            document.getElementById('inputAddress').value = '';
+    
+        }
+        else if(amount < 1){
+            errorText = true
+            $('#error_message').html("Amount should be greater than 0.");
+            $('#error_message').parent().show();
+            setTimeout(function () {
+            $('#error_message').parent().hide();
+            }, 3000);
+            document.getElementById('inputAddress').value = '';
+    
+        }
+        else errorText = false;
+    }
+    
+    
+    //  OnLoad Function ------------------------------------>
+    
+    // Declare a variable to store the chart instance PAYIN FUNCTION 
+    var myChart;   
+    
+    window.addEventListener("load", listDataFrameSet(JSON.parse('{{ context2_json|safe }}')));
+    
+    function listDataFrameSet(dataSet) {
+    const ctx = document.getElementById('myChart');
+    if (myChart) {
+        myChart.destroy();
+    }
+    
+    if (typeof(dataSet) === 'object') {
+        list = dataSet.payin_data;
+        payin_volume = dataSet.payin_volume;
+    } else {
+        list = dataSet;
+        payin_volume = dataSet;
+    }
+    
+    list = list.map(x => {
+        return ({ year: x });
+    });
+    
+    const data = list;
+    myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: data.map(row => row.year),
+            datasets: [{
+                label: 'Payins',  //payins
+                data: payin_volume,
+                borderWidth: 0.5,
+                backgroundColor: [
+                    '#6414E9',  //label
+                    'rgb(147,112,219)', 
+                    '#6414E9', 
+                    'rgb(147,112,219)', 
+                    '#6414E9', 
+                    'rgb(147,112,219)', 
+                    '#6414E9',
+                    'rgb(147,112,219)', 
+                    '#6414E9',
+                    'rgb(147,112,219)',
+                    '#6414E9'                
+                ],
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    }
+    
+    
+    // PAYOUT FUNTION =================================================================>
+    
+    var myPayOutChart;
+    
+    window.addEventListener("load", getPayoutData(JSON.parse('{{ context2_json|safe }}')));
+    
+    function getPayoutData(dataSet) {
+    const ctx = document.getElementById('mypayoutChart');
+    if (myPayOutChart) {
+        myPayOutChart.destroy();
+    }
+    if(typeof(dataSet) === 'object'){
+        list = dataSet.payout_data
+        payout_volume = dataSet.payout_volume
+    }
+    else{
+        list = dataSet
+        payout_volume = dataSet
+    }
+    list = list.map(x => {
+    return({year: x});
+    });
+    const data = list;
+    myPayOutChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels:data.map(row => row.year),
+        datasets: [{
+        label: 'Payouts', //payouts
+        data: payout_volume,
+        borderWidth: 0.5,
+        backgroundColor: [
+            '#6414E9',  //label 
+            'rgb(147,112,219)', 
+            '#6414E9', 
+            'rgb(147,112,219)', 
+            '#6414E9', 
+            'rgb(147,112,219)', 
+            '#6414E9',
+            'rgb(147,112,219)', 
+            '#6414E9',
+            'rgb(147,112,219)',
+            '#6414E9',
+        ],
+        }]
+    },
+    options: {
+        scales: {
+        y: {
+            beginAtZero: true
+        }
+        }
+    }
+    });
+    }
+    
+    function zai(clickedFromSubmit) {
+        if (errorText) return;
+        var payin_data = null;
+        var zai_user_id = $('#zai_user_id').val();
+        var graph_time = $('#graph_time').val();
+        var amount = $('#inputAddress').val();
+    
+        if(clickedFromSubmit && isNaN(parseInt(amount))){
+                $('#error_message').html("Please enter amount.");
+                $('#error_message').parent().show();
+                setTimeout(function () {
+                $('#error_message').parent().hide();
+                }, 3000);
+                document.getElementById('inputAddress').value = '';
+    
+            }
+        else if(clickedFromSubmit && amount ===0){
+                $('#error_message').html("Amount should be greater than 0.");
+                $('#error_message').parent().show();
+                setTimeout(function () {
+                $('#error_message').parent().hide();
+                }, 3000);
+                document.getElementById('inputAddress').value = '';
+    
+            }
+        else {
+            var data = {amount: amount,
+                graph_time: graph_time,
+                zai_user_id: zai_user_id,
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            };
+            if(!clickedFromSubmit ){
+                delete data['amount']; 
+                $('#inputAddress').val('');
+            }
+    
+           
+        $('#loader').show();
+        $.ajax({
+            type: "POST",
+            url: "{% url 'mophy:zai' %}",
+            data: data,
+            success: function (data) {
+                console.log(data)
+                if (data.success) {
+                    var payin_data = data.payin_data;
+                    var payin_volume = data.payin_volume;
+                    console.log(data + " resp payin data  ", typeof(payin_data));
+                    // getPayinData(payin_data, payin_volume);
+                    listDataFrameSet(data)
+                    getPayoutData(data);
+                    $('#loader').hide();
+                    $('.wallet-blance').html(data.wallet_balance + " AUD");
+                    $('.zai_email').html(data.zai_email+" AUD");
+                    $('#total_payins').html(data.payin+" AUD");
+                    $('#total_payouts').html(data.payout+" AUD");
+                    $('#pending_payouts').html(data.pending_payout+" AUD");
+    
+                    if (data.type == "completed") {
+                        $('#success_message').html(data.message);
+                        $('#success_message').parent().show();
+                        setTimeout(()=>{
+                            window.location.reload();
+                            },2000);                     
+                            
+                        document.getElementById('inputAddress').value = '';
+    
+                    }
+                }
+                if (data.success == false) {
+                    $('#loader').hide();
+                    $('#error_message').html(data.message);
+                    $('#error_message').parent().show();
+                    setTimeout(function () {
+                        $('#error_message').parent().hide();
+                    }, 1500);
+                    document.getElementById('inputAddress').value = '';
+                }
+            }
+    
+                });    
+        } 
+    }
+</script>
+<!-- End Withdraw Funds and set Graph data -->
+
+<script>
+const elements = document.querySelectorAll('.comma-values');
+elements.forEach(element => {
+    const originalValue = parseFloat(element.textContent.match(/\d+/)[0]);
+    const formattedValue = originalValue.toLocaleString();
+    element.textContent = element.textContent.replace(/\d+/, formattedValue);
+});
+</script>
+
+<style>
+    .dataTables_scrollHeadInner {
+      width: 100% !important;
+    }
+
+    table.table.dataTablesCard.style-1.custom-tbl.card-table.previous-transactions.display.dataTable.no-footer {
+      width: 100% !important;
+    }
+
+    table.table.dataTablesCard.style-1.custom-tbl.card-table.previous-transactions.display.dataTable.no-footer {
+      width: 100% !important;
+    }
+</style>
+
+
+
+<!-- New Functions -->
+<!-- Get zai wallt balance and email  -->
+<script>
+    function get_wallet_balance(){
+        $('#loader').show();
+        var zai_user_id = $('#zai_user_id').val()      
+        $.ajax({
+            type: "POST",
+            url: "{% url 'mophy:get-zai-wallet' %}",
+            data: {zai_user_id: zai_user_id, csrfmiddlewaretoken: '{{ csrf_token }}'},
+            success: function (data) {
+                $('#loader').hide();
+                if (data.success){
+                    $('.wallet-blance').html(data.balance + " AUD");
+                    $('.zai_email').html(data.email);
+                }
+                }
+            })
+    }
+</script>
+
+<!-- Withdraw Zai Funds -->
+<script>
+    var errorFlag = false;
+    function check_amount(){
+        var amount = $('#inputAddress').val();
+        if(isNaN(parseInt(amount))){
+            errorFlag = true
+            $('#error_message').html("Please enter an amount");
+            $('#error_message').parent().show();
+            setTimeout(function () { $('#error_message').parent().hide(); }, 3000);
+            document.getElementById('inputAddress').value = '';
+        }
+        else if(amount < 1){
+            errorFlag = true
+            $('#error_message').html("Amount should be greater than 0.");
+            $('#error_message').parent().show();
+            setTimeout(function () { $('#error_message').parent().hide(); }, 3000);
+            document.getElementById('inputAddress').value = '';
+            }
+        else errorFlag = false;
+    }           
+      
+    function withdraw_zai_funds(clickedFromSubmit) {
+        if (errorFlag) return;
+        var zai_user_id = $('#zai_user_id').val();
+        var amount = $('#inputAddress').val();
+        var balance = $('.wallet-blance').val();
+
+        if(clickedFromSubmit && isNaN(parseInt(amount))){
+            $('#error_message').html("Please enter amount.");
+            $('#error_message').parent().show();
+            setTimeout(function () { $('#error_message').parent().hide(); }, 3000);
+            document.getElementById('inputAddress').value = '';
+        }
+        else if(clickedFromSubmit && amount ===0){
+            $('#error_message').html("Amount should be greater than 0.");
+            $('#error_message').parent().show();
+            setTimeout(function () { $('#error_message').parent().hide(); }, 3000);
+            document.getElementById('inputAddress').value = '';
+        }
+        else {
+            var data = {amount: amount, zai_user_id: zai_user_id, balance:balance, csrfmiddlewaretoken: '{{ csrf_token }}' };
+            if(!clickedFromSubmit ){
+                delete data['amount']; 
+                $('#inputAddress').val('');
+            }               
+        $('#loader').show();
+        $.ajax({
+            type: "POST",
+            url: "{% url 'mophy:withdraw-funds' %}",
+            data: data,
+            success: function (data) {
+                $('#loader').hide();
+                if (data.success) {
+                    $('.wallet-blance').html(data.wallet_balance + " AUD");
+                    $('.zai_email').html(data.zai_email+" AUD");                 
+                        if (data.type == "completed") {
+                        $('#success_message').html(data.message);
+                        $('#success_message').parent().show();
+                        setTimeout(()=>{ window.location.reload(); },2000);                     
+                        document.getElementById('inputAddress').value = '';
+                    }
+                }
+                if (data.success == false) {
+                    $('#error_message').html(data.message);
+                    $('#error_message').parent().show();
+                    setTimeout(function () { $('#error_message').parent().hide(); }, 1500);
+                    document.getElementById('inputAddress').value = '';
+                }
+            }
+    
+            });    
+        } 
+    }
+</script>
+
+<!-- Get Payin and Payout Graph Data -->
+<script>
+    let error_flag = false;   
+    //  OnLoad Function //
+    
+    // Declare a variable to store the chart instance PAYIN FUNCTION 
+    var myChart;       
+
+    window.addEventListener("load", listDataFrameSet(JSON.parse('{{ context2_json|safe }}')));
+    
+    function listDataFrameSet(dataSet) {
+    const ctx = document.getElementById('myChart');
+    if (myChart) {
+        myChart.destroy();
+    }    
+    if (typeof(dataSet) === 'object') {
+        list = dataSet.payin_data;
+        payin_volume = dataSet.payin_volume;
+    } else {
+        list = dataSet;
+        payin_volume = dataSet;
+    }
+    list = list.map(x => {
+        return ({ year: x });
+    });
+    
+    var data = list;
+    myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: data.map(row => row.year),
+            datasets: [{
+                label: 'Payins',  //payins
+                data: payin_volume,
+                borderWidth: 0.5,
+                backgroundColor: [
+                    '#6414E9',  //label
+                    'rgb(147,112,219)', 
+                    '#6414E9', 
+                    'rgb(147,112,219)', 
+                    '#6414E9', 
+                    'rgb(147,112,219)', 
+                    '#6414E9',
+                    'rgb(147,112,219)', 
+                    '#6414E9',
+                    'rgb(147,112,219)',
+                    '#6414E9'                
+                ],
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    }
+    
+    
+    // PAYOUT FUNTION =================================================================>    
+    var myPayOutChart;
+    
+    window.addEventListener("load", getPayoutData(JSON.parse('{{ context2_json|safe }}')));
+    
+    function getPayoutData(dataSet) {
+    const ctx = document.getElementById('mypayoutChart');
+    if (myPayOutChart) {
+        myPayOutChart.destroy();
+    }
+    if(typeof(dataSet) === 'object'){
+        list = dataSet.payout_data
+        payout_volume = dataSet.payout_volume
+    }
+    else{
+        list = dataSet
+        payout_volume = dataSet
+    }
+    list = list.map(x => {
+    return({year: x});
+    });
+    const data = list;
+    myPayOutChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels:data.map(row => row.year),
+        datasets: [{
+        label: 'Payouts', //payouts
+        data: payout_volume,
+        borderWidth: 0.5,
+        backgroundColor: [
+            '#6414E9',  //label 
+            'rgb(147,112,219)', 
+            '#6414E9', 
+            'rgb(147,112,219)', 
+            '#6414E9', 
+            'rgb(147,112,219)', 
+            '#6414E9',
+            'rgb(147,112,219)', 
+            '#6414E9',
+            'rgb(147,112,219)',
+            '#6414E9',
+        ],
+        }]
+    },
+    options: {
+        scales: {
+        y: {
+            beginAtZero: true
+        }
+        }
+    }
+    });
+    }
+    
+    function get_graph_data(){
+        var payin_data = null;
+        var zai_user_id = $('#zai_user_id').val();
+        var graph_time = $('#graph_time').val();  
+
+        $('#loader').show();
+        $.ajax({
+            type: "POST",
+            url: "{% url 'mophy:zai' %}",
+            data: {graph_time: graph_time, zai_user_id: zai_user_id, csrfmiddlewaretoken: '{{ csrf_token }}' },
+            success: function (data) {
+                console.log(data)
+                if (data.success) {
+                    var payin_data = data.payin_data;
+                    var payin_volume = data.payin_volume;
+                    console.log(data + " resp payin data  ", typeof(payin_data));
+                    // getPayinData(payin_data, payin_volume);
+                    listDataFrameSet(data)
+                    getPayoutData(data);
+                    $('#loader').hide();
+                    $('.wallet-blance').html(data.wallet_balance + " AUD");
+                    $('.zai_email').html(data.zai_email+" AUD");
+                    $('#total_payins').html(data.payin+" AUD");
+                    $('#total_payouts').html(data.payout+" AUD");
+                    $('#pending_payouts').html(data.pending_payout+" AUD");
+    
+                    if (data.type == "completed") {
+                        $('#success_message').html(data.message);
+                        $('#success_message').parent().show();
+                        setTimeout(()=>{
+                            window.location.reload();
+                            },2000);                     
+                            
+                        document.getElementById('inputAddress').value = '';
+    
+                    }
+                }
+                if (data.success == false) {
+                    $('#loader').hide();
+                    $('#error_message').html(data.message);
+                    $('#error_message').parent().show();
+                    setTimeout(function () {
+                        $('#error_message').parent().hide();
+                    }, 1500);
+                    document.getElementById('inputAddress').value = '';
+                }
+            }
+    
+                });    
+        } 
+    
+</script>
+{% endblock %}

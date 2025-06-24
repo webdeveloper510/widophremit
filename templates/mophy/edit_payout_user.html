@@ -1,0 +1,162 @@
+{% extends 'mophy/elements/layouts/admin.html' %}
+{% load static widget_tweaks %}
+
+
+{% block additional_css %}
+
+{% endblock %}
+
+{% block message %}
+{% include 'mophy/elements/alert.html' %}
+{% endblock %}
+
+{% block content %}
+
+<div class="card">
+<div class="top-header">
+    <div class="zai-select">
+      <div class="heaidng-zai">Edit User Account</div>
+
+    </div>
+        <div class="total_money">
+            <a href="{% url 'mophy:payout-list' %}" class="btn btn-primary style-button" id="btn33">View All Accounts</a>
+            
+    </div>
+  </div>
+
+  <div class="card-body">
+    <div class="basic-form form-custom-label">
+        <div style="display: none;" class="alert alert-danger alert-dismissible fade show" id="alert" role="alert">
+            <strong id="error_message"></strong> 
+        </div>
+          <div class="row">
+              <div class="row col-md-12">
+                  <div class="mb-4 col-md-6">
+                      <label class="form-label">First Name</label> 
+                      <input class="form-control input-custom" type="text" id="first_name" name="first_name" value="{% if user.first_name %}{{ user.first_name }}{% endif %}" maxlength="50" required>
+                  </div>
+
+                  <div class="mb-4 col-md-6">
+                      <label class="form-label">Last Name</label>
+                      <input class="form-control input-custom" type="text" id="last_name" name="last_name" value="{% if user.last_name %}{{ user.last_name }}{% endif %}" maxlength="50" required>
+                  </div>
+              </div>  
+              
+              <div class="row col-md-12">
+                <div class="mb-4 col-md-6">
+                    <label class="form-label">Nick Name</label>
+                    <input class="form-control input-custom" type="text" id="nick_name" name="nick_name" placeholder="Nick Name" value="{% if user.nick_name %}{{ user.nick_name }}{% endif %}" maxlength="50" required>
+                </div>
+                <div class="mb-4 col-md-6">
+                    <label class="form-label">Email</label>
+                    <input class="form-control input-custom" type="email" id="email" name="email" placeholder="abc@example.com" value="{{user.zai_email}}" maxlength="50" required>
+                </div>
+            </div>  
+
+            <div class="row col-md-12">
+                    <button type="submit" onclick="edit_payout_user('{{id}}')" class="btn btn-primary mt-4 mb-5 style-button" style="width:80%;">Save</button>
+                    <a href="{% url 'mophy:confirm-details' %}" class="btn btn-primary mt-4 mb-5 style-button">Cancel</a>
+                <div class="col-10"></div>
+              </div>
+          </div>
+    </div>
+  </div>
+</div>
+
+<div id="loader" style="display:none" class="loader-overly"><div class="loader" ></div>
+
+{% endblock %}
+
+
+{% block additional_js %}
+<script>
+    function edit_payout_user(id) {
+
+        // Get jQuery objects for input fields
+        var $firstName = $('#first_name');
+        var $lastName = $('#last_name');
+        var $nickName = $('#nick_name');
+        var $email = $('#email');
+        var errorFlag = false;
+        var url = "{% url 'mophy:edit-payout-account' id=0 %}".replace('0', id);
+        var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; 
+
+        // Clear previous error messages and classes
+        $firstName.removeClass('is-invalid');
+        $('#fn-error').remove();
+
+        $lastName.removeClass('is-invalid');
+        $('#ln-error').remove();
+
+        $nickName.removeClass('is-invalid');
+        $('#nn-error').remove();
+
+        $email.removeClass('is-invalid');
+        $('#email-error').remove();
+
+        if (!$firstName.val().trim()) {
+            errorFlag = true;
+            $firstName.addClass('is-invalid');
+            $firstName.after('<div id="fn-error" class="invalid-feedback">First Name is required.</div>');
+        }
+        if (!$lastName.val().trim()) {
+            errorFlag = true;
+            $lastName.addClass('is-invalid');
+            $lastName.after('<div id="ln-error" class="invalid-feedback">Last Name is required.</div>');
+        }
+        if (!$nickName.val().trim()) {
+            errorFlag = true;
+            $nickName.addClass('is-invalid');
+            $nickName.after('<div id="nn-error" class="invalid-feedback">Nick Name is required.</div>');
+        }
+        if (!$email.val().trim()) {
+            errorFlag = true;
+            $email.addClass('is-invalid');
+            $email.after('<div id="email-error" class="invalid-feedback">Email is required.</div>');
+        }
+        if (!emailPattern.test($email.val().trim())) {
+            errorFlag = true;
+            $email.addClass('is-invalid');
+            $email.after('<div id="email-error" class="invalid-feedback">Please enter a valid email address.</div>');
+        }
+        // If no errors, proceed with AJAX request
+        if (!errorFlag) {
+            $('#loader').show();
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: {
+                    first_name: $firstName.val(),
+                    last_name: $lastName.val(),
+                    nick_name: $nickName.val(),
+                    email: $email.val(),                   
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                success: function (data) {
+                    $('#loader').hide();
+                    if (data.success === true) {
+                        $('#success_message').html(data.message);
+                        $('#success_message').parent().show();
+                        setTimeout(function() {
+                            window.location.href = "{% url 'mophy:payout-list' %}"; 
+                        }, 2000);
+                    } else {
+                        $('#error_message').html(data.message);
+                        $('#error_message').parent().show();
+                        setTimeout(function () { $('#error_message').parent().hide(); }, 3000);
+                    }
+                }
+            });
+        }
+    }
+
+    // Remove invalid class and error message on input
+    $('.form-control').on('input', function() {
+        $(this).removeClass('is-invalid');
+        $(this).next('.invalid-feedback').remove();
+    });
+</script>
+
+
+{% endblock %}
+

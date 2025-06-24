@@ -1,0 +1,243 @@
+{% extends 'mophy/elements/layouts/admin.html' %}
+
+{% load static %}
+
+{% block additional_css %}
+{% endblock %}
+
+{% block content %}
+<link rel="icon" type="image/png" sizes="16x16" href="/static/mophy/images/footer-logo.svg" />   
+<link rel="stylesheet" href="/static/mophy/vendor/jqvmap/css/jqvmap.min.css" >
+<link rel="stylesheet" href="/static/mophy/vendor/chartist/css/chartist.min.css" >
+<link rel="stylesheet" href="/static/mophy/vendor/datatables/css/jquery.dataTables.min.css" >
+<link rel="stylesheet" href="/static/mophy/vendor/bootstrap-select/dist/css/bootstrap-select.min.css">
+<link rel="stylesheet" href="/static/mophy/css/style.css">
+
+
+<div class="card corridore_card">
+    <div class="card-header">
+        <h4 class="card-title">{{title}}</h4>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item "><a class="text-black fw-bold" href="{% url 'mophy:index' %}" ><u >Back</u></a></li>
+       </ol>
+    </div>
+
+    <div class="row mb-3" style="display: flex; justify-content: left;">
+        <button type="button" class="btn btn-primary style-button" onclick="submit_report('inflow')" id="submitInflowButton" style="float: left;">submit inflow report</button>
+        <button type="button" class="btn btn-primary style-button" style="float: left;">submit outflow report</button>
+        <button type="button" class="btn btn-primary style-button" style="float: left;">download inflow report</button>
+        <button type="button" class="btn btn-primary style-button" style="float: left;">download outflow report</button>
+    </div>
+
+ <div class="card-body">
+  <div class="row newlayout-table">
+    <div class="col-lg-12">
+     <div class="table-hover fs-14 card-table customer-table-row" id="custom-search" style="position: relative;">    
+        <table class="table dataTablesCard style-1 custom-tbl card-table previous-transactions display" id="example22" style="width: 100% !important;">
+            <thead>
+                <tr>       
+                    <th>S/N</th>
+                    <th>Transaction Id</th>
+                    <th>Date</th>
+                    <th>Payment Status</th>
+                    <th>TM Status</th>
+                    <th>PEP/AML</th>
+                </tr>
+            </thead>
+            <tbody>               
+                {% for t in transaction %}
+                <tr class="data-row">
+                    <td>
+                        <input type="checkbox" name="select_transaction" value="{{t.transaction_id}}">
+                        &nbsp; &nbsp;
+                        <span class="text-black font-w400 mb-0"> {{forloop.counter}}</span>
+                    </td>
+                    <td><a href="{% url 'mophy:transactions-details' id=t.id %}"><span class="text-black font-w400 mb-0 text-decoration-underline">{{t.transaction_id}}</span></a></td>
+                    <td><a href="{% url 'mophy:transactions-details' id=t.id %}"><span class="text-black font-w400 mb-0"> {{t.date}}</span></a></td>
+                    <td><a href="{% url 'mophy:transactions-details' id=t.id %}"><span class="text-black font-w400 mb-0"> {{t.payment_status}}</span></a></td>
+
+                    {% if t.payment_status == "Incomplete" %} 
+                        <td><a href="{% url 'mophy:transactions-details' id=t.id %}"><span class="text-black font-w400 mb-0"> Pending</span></a></td>
+                    {% elif t.tm_status == "NA" or t.tm_status == None %} 
+                        <td><a href="{% url 'mophy:transactions-details' id=t.id  %}"><span class="comma-values text-black font-w400 mb-0">No action triggered</span></a></td>
+                    {% else %}
+                        <td><a href="{% url 'mophy:transactions-details' id=t.id  %}"><span class="comma-values text-black font-w400 mb-0">{{t.tm_status}}</span></a></td>
+                    {% endif %}    
+
+                    {% if t.aml_pep_status == False or t.aml_pep_status == "False" %} 
+                        <td><a href="{% url 'mophy:transactions-details' id=t.id %}"><span class="text-black font-w400 mb-0">Passed</span></a></td>
+                    {% elif t.aml_pep_status == True or t.aml_pep_status == "True" %} 
+                        <td><a href="{% url 'mophy:transactions-details' id=t.id %}"><span class="text-black font-w400 mb-0">Failed</span></a></td>
+                    {% elif t.payment_status == "incomplete" or t.payment_status == "Incomplete" %} 
+                        <td><a href="{% url 'mophy:transactions-details' id=t.id %}"><span class="text-black font-w400 mb-0"> Pending</span></a></td>
+                    {% else %}
+                        <td><a href="{% url 'mophy:transactions-details' id=t.id  %}"><span class="comma-values text-black font-w400 mb-0">No action triggered</span></a></td>
+                    {% endif %} 
+                </tr>
+                {% endfor %}         
+            </tbody>
+        </table>
+     </div>
+    </div>
+  </div>
+ </div>
+</div>
+
+<div id="loader" style="display:none" class="loader-overly" ><div class="loader" ></div>
+
+{% endblock %}
+
+{% block additional_js %}
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        new DataTable('#example22', {
+            scrollX: true,
+            scrollCollapse: true,
+            scrollY: '530px',
+            pageLength: 20,
+            fixedHeader: true,
+            lengthChange: false,
+            responsive: true,
+            order: [], 
+        });
+    });
+</script>
+
+<style>
+    .dataTables_scrollHeadInner{
+        width: 100% !important;
+    }
+    table.table.dataTablesCard.style-1.custom-tbl.card-table.previous-transactions.display.dataTable.no-footer {
+        width: 100% !important;
+    }
+    table.table.dataTablesCard.style-1.custom-tbl.card-table.previous-transactions.display.dataTable.no-footer {
+        width: 100% !important;
+    }
+</style>
+
+
+<!-- <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const submitInflowButton = document.getElementById('submitInflowButton');        
+        submitInflowButton.addEventListener('click', function() {
+            const checkboxes = document.querySelectorAll('input[name="select_transaction"]:checked');            
+            const selectedIds = Array.from(checkboxes).map(checkbox => checkbox.value);
+            console.log('Selected IDs:', selectedIds);
+
+            // Example: If you want to send the selected IDs to the server via AJAX
+            if (selectedIds.length > 0) {
+                fetch('/submit-inflow-report/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({ selected_ids: selectedIds })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            } else {
+                alert('Please select at least one transaction.');
+            }
+        });
+    });
+</script> -->
+
+
+<script>
+    function submit_report(type) {
+        console.log(type, "transactionId, reportType")
+        var errorFlag = false;
+
+        const checkboxes = document.querySelectorAll('input[name="select_transaction"]:checked');            
+        const selectedIds = Array.from(checkboxes).map(checkbox => checkbox.value);
+
+        
+        // If no errors, proceed with AJAX request
+        if (!errorFlag) {
+            $('#loader').show();
+            $.ajax({
+                type: "POST",
+                url: "{% url 'mophy:austrac' %}",
+                data: {transactions_id:JSON.stringify(selectedIds), type:type, csrfmiddlewaretoken: '{{ csrf_token }}' },
+                success: function (data) {
+                    $('#loader').hide();
+                    if (data.success === true) {
+                        $('#success_message').html(data.message);
+                        $('#success_message').parent().show();
+                        setTimeout(function() {
+                            $('#submitReport').hide();
+                            window.location.href = "{% url 'mophy:austrac' %}"; 
+                        }, 2000);
+                    } else {
+                        $('#loader').hide();
+                        alert(data.message);                         
+                    }
+                }
+            });
+        }
+    }
+</script>
+
+
+<script>
+    function submit_austrac_report(transactionId, reportType) {
+        console.log(transactionId, reportType, "transactionId, reportType")
+        var errorFlag = false;
+
+        // If no errors, proceed with AJAX request
+        if (!errorFlag) {
+            $('#loader').show();
+            $.ajax({
+                type: "POST",
+                url: "{% url 'mophy:austrac' %}",
+                data: {id:transactionId, type:reportType, csrfmiddlewaretoken: '{{ csrf_token }}' },
+                success: function (data) {
+                    $('#loader').hide();
+                    if (data.success === true) {
+                        $('#success_message').html(data.message);
+                        $('#success_message').parent().show();
+                        setTimeout(function() {
+                            $('#submitReport').hide();
+                            window.location.href = "{% url 'mophy:austrac' %}"; 
+                        }, 2000);
+                    } else {
+                        $('#loader').hide();
+                        alert(data.message);                         
+                    }
+                }
+            });
+        }
+    }
+
+    // Remove invalid class and error message on input
+    $('.form-control').on('input', function() {
+        $(this).removeClass('is-invalid');
+        $(this).next('.invalid-feedback').remove();
+    });
+</script>
+
+<script>
+    function download_austrac_report(path) {
+    const fileUrl = path;
+    const link = document.createElement('a');
+    link.href = fileUrl;
+    link.download = fileUrl.split('/').pop(); // Use the file name from the URL
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+</script>
+
+
+
+{% endblock %}
+
+

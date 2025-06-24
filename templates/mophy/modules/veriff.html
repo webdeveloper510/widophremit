@@ -1,0 +1,324 @@
+{% extends 'mophy/elements/layouts/admin.html' %}
+
+{% load static %}
+
+{% block additional_css %}
+{% endblock %}
+
+{% block content %}
+
+<link rel="icon" type="image/png" sizes="16x16" href="/static/mophy/images/footer-logo.svg" />   
+<link rel="stylesheet" href="/static/mophy/vendor/jqvmap/css/jqvmap.min.css" >
+<link rel="stylesheet" href="/static/mophy/vendor/chartist/css/chartist.min.css" >
+<link rel="stylesheet" href="/static/mophy/vendor/datatables/css/jquery.dataTables.min.css" >
+<link rel="stylesheet" href="/static/mophy/vendor/bootstrap-select/dist/css/bootstrap-select.min.css">
+<link rel="stylesheet" href="/static/mophy/css/style.css">
+
+
+<div class="card corridore_card">
+    <div class="card-header">
+        <h4 class="card-title">KYC Details</h4>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item "><a class="text-black fw-bold" href="{% url 'mophy:index' %}" ><u >Back</u></a></li>
+          </ol>
+    </div>
+
+ <div class="card-body">
+   
+  <div class="row newlayout-table">
+    <div class="col-lg-12">
+     <div class="table-hover fs-14 card-table" style="position: relative;">    
+        <table class="table dataTablesCard style-1 custom-tbl card-table previous-transactions display" id="example22"  style="width: 100% !important;">
+            <thead>
+                <tr>       
+                    <th>S/N</th>
+                    <th>Cust Id</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>ID Type</th>
+                    <th>ID Number</th>
+                    <th>Country</th>
+                    <th>Status</th>
+                    <th>Media</th>
+                </tr>
+            </thead>
+            <tbody>               
+                {% for t in data %}
+                <tr class="data-row">
+                    <td><span class="text-black font-w400 mb-0">{{forloop.counter}}</span></td>
+                    <td><span class="text-black font-w400 mb-0" id="customer-id"> {{t.customer_id}}</span></td>
+                    <td><span class="text-black font-w400 mb-0"> {{t.first_name}}</span></td>
+                    <td><span class="text-black font-w400 mb-0"> {{t.last_name}} </span></td>
+                    <td><span class="text-black font-w400 mb-0"> {{t.id_type}}</span></td>
+                    <td><span class="text-black font-w400 mb-0"> {{t.id_number}} </span></td>
+                    <td><span class="text-black font-w400 mb-0">{{t.id_country}}</span></td>
+                    <td>
+                        <span class="d-flex text-black font-w400 mb-0 text-black text-nowrap" id="status">
+                            {{t.status}} &nbsp<i class="fas fa-pencil-alt text-primary pull-right update-status-btn" data-customer-id="{{t.customer_id}}"  data-bs-toggle="modal" data-bs-target="#update_status_modal"></i>
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn btn-primary btn-xs content-justify-right view-media-btn" data-media='{{ t.media_data}}' data-bs-toggle="modal" data-bs-target="#viewmedia" type="submit" name="submit">View</button>
+                    </td>
+                </tr>
+                {% endfor %}         
+            </tbody>
+        </table>
+     </div>
+    </div>
+  </div>
+ </div>
+</div>
+
+
+<!-- View media Modal Start -->
+<div class="modal fade" id="viewmedia">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Media</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="swiper-container">
+                    <div class="swiper-wrapper" id="swiper-wrapper">
+                        <!-- Slides will be inserted here dynamically -->
+                    </div>
+                    <!-- Add Pagination -->
+                    <div class="swiper-pagination"></div>
+                    <!-- Add Navigation -->
+                    <div class="swiper-button-next"></div>
+                    <div class="swiper-button-prev"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!---- View media Modal end ------->
+<!-- Update Status Modal Start -->
+<div class="modal fade" id="update_status_modal">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Update Status</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal">
+                </button>
+            </div>
+            <div class="modal-body select-row">
+                <select class="form-control" id="status_value">
+                    <option value="" selected disabled>Choose Status</option>
+                    {% for i in veriff_status_list %}
+                        {% for key, value in i.items %}
+                            <option value="{{value}}">{{key}} </option>
+                        {% endfor %}
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="modal-footer">
+                    <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary save_btn">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Update status Modal End -->
+
+
+{% endblock %}
+
+{% block additional_js %}
+<link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
+<script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        $('.view-media-btn').on('click', function() {
+            // Get media data from data attribute
+            var mediaDataRaw = $(this).data('media');
+            var mediaData;
+
+            // Check if mediaData is empty
+            if (!mediaDataRaw ) {
+                $('#swiper-wrapper').append('<div class="swiper-slide">No media available.</div>');
+            } 
+            else {
+                // Check if mediaDataRaw is a string and parse it
+                if (typeof mediaDataRaw === 'string') {
+                    mediaData = JSON.parse(mediaDataRaw);
+                } else {
+                    mediaData = mediaDataRaw; // Assuming it's already an array
+                }
+
+                console.log('Type of mediaData:', typeof(mediaData), mediaData.length);
+
+                // Clear previous slides
+                $('#swiper-wrapper').empty();
+
+                // Generate new slides
+                mediaData.forEach(function(item) {
+                    // Access path, name, and type from the item object
+                    var path = item.path;
+                    var name = item.name;
+                    var type = item.type; // Assuming 'type' is either 'image' or 'video'
+
+                    // Determine the type of media
+                    var mediaElement = (type === 'video')
+                        ? `<video controls style="max-width: 100%;"><source src="${path}" type="video/${path.split('.').pop()}">Your browser does not support the video tag.</video>`
+                        : `<img src="${path}" alt="Media ${name}" style="max-width: 100%;">`;
+
+                    var slideHtml = `
+                        <div class="swiper-slide">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <h2 style="text-align:center; text-transform:capitalize;">${name}</h2>
+                                <a href="${path}" download class="btn btn-primary btn-sm">Download</a>
+                            </div>
+                            ${mediaElement}
+                        </div>
+                    `;
+                    $('#swiper-wrapper').append(slideHtml);
+                });
+            }
+
+            // Initialize or reinitialize Swiper
+            var swiper = new Swiper('.swiper-container', {
+                slidesPerView: 1,
+                spaceBetween: 10,
+                pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true,
+                },
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
+                },
+            });
+        });
+    });
+</script>
+
+
+<script>
+    var swiper = new Swiper('.swiper-container', {
+  slidesPerView: 3, // Adjust based on how many items you want visible
+  spaceBetween: 10,
+  navigation: {
+    nextEl: '.swiper-button-next',
+    prevEl: '.swiper-button-prev',
+  },
+  pagination: {
+    el: '.swiper-pagination',
+    clickable: true,
+  },
+});
+</script>
+ 
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- <script src="https://code.jquersy.com/jquery-3.6.0.min.js"></script> -->
+
+<script>
+    $(document).ready(function () {
+        var customer_id = null;
+        var status_value = null
+        $('.update-status-btn').on('click', function() {
+            customer_id = $(this).data('customer-id');
+            console.log('Customer ID:', customer_id);
+        });
+
+        $(".save_btn").click(function (el) {
+            var status = $(this).attr('data-status');
+            Swal.fire({
+                title: "Are you sure to update?",
+                text: '',
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#4BB543",
+                confirmButtonText: "Confirm",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    status_value = $('#status_value').val();
+                    console.log(status_value, "status value---", customer_id, "customer id")
+                    if (status_value === null || status_value === undefined || status_value.trim() === '') {
+                        status_value = 'pending'
+                    }                    
+                    $.ajax({
+                        url: "{% url 'mophy:update-veriff-status' %}",
+                        type: 'POST',
+                        data: {customer_id:customer_id, status_value:status_value, csrfmiddlewaretoken: '{{ csrf_token }}'},
+                        success: function (response) {
+                            if (response.success){
+                                Swal.fire({
+                                    title: 'Updated!',
+                                    text: response.message,
+                                    icon: 'success',
+                                    confirmButtonText: 'OK'
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        $('#update_status_modal').hide();
+                                        window.location.reload();
+                                    }
+                                });
+                            }
+                            else{
+                                Swal.fire(
+                                'Failed!', response.message, 'error'
+                                );
+                            }                            
+                        },
+                        error: function (error) {
+                            Swal.fire(
+                                'Failed!','Something went wrong. Please try again later', 'error'
+                            );
+                        }
+                    });
+                    resetFieldsAndValues();
+                }
+            });
+        });
+        function resetFieldsAndValues() {
+            $('#status_value').val('');
+            $('#customer_id').val('');
+            status_value = '';
+            customer_id = '';
+        }
+});
+
+    
+</script>
+    
+
+<script>
+    $(document).ready(function() {
+        new DataTable('#example22', {
+            scrollX: true,
+            scrollCollapse: true,
+            scrollY: '530px',
+            pageLength: 20,
+            fixedHeader: true,
+            lengthChange: false,
+            responsive: true,
+            order: [], // Disable initial sorting
+            // columnDefs: [{
+            //     targets: '_all', 
+            //     orderable: true,
+            //     orderData: [0], // Set the order data (adjust index as needed)
+            //     orderSequence: ['desc', 'asc'] // Set the order sequence for sorting
+            // }]
+        });
+    });
+</script>
+
+<style>
+    .dataTables_scrollHeadInner{
+        width: 100% !important;
+    }
+    table.table.dataTablesCard.style-1.custom-tbl.card-table.previous-transactions.display.dataTable.no-footer {
+        width: 100% !important;
+    }
+    table.table.dataTablesCard.style-1.custom-tbl.card-table.previous-transactions.display.dataTable.no-footer {
+        width: 100% !important;
+    }
+    </style>
+{% endblock %}
+

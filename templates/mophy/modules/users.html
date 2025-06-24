@@ -1,0 +1,362 @@
+{% extends 'mophy/elements/layouts/admin.html' %}
+
+{% load static %}
+
+{% block additional_css %}
+{% endblock %}
+
+{% block content %}
+
+
+<link rel="stylesheet" href="/static/mophy/vendor/datatables/css/jquery.dataTables.min.css" >
+<link rel="stylesheet" href="/static/mophy/css/style.css">
+
+<!-- heading -->
+<!-- <div class="row mx-0">
+    <div class="col-sm-6 p-md-0">
+        <div class="welcome-text mb-4">
+            <h2 class="text-black fw-bold">{{title}}</h2>
+        </div>
+    </div>
+    <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex fw-bold">
+        <ol class="breadcrumb">
+        <li class="breadcrumb-item "><a class="text-black fw-bold" href="{% url 'mophy:index' %}" ><u >Back</u></a></li>
+        </ol>
+    </div>
+</div> -->
+
+<div class="card corridore_card">
+    <div class="card-header">
+        <h4 class="card-title">{{title}}</h4>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item "><a class="text-black fw-bold" href="{% url 'mophy:index' %}" ><u >Back</u></a></li>
+       </ol>
+    </div>
+ <div class="card-body">
+    {% if title == "Customers" %}
+        <!-- <div class="row">
+            <a id="customer_create_btn" href="{% url 'mophy:add-user' %}"><button class="btn btn-primary fw-bold " style="width: 12%;;">Add</button></a>
+        </div> -->
+    {% endif %}
+  <div class="row newlayout-table">
+    <div class="col-lg-12">
+        {% if title == "Customers" %}
+            <div class="row select-row">
+                <div class="col-3">
+                    <select onchange="get_csv_filter_values()" class="form-control" id="csv_key" name="csv_key">
+                        <option disabled selected>Choose Filter...</option>
+                        {% for dict in csv_filter_list %}
+                            {% for key, value in dict.items %}
+                                <option value="{{value}}">{{ key }}</option>
+                            {% endfor %}
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-3">
+                    <select class="form-control" id="csv_value" onchange="set_value()" name="csv_value" >
+                        <option disabled selected>Choose Value...</option>     
+                    </select>
+                </div>
+                <div class="col-3">
+                    <button type="button" onclick="download_csv()" class="btn btn-primary style-button"  style="float:left;">Download CSV</button>
+                </div>
+            </div>
+        {% endif %}
+      <div class="table-hover fs-14 card-table customer-table-row" id ="custom-search" style="position:relative;">  
+        <table class="table dataTablesCard style-1 custom-tbl card-table previous-transactions display" id="example22" style="width: 100% !important;">
+            <thead>
+                <tr>       
+                    <th>S/N</th>
+                    <th>Cust Id</th>
+                    <th>Email</th>                 
+                    <th>KYC Status (Veriff)</th>
+                    <th>AML/PEP Status</th>
+                    <th>Promo & Marketing</th>
+                    <th>Email Verification</th>
+                    <th>Date of Creation</th>
+                    <th class="customer_th">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in user_list %}
+                <tr class="data-row">
+                  <td><a href="{% url 'mophy:user-details' id=user.customer_id %}"><span class="text-black font-w400 mb-0"> {{forloop.counter}}</span></a></td>
+                  <td><a href="{% url 'mophy:user-details' id=user.customer_id %}"><span class="text-black font-w400 mb-0 text-decoration-underline"> {{user.customer_id}}</span></a></td>
+                  <td class="customer-table"><a href="{% url 'mophy:user-details' id=user.customer_id %}"><span class="text-black font-w400 mb-0"> {{user.email }}</span></a></td>
+                  <td><a href="{% url 'mophy:user-details' id=user.customer_id %}"><span class="text-black font-w400 mb-0 text-capitalize"> {{user.is_digital_Id_verified }}</span></a></td>
+
+                    {% if user.aml_pep_status == False %}
+                        <td><a href="{% url 'mophy:user-details' id=user.customer_id %}"><span class="text-black font-w400 mb-0">Passed</span></a></td>
+                        <!-- <td><a href="{% url 'mophy:user-details' id=user.customer_id %}"><i class="fa fa-check text-success " style="font-size:20px;" aria-hidden="true"></i></a></td>  -->
+                    {% elif user.aml_pep_status == True %}
+                       <td><a href="{% url 'mophy:user-details' id=user.customer_id %}"><span class="text-black font-w400 mb-0">Failed</span></a></td>
+                        <!-- <td><a href="{% url 'mophy:user-details' id=user.customer_id %}"><i class="fa fa-times text-danger" style="font-size:20px;" aria-hidden="true"></i></a></td> -->
+                    {% else %}
+                        <td><a href="{% url 'mophy:user-details' id=user.customer_id %}"><span class="text-black font-w400 mb-0 text-capitalize">Pending</span></a></td>                        
+                    {% endif %}
+                    
+                    {% if user.promo_marketing == True %}
+                        <td><a href="{% url 'mophy:user-details' id=user.customer_id %}"><i class="fa fa-check text-success " style="font-size:20px;" aria-hidden="true"></i></a></td> 
+                    {% else %}
+                        <td><a href="{% url 'mophy:user-details' id=user.customer_id %}"><i class="fa fa-times text-danger" style="font-size:20px;" aria-hidden="true"></i></a></td>
+                    {% endif %}
+
+                    {% if user.is_verified == True %}
+                        <td><a href="{% url 'mophy:user-details' id=user.customer_id %}"><i class="fa fa-check text-success " style="font-size:20px;" aria-hidden="true"></i></a></td> 
+                    {% else %}
+                        <td><a href="{% url 'mophy:user-details' id=user.customer_id %}"><i class="fa fa-times text-danger" style="font-size:20px;" aria-hidden="true"></i></a></td>
+                    {% endif %}
+
+                    <td><a href="{% url 'mophy:user-details' id=user.customer_id %}"><span class="text-black font-w400 mb-0"> {{user.created_at }}</span></a></td>
+
+                    <td id="customer_td">
+                        <div class="form-check form-switch" onclick="delete_user('{{user.customer_id}}', this)" data-delete-user="{{user.delete}}">
+                            {% if user.delete == False %}
+                                    <input type="checkbox" class="form-check-input" id="toggleCustomerBtn" onclick="return false;" onkeydown="return false;" checked>
+                                {% else %}
+                                    <input type="checkbox" class="form-check-input" id="toggleCustomerBtn" onclick="return false;" onkeydown="return false;">
+                                {% endif %}
+                                <!-- <label class="form-check-label" for="toggleCustomerBtn"></label> -->
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}         
+              </tbody>
+        </table>  
+      </div>
+    </div>
+  </div>
+ </div>
+</div>
+
+<p id="old_csv_value" value="" style="display: none;"></p>
+
+{% endblock %}
+{% block additional_js %}
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+
+<script>
+    function get_csv_filter_values(){
+        var key = $('#csv_key').val();
+        var old_csv_value = $('#old_csv_value').val();
+
+        $.ajax({
+            type: "POST",
+            url: "{% url 'mophy:get-csv-values' %}",
+            data: {csv_key:key, type:"customer", csrfmiddlewaretoken: '{{ csrf_token }}'},
+            success: function (data) {
+                if (data.success) {
+                    data = data.csv_values;
+                    $('#csv_value').html('');
+                    $('#csv_value').append($('<option>').text('Choose Value ..').prop('disabled', true).prop('selected', true));
+                    for (var i = 0; i < data.length; i++) {
+                        $('#csv_value').append($('<option>').text(data[i]).attr('value', data[i]));
+                    }
+                    var get_value = '{{ value }}';
+                    if (get_value !== 'None' && get_value !== old_csv_value) {
+                        $('#csv_value').val(get_value);
+                    }
+                    $('#old_csv_value').val(get_value);
+            }
+            }            
+        })
+    }
+
+    function set_value(){
+    var key = $('#csv_value').val();
+    $.ajax({
+        type: "POST",
+        url: "{% url 'mophy:set-value' %}",
+        data: {key, type:"customer", csrfmiddlewaretoken: '{{ csrf_token }}'},
+        success: function (data) {
+          window.location.reload();
+        }            
+    })
+}
+
+    function getFilterList(){
+        var filter_value = '{{ filter_value }}';
+        var get_value = '{{ value }}';
+        console.log(filter_value,get_value);
+        if(filter_value=='None' || get_value=='None' || filter_value=='' || get_value==''){
+
+        }
+        else{
+        
+            $('#csv_key').val(filter_value);
+            $('#csv_value').val(get_value);
+
+            get_csv_filter_values();      
+                    
+        }
+    }
+    getFilterList();
+</script>
+
+<script>
+    function download_csv(){
+        var key = $('#csv_key').val();
+        var value = $('#csv_value').val();
+        var error_flag = false
+
+        if (key === null && value === null){
+            error_flag = false
+            key = "null"
+            value = "null"
+        }
+        else{
+            if (key === null){
+                $("#csv_key").addClass("is-invalid");
+                event.preventDefault(); 
+                error_flag = true
+            }
+            if (value === null || value === 'None'){
+                $("#csv_value").addClass("is-invalid");
+                event.preventDefault(); 
+                error_flag = true
+            }
+        }   
+        if (error_flag === false){
+            $("#csv_key").removeClass("is-invalid");
+            $("#csv_value").removeClass("is-invalid");
+
+            $.ajax({
+                type: "POST",
+                url: "{% url 'mophy:download-csv' %}",
+                data: {csv_key:key, csv_value:value, type:"customer", csrfmiddlewaretoken: '{{ csrf_token }}'},
+                success: function (data) {
+                    if(data.success){
+                        window.open("{% url 'mophy:download-csv' %}")
+                    }
+                }                      
+            })
+
+        }
+    }
+</script>
+
+<script>
+    $(document).ready(function() {
+        new DataTable('#example22', {
+            scrollX: true,
+            scrollCollapse: true,
+            scrollY: '530px',
+            pageLength: 20,
+            fixedHeader: true,
+            lengthChange: false,
+            responsive: true,
+            order: [], 
+        });
+    });
+</script>
+
+<style>
+.dataTables_scrollHeadInner{
+    width: 100% !important;
+}
+table.table.dataTablesCard.style-1.custom-tbl.card-table.previous-transactions.display.dataTable.no-footer {
+    width: 100% !important;
+}
+table.table.dataTablesCard.style-1.custom-tbl.card-table.previous-transactions.display.dataTable.no-footer {
+    width: 100% !important;
+}
+</style>
+
+<script>
+    $('.sweet-success-cancel').on('click', function (event) {
+           event.preventDefault();
+           const url = $(this).attr('href');
+   
+           Swal.fire({
+               title: 'Are you sure?',
+               text: "You won't be able to revert this!",
+               type: "warning",
+               icon: 'question',
+               showCancelButton: true,
+               confirmButtonText: "Yes, delete it !!",
+               confirmButtonText: 'Delete',
+               confirmButtonColor: "#DD6B55"
+               
+           }).then((result) => {
+               if (result.value) {
+                   window.location.href = url;
+               } else if (result.dismiss === Swal.DismissReason.cancel) {
+                   event.preventDefault();
+               }
+           })
+       });
+</script>
+   
+<script>
+    const  delete_user =(customer_id, element)=> {
+        const delete_value = element.getAttribute('data-delete-user');
+        var success =  false
+        if (delete_value === 'True'){
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You want to enable this user!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, enable it!',
+                confirmButtonColor: '#DD6B55',
+                showLoaderOnConfirm: true,
+                preConfirm: function () {
+                    return $.ajax({
+                        type: "POST",
+                        url: "{% url 'mophy:enable-user' id=0 %}".replace('0', customer_id),
+                        data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+                        success: function (data) {
+                            console.log(data, "data = = = =")
+                            success = data.success
+                        }
+                    });
+                },
+                allowOutsideClick: false,
+            }).then(function (result) {
+                if (success === true) {
+                    Swal.fire('Enabled!', 'The user has been enabled.', 'success').then(function () {
+                        window.location.reload();
+                    });
+                } else {
+                    Swal.fire('Error', 'Failed to enable user.', 'error');
+                }
+            });
+        }
+        else{
+            Swal.fire({
+            title: 'Are you sure?',
+            text: "You want to disable this user!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, disable it!',
+            confirmButtonColor: '#DD6B55',
+            showLoaderOnConfirm: true,
+            preConfirm: function () {
+                return $.ajax({
+                    type: "POST",
+                    url: "{% url 'mophy:delete-user' id=0 %}".replace('0', customer_id),
+                    data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+                    success: function (data) {
+                        success = data.success
+                    }
+                });
+            },
+            allowOutsideClick: false,
+        }).then(function (result) {
+            if (success === true) {
+                Swal.fire('Disabled!', 'The user has been disabled.', 'success').then(function () {
+                    window.location.reload();
+                });
+            } else {
+                Swal.fire('Error', 'Failed to disable user.', 'error');
+            }
+        });
+        }
+    }
+</script>
+
+
+{% endblock %}
+

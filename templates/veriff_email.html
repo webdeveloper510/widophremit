@@ -1,0 +1,102 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <title>Welcome</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style type="text/css">
+    @import url("http://fonts.cdnfonts.com/css/pf-din-text-cond-pro-medium");
+    @import url("http://fonts.cdnfonts.com/css/pf-din-text-comp-pro-light");
+    @import url("http://db.onlinewebfonts.com/c/2090551770be22b09600a40b0b4673b7?family=Avenir+Medium");
+  </style>
+</head>
+
+<body style="margin: 0; padding: 0">
+  <table border="0" cellpadding="0" cellspacing="0" width="100%">
+    <tr>
+      <td>
+        <table bgcolor="#fff4f2" align="center" border="0" cellpadding="0" cellspacing="0" width="600" style="border-collapse: collapse">
+          <tr>
+            <td align="center" style="padding-top: 50px; padding-bottom:20px;">
+              <img  src="{{data.Verify_Email_Logo}}"alt="top img" style="display: block; width: 100px;;"/>
+            </td>
+          </tr>
+          <tr>
+            <td style=" font-family: 'Avenir Medium', sans-serif; text-align: center; font-size: 16px; color: #191970;padding-right: 56px; padding-left: 56px;"> 
+              <p style="text-align: left; margin-top: 0;">Dear Obi Orji-Ukabiala,</p>
+              <p style="text-align: left; margin-top: 2em; line-height: 24px;">
+                  We are writing to inform you that a new customer has submitted documents for KYC. Please review the documents and approve the request.
+              </p>
+              <table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-top: 2em; margin-bottom: -30px; text-align: left;" >
+                <tr style="background:#cccccc38">
+                  <th style="width: 40%; padding: 5px">Customer ID</th>
+                  <td>{{user.customer_id}} </td>
+                </tr>  
+                <tr style="background:#cccccc38">
+                  <th style="width: 40%; padding: 5px">Email</th>
+                  <td>{{user.email}} </td>
+                </tr>                 
+              </table>
+
+              <p style="text-align: left; margin-top: 2em; margin-bottom: 20px;">                 
+                  Sincerely,
+                <br/>
+                <strong> WidophRemit </strong> </p>
+            </td>
+          </tr>
+          <tr>
+            <td
+              style="
+                font-family: 'Avenir Medium', sans-serif;
+                font-size: 11px;
+                color: white;
+                text-align: center;
+              "
+            >
+              <table bgcolor="#6414e9" width="100%" style="padding: 44px 50px 30px">
+                <tr>
+                  <td>
+                    <div style="font-size:11px;color:#ffffff;line-height:20px">
+                      <p style="margin-top: 0; margin-bottom: 13px; outline:none;padding:0; font-family: Arial,helvetica,sans-serif;">WidophRemit Solutions PTY LTD (ACN 646058433)<br>
+                      WidophRemit is registered and regulated by AUSTRAC under the AML/CTF Act 2006 of Australia<br> with registration number: IND100729095-001
+                      
+                      </p>
+                      </div>
+                      <div class="social-links mt-3" id="social-media">
+                        <a class="twitter" target="_blank" href="https://twitter.com/remitassure" style="display: inline-block !important;">
+                        <img src="{{data.Twitter}}" style="width: 30px; margin: 5px;">
+                        </a>
+                          
+                        <a class="facebook" target="_blank" href="https://www.facebook.com/remitassure" style="display: inline-block !important;">
+                        <img src="{{data.Facebook}}" style="width: 30px; margin: 5px;">
+                        </a>
+                        
+                        <a class="instagram" target="_blank" href="https://www.instagram.com/media.remitassure/" style="display: inline-block !important;">
+                          <img src="{{data.Instagram}}" style="width: 30px; margin: 5px;"> 
+                        </a>
+                        
+                        <a class="linkedin" target="_blank" href="https://www.linkedin.com/company/remitassure/" style="display: inline-block !important;">
+                          <img src="{{data.Linkedin}}" style="width: 30px; margin: 5px;">
+                        </a>
+                      </div>
+                  </td>
+                </tr>
+                <!-- space -->
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+
+<script>
+  const elements = document.querySelectorAll('td .comma-values');
+  elements.forEach(element => {
+      const originalValue = parseFloat(element.textContent.match(/\d+/)[0]);
+      const formattedValue = originalValue.toLocaleString();
+      element.textContent = element.textContent.replace(/\d+/, formattedValue);
+  });
+</script>

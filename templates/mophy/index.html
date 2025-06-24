@@ -1,0 +1,360 @@
+{% extends 'mophy/elements/layouts/admin.html' %}
+
+{% load static %}
+
+{% block additional_css %}
+{% endblock %}
+
+{% block content %}
+<div id="permission_message" class="alert alert-danger fs-4" role="alert" style="display:none;"></div>
+
+<!-- <div class="form-head mb-4">
+<h2 class="text-black font-w600 mb-0">Dashboard test</h2>
+</div> -->
+<div class="row">
+<div class="col-xl-6">
+<div class="row">
+<div class="col-xl-12">
+
+<div class="card dashboard_transaction-card">
+    <div class="card-body">
+<div class="pr-3 me-auto mb-sm-0 mb-3">
+<h4 class="fs-20 fw-bold text-black mb-1">TRANSACTION OVERVIEW</h4>
+</div>
+
+
+
+ <table class="table card-table previous-transactions dashboard-table">
+    <tbody>
+        <tr>
+            <td  class="text-black font-w600 mb-0"><a id="customer_view_btn" href="{% url 'mophy:new-customers' %}" class="text-black">New Customers</a></td>
+            <td><span class="text-black font-w400"><a id="customer_view_btn" href="{% url 'mophy:new-customers' %}" class="text-black">{{new_customers}}</a></span></td>
+        </tr>
+
+        <tr>
+            <td  class="text-black font-w600 mb-0"><a id="transaction_view_btn" href="{% url 'mophy:pending-transactions' %}" class="text-black">Pending Payments</a></td>
+            <td><span class="text-black font-w400"><a id="transaction_view_btn" href="{% url 'mophy:pending-transactions' %}" class="text-black">{{pending_transactions}}</a></span></td>
+        </tr>
+
+        <tr>
+            <td  class="text-black font-w600 mb-0"><a id="transaction_view_btn" href="{% url 'mophy:incomplete-transactions' %}" class="text-black">Incomplete Payments</a></td>
+            <td><span class="text-black font-w400"><a id="transaction_view_btn" href="{% url 'mophy:incomplete-transactions' %}" class="text-black">{{incomplete_transactions}}</a></span></td>
+        </tr>
+            
+        <tr>
+            <td  class="text-black font-w600 mb-0"><a id="transaction_view_btn" href="{% url 'mophy:pending-review-processing-transactions' %}" class="text-black">Pending Review & Processing</a></td>
+            <td><span class="text-black font-w400"><a id="transaction_view_btn" href="{% url 'mophy:pending-review-processing-transactions' %}" class="text-black">{{pending_review_and_processing_transactions}}</a></span></td>
+        </tr>
+
+        <tr>
+            <td  class="text-black font-w600 mb-0">Total Payins</td>
+            <td><span class="text-black font-w400">{{total_payins}}</span></td>
+        </tr>
+
+        <tr>
+            <td  class="text-black font-w600 mb-0">Total Payouts</td>
+            <td><span class="text-black font-w400">{{total_payouts}}</span></td>
+        </tr>
+
+        <tr>
+            <td  class="text-black font-w600 mb-0">Pending Payouts</td>
+            <td><span class="text-black font-w400">{{pending_payouts}}</span></td>
+        </tr>
+        
+        <!-- <tr class="bg-success">
+            <td><span class="text-white fw-bold"><a id="transaction_view_btn" class="text-white fw-bold" href="{% url 'mophy:approved-transactions' %}">Approved Transactions</a></span></td>
+            <td><span class="text-white fw-bold"><a id="transaction_view_btn" class="text-white fw-bold" href="{% url 'mophy:approved-transactions' %}">{{approved_transactions}}</a></span></td>
+        </tr>
+
+        <tr class="bg-warning">
+            <td><span class="text-white fw-bold"><a id="transaction_view_btn" class="text-white fw-bold" href="{% url 'mophy:queue-transactions' %}">Queued Transactions</a></span></td>
+            <td><span class="text-white fw-bold"><a id="transaction_view_btn" class="text-white fw-bold" href="{% url 'mophy:queue-transactions' %}">{{queued_transactions}}</a></span></td>
+        </tr>
+
+        <tr class="btn-danger" style="background-color:red;">
+            <td><span class="text-white fw-bold"><a id="transaction_view_btn" class="text-white fw-bold" href="{% url 'mophy:cancelled-transactions' %}">Cancelled Transactions</a></span></td>
+            <td><span class="text-white fw-bold"><a id="transaction_view_btn" class="text-white fw-bold" href="{% url 'mophy:cancelled-transactions' %}">{{cancelled_transactions}}</a></span></td>
+        </tr> -->
+
+    </tbody>
+ </table>  
+</div>
+</div>
+
+</div>
+</div>
+
+
+<div class="row transaction_row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <span class="approved-text"><a id="transaction_view_btn" class="text-white fw-bold" href="{% url 'mophy:approved-transactions' %}">Approved Transactions</a></span>
+                <span class="approved-number"><a id="transaction_view_btn" class="text-white fw-bold" href="{% url 'mophy:approved-transactions' %}">{{approved_transactions}}</a></span>
+           
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 centered-column">
+             <div class="card">
+            <div class="card-body">
+                <span class="queued-text"><a id="transaction_view_btn" class="text-white fw-bold" href="{% url 'mophy:queue-transactions' %}">Queued Transactions</a></span>
+                <span class="approved-number"><a id="transaction_view_btn" class="text-white fw-bold" href="{% url 'mophy:queue-transactions' %}">{{queued_transactions}}</a></span>
+            </div>
+        </div>
+        </div>
+        
+        <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <span class="cencelled-text"><a id="transaction_view_btn" class="text-white fw-bold" href="{% url 'mophy:cancelled-transactions' %}">Cancelled Transactions</a></span>
+                <span class="approved-number"><a id="transaction_view_btn" class="text-white fw-bold" href="{% url 'mophy:cancelled-transactions' %}">{{cancelled_transactions}}</a></span>
+            </div>
+        </div>
+        </div>
+    
+        
+        </div>
+    </div>
+
+<div class="col-xl-6">
+<div class="row">
+<div class="col-xl-12 no-padding">
+<div class="card corridore_card">
+<div class="card-body">
+<div class="row align-items-center">
+
+    <div class="col-xl-12  col-xxl-12 col-md-12">
+        <h4 class="fs-20 mb-4">
+        <a class="text-black fs-20 fw-bolder mb-5 mt-2 text-decoration-underline" id="corridor_view_btn" href="{% url 'mophy:corridors' %}">REMITTANCE BY CORRIDORS</a></h4>
+        <div class="row g-3">
+            <div class="col-sm-6">
+                <div class="bg-secondary rounded text-center p-3 graph1">
+                    <div class="d-flex">
+                    <div class="d-inline-block position-relative donut-chart-sale mb-1">
+                        <span class="donut1" data-peity='{ "fill": ["rgb(57, 165, 212)", "rgb(57, 165, 212, 40%)"],   "innerRadius": 33, "radius": 10}'>{{very_high}}/8</span>
+                        <small class="text-black fs-3">{{top1_count}}</small>
+                    </div>
+                    <div class="graph-value">
+                    <span class="comma-values fs-14 text-white d-block fw-bolder">Outflow: 
+                        <br>AUD {{top1_outflow}}</span>
+                    <span class="fs-14 text-white d-block fw-bolder convert-value">AUD <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                        {{top1}}</span>
+                        </div>
+                        </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="bg-success rounded text-center p-3 graph2">
+                    <div class="d-flex">
+                    <div class="d-inline-block position-relative donut-chart-sale mb-1">
+                        <span class="donut1" data-peity='{ "fill": ["rgb(43, 193, 85)", "rgb(43, 193, 85, 40%)"],   "innerRadius": 33, "radius": 10}'>{{high}}/8</span>
+                        <small class="text-black fs-3">{{top2_count}}</small>
+                    </div>
+                    <div class="graph-value">
+                    <span class="comma-values fs-14 text-white d-block fw-bolder">Outflow: AUD {{top2_outflow}}</span>
+                    <span class="fs-14 text-white d-block fw-bolder convert-value">AUD <i class="fa fa-arrow-right" aria-hidden="true"></i> {{top2}}</span>            
+                </div>
+                </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="bg-warning rounded text-center p-3 graph3">
+                    <div class="d-flex">
+                    <div class="d-inline-block position-relative donut-chart-sale mb-1">
+                        <span class="donut1" data-peity='{ "fill": ["rgb(254, 128, 36)", "rgb(254, 128, 36, 40%)"],   "innerRadius": 33, "radius": 10}'>{{high}}/8</span>
+                        <small class="text-black fs-3">{{top3_count}}</small>
+                    </div>
+                    <div class="graph-value">
+                    <span class="comma-values fs-14 text-white d-block fw-bolder">Outflow: AUD {{top3_outflow}}</span>
+                    <span class="fs-14 text-white d-block fw-bolder convert-value">AUD <i class="fa fa-arrow-right" aria-hidden="true"></i> {{top3}}</span>           
+                </div>
+                </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="bg-primary rounded text-center p-3 graph4">
+                    <div class="d-flex">
+                    <div class="d-inline-block position-relative donut-chart-sale mb-1">
+                        <span class="donut1" data-peity='{ "fill": ["rgb(100, 20, 233)", "rgb(100, 20, 233, 10%)"],   "innerRadius": 33, "radius": 10}'>{{low}}/10</span>
+                        <small class="text-black fs-3">{{top4_count}}</small>
+                    </div>
+                    <div class="graph-value">
+                    <span class="comma-values fs-14 text-white d-block fw-bolder">Outflow: AUD {{top4_outflow}}</span>
+                    <span class="fs-14 text-white d-block fw-bolder convert-value">AUD <i class="fa fa-arrow-right" aria-hidden="true"></i> {{top4}}</span>
+                </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+<div class="col-xl-12" id="transaction_view_page">
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card corridore_card">
+                <div class="card-body tab-content newlayout-table">
+                <div class="pr-3 me-auto mb-sm-0 mb-3">
+                <h4 class="fs-20 fw-bold text-black mb-1">CURRENT TRANSACTIONS</h4>
+                </div>
+              
+
+           
+                <div class="table-hover fs-14 card-table mt-3" style="position:relative;">  
+                    <table class="table dataTablesCard style-1 custom-tbl card-table previous-transactions display" id="example22" style="width: 100% !important;">
+                        <thead>
+                            <tr>
+                            <th>Recipient Name</th>
+                            <th>Payin Amount</th>
+                            <th>FX</th>
+                            <th>TM Status</th>
+                            <th>Payment Status</th>
+                            <th>Reason</th>
+                            </tr>
+                           </thead>
+                           <tbody>
+                                {% for t in transactions %}
+                                <tr>
+                                    <td>
+                                        {% if t.recipient == None or t.recipient_name == '' %}
+                                            <h6 class=" text-black font-w400 mb-0"><a id="transaction_view_btn" href="{% url 'mophy:transactions-details' id=t.id %}" class="text-black">None</a></h6>
+                                        {% else %}
+                                            <h6 class=" text-black font-w400 mb-0"><a id="transaction_view_btn" href="{% url 'mophy:transactions-details' id=t.id %}" class="text-black">{{t.recipient_name}}</a></h6>
+                                        {% endif %}
+                                        <span class="fs-12"><a id="transaction_view_btn" href="{% url 'mophy:transactions-details' id=t.id %}" class="text-black"><u>{{t.date}}</u></a></span>
+                                    </td>
+                                    <td>
+                                        <div class="out_name">
+                                            <h6 class="comma-values text-black font-w400 mb-0">{{t.send_currency}} {{t.amount}} </h6>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <h6 class="text-black font-w400 mb-0">{{t.exchange_rate}}</h6>
+                                    </td>
+                                    <td>
+                                        <h6 class=" text-black font-w400 mb-0">{{t.tm_status}}</h6>
+                                    </td>
+                                    <td>
+                                        <h6 class=" text-black font-w400 mb-0">{{t.payment_status}}</h6>
+                                    </td>                                   
+                                    {% if t.reason == None or t.reason == '' %}
+                                        <td><h6 class="text-black font-w400 mb-0">None</h6></td>
+                                    {% else %}
+                                        <td><h6 class="text-black font-w400 mb-0">{{t.reason}}</h6></td>
+                                    {% endif %}
+                                </tr>
+                                {% endfor %}
+                           </tbody>
+                    </table>  
+                  </div>
+            </div>
+            </div>
+            </div>
+    </div>
+</div>
+
+
+
+<div class="footer">
+    <div class="copyright">
+        <p>Copyright © Designed &amp; Developed by WidophRemit pp<span id="year"></span></p>
+
+        <!-- <p>Copyright © Designed &amp; Developed by <a href="http://dexignzone.com/" target="_blank">DexignZone</a> 2022</p> -->
+    </div>
+</div>
+
+</div>
+
+{% endblock %}
+
+{% block additional_js %}
+<script>
+function carouselReview(){
+/*  testimonial one function by = owl.carousel.js */
+/*  testimonial one function by = owl.carousel.js */
+jQuery('.testimonial-one').owlCarousel({
+loop:true,
+margin:10,
+nav:false,
+center:true,
+dots: false,
+navText: ['<i class="fas fa-caret-left"></i>', '<i class="fas fa-caret-right"></i>'],
+responsive:{
+0:{
+items:2
+},
+400:{
+items:3
+},	
+700:{
+items:5
+},	
+991:{
+items:6
+},			
+
+1200:{
+items:4
+},
+1600:{
+items:5
+}
+}
+})	
+}
+
+jQuery(window).on('load',function(){
+setTimeout(function(){
+carouselReview();
+}, 1000); 
+});
+</script>
+
+<style>
+    .dataTables_scrollHeadInner{
+        width: 100% !important;
+    }
+    table.table.dataTablesCard.style-1.custom-tbl.card-table.previous-transactions.display.dataTable.no-footer {
+        width: 100% !important;
+    }
+    table.table.dataTablesCard.style-1.custom-tbl.card-table.previous-transactions.display.dataTable.no-footer {
+        width: 100% !important;
+    }
+</style>
+
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        new DataTable('#example22', {
+            scrollX: true,
+            scrollCollapse: true,
+            scrollY: '530px',
+            pageLength: 20,
+            fixedHeader: true,
+            lengthChange: false,
+            responsive: true,
+            searching: false,
+            paging: false,
+            info: false,
+            order: [], // Disable initial sorting
+            // columnDefs: [{
+            //     targets: '_all', 
+            //     orderable: true,
+            //     orderData: [0], // Set the order data (adjust index as needed)
+            //     orderSequence: ['desc', 'asc'] // Set the order sequence for sorting
+            // }]
+        });
+    });
+</script>
+
+{% endblock %}
+

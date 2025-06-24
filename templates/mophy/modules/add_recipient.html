@@ -1,0 +1,192 @@
+{% extends 'mophy/elements/layouts/admin.html' %}
+{% load static widget_tweaks %}
+
+
+{% block additional_css %}
+
+{% endblock %}
+
+{% block message %}
+{% include 'mophy/elements/alert.html' %}
+{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center h-100 align-items-center">
+  <div class="col-xl-12 col-lg-12">
+    <div class="card">
+        <div class="card-header">
+            <h4 class="card-title">New Recipient Form</h4>
+        </div>
+        <div class="card-body">
+          <div class="basic-form">
+            <form  method="post" enctype="multipart/form-data" novalidate autocomplete="off">
+                {% csrf_token %}
+                <h4 class="fw-bold">Bank Details</h4><br>
+                <div class="row col-md-12">    
+                    <div class="mb-4 col-md-4">
+                        <label class="form-label fw-bold">Bank Name {% if form.bank_name.field.required %}<span class="text-danger">*</span> {% endif %}</label>
+                        {{ form.bank_name|attr:"type:text"|attr:"class:form-control"|attr:"placeholder:Bank Name" }}
+                        <div class="text-danger w-100 d-block mt-1">
+                        {{ form.bank_name.errors }}
+                        </div>
+                        <!-- <label class="form-label fw-bold">Bank Name<span class="text-danger">*</span></label>
+                        <input class="form-control" type="text" name="bank_name" placeholder="Bank Name" required/> -->
+                    </div>    
+                    <div class="mb-4 col-md-4">
+                        <label class="form-label fw-bold">Account Name<span class="text-danger">*</span></label>
+                        <input class="form-control" type="text" name="account_name" placeholder="Account Name" required>
+                    </div>  
+                    <div class="mb-4 col-md-4">
+                        <label class="form-label fw-bold">Account Number<span class="text-danger">*</span></label>
+                        <input class="form-control" type="number"  name="account_number" placeholder="Account NUmber" required>
+                    </div>  
+                </div>
+
+                <h4 class="fw-bold">Personal Details</h4><br>
+                <div class="row">
+                    <div class="row col-md-12">
+                        <div class="mb-4 col-md-4">
+                            <label class="form-label fw-bold">First Name {% if form.first_name.field.required %}<span class="text-danger">*</span> {% endif %}</label>
+                            {{ form.first_name|attr:"type:text"|attr:"class:form-control"|attr:"placeholder:First Name" }}
+                            <div class="text-danger w-100 d-block mt-1">
+                            {{ form.first_name.errors }}
+                            </div>
+                        </div>
+                        <div class="mb-4 col-md-4">
+                            <label class="form-label fw-bold">Middle Name {% if form.middle_name.field.required %}<span class="text-danger">*</span> {% endif %}</label>
+                            {{ form.middle_name|attr:"type:text"|attr:"class:form-control"|attr:"placeholder:Middle Name" }}
+                            <div class="text-danger w-100 d-block mt-1">
+                            {{ form.middle_name.errors }}
+                            </div>
+                        </div>
+                        <div class="mb-4 col-md-4">
+                            <label class="form-label fw-bold">Last Name {% if form.last_name.field.required %}<span class="text-danger">*</span> {% endif %}</label>
+                            {{ form.last_name|attr:"type:text"|attr:"class:form-control"|attr:"placeholder:Last Name" }}
+                            <div class="text-danger w-100 d-block mt-1">
+                            {{ form.last_name.errors }}
+                            </div>
+                        </div>                        
+                    </div>
+
+                    <div class="row col-md-12 ">
+                        <div class="mb-5 col-md-5">
+                            <label class="form-label fw-bold">Email {% if form.email.field.required %}<span class="text-danger">*</span> {% endif %}</label>
+                            {{ form.email|attr:"type:email"|attr:"class:form-control"|attr:"placeholder:Email" }}
+                            <div class="text-danger w-100 d-block mt-1">
+                            {{ form.email.errors }}
+                            </div>
+                        </div> 
+                        <div class="mb-4 col-md-4">
+                            <label class="form-label fw-bold">Mobile {% if form.mobile.field.required %}<span class="text-danger">*</span> {% endif %}</label>
+                            <input class="form-control" type="number" id="mobile" step="1" onkeypress="if(this.value.length==10) return false; else return event.charCode >= 48 && event.charCode <= 57 " name="mobile" />                         
+                            <div class="text-danger w-100 d-block mt-1">
+                            {{ form.mobile.errors }}
+                            </div>
+                        </div>                                                                    
+                    </div>
+                </div>
+
+                <h4 class="fw-bold">Address</h4><br>
+                <div class="row">
+                    <div class="row col-md-12">    
+                        <div class="mb-4 col-md-4">
+                            <label class="form-label fw-bold">Country {% if form.location.field.required %}<span class="text-danger">*</span> {% endif %}</label>
+                            {{ form.country|attr:"type:text"|attr:"class:form-control"|attr:"placeholder:Country" }}
+                            <div class="text-danger w-100 d-block mt-1">
+                            {{ form.country.errors }}
+                            </div>
+                        </div>       
+                        <div class="mb-4 col-md-4">
+                            <label class="form-label fw-bold">State {% if form.state.field.required %}<span class="text-danger">*</span> {% endif %}</label>
+                            {{ form.state|attr:"type:text"|attr:"class:form-control"|attr:"placeholder:State" }}
+                            <div class="text-danger w-100 d-block mt-1">
+                            {{ form.state.errors }}
+                            </div>
+                        </div>       
+                        <div class="mb-3 col-md-3">
+                            <label class="form-label fw-bold">City/Suburb {% if form.city.field.required %}<span class="text-danger">*</span> {% endif %}</label>
+                            {{ form.city|attr:"type:text"|attr:"class:form-control"|attr:"placeholder:City" }}
+                            <div class="text-danger w-100 d-block mt-1">
+                            {{ form.city.errors }}
+                            </div>
+                        </div>     
+                    </div>
+                    
+                    <div class="row col-md-12">    
+                        <div class="mb-4 col-md-4">
+                            <label class="form-label fw-bold">Street Name {% if form.street.field.required %}<span class="text-danger">*</span> {% endif %}</label>
+                            {{ form.street|attr:"type:text"|attr:"class:form-control"|attr:"placeholder:Street" }}
+                            <div class="text-danger w-100 d-block mt-1">
+                            {{ form.street.errors }}
+                            </div>
+                        </div>    
+                        
+                        <div class="mb-4 col-md-4">
+                            <label class="form-label fw-bold">Zip/Postal Code {% if form.postcode.field.required %}<span class="text-danger">*</span> {% endif %}</label>
+                            {{ form.postcode|attr:"type:text"|attr:"class:form-control"|attr:"placeholder:Postcode" }}
+                            <div class="text-danger w-100 d-block mt-1">
+                            {{ form.postcode.errors }}
+                            </div>
+                        </div>     
+
+                        <div class="mb-4 col-md-4">
+                            <label class="form-label fw-bold">Building No. {% if form.building.field.required %}<span class="text-danger">*</span> {% endif %}</label>
+                            {{ form.building|attr:"type:text"|attr:"class:form-control"|attr:"placeholder:Building" }}
+                            <div class="text-danger w-100 d-block mt-1">
+                            {{ form.building.errors }}
+                            </div>
+                        </div>            
+                    </div>
+
+                    <div class="row col-md-12">           
+                        <div class="mb-3 col-md-3">
+                            <label class="form-label fw-bold">Flat No.{% if form.flat.field.required %}<span class="text-danger">*</span> {% endif %}</label>
+                            {{ form.flat|attr:"type:text"|attr:"class:form-control"|attr:"placeholder:Flat" }}
+                            <div class="text-danger w-100 d-block mt-1">
+                            {{ form.flat.errors }}
+                            </div>
+                        </div>    
+                    </div>
+
+                    <div class="row col-md-12">
+                        <div class="col-2">
+                            <button type="submit" class="btn btn-primary mt-4 mb-5 " style="width:80%;">Save</button>
+                        </div>
+                        <div class="col-2 ">
+                            <a href="{% url 'mophy:user-details' id=context.customer_id %}" style="width:80%;" class="btn btn-primary mt-4 mb-5">Cancel</a>
+                        </div>
+                        <div class="col-10"></div>
+                    </div>
+                </div>
+            </form>
+          </div>
+        </div>
+    </div>
+  </div>
+</div>
+
+
+
+{% endblock %}
+
+
+{% block additional_js %}
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
+
+<script>
+    const phoneInputField = document.querySelector("#mobile");
+    const contextData = JSON.parse('{{ context_json|safe }}');
+
+    const phoneInput = window.intlTelInput(phoneInputField, {
+      utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+      onlyCountries: contextData.country_list, // Add country codes for Australia and New Zealand
+    });
+</script>
+
+
+{% endblock %}
+

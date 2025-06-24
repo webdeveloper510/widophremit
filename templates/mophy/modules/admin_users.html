@@ -1,0 +1,220 @@
+{% extends 'mophy/elements/layouts/admin.html' %}
+
+{% load static %}
+
+{% block additional_css %}
+{% endblock %}
+
+{% block content %}
+
+
+
+<link rel="stylesheet" href="/static/mophy/vendor/datatables/css/jquery.dataTables.min.css" >
+<link rel="stylesheet" href="/static/mophy/css/style.css">
+
+<!-- heading -->
+<!-- <div class="form-head mb-4">
+    <h2 class="text-black font-w600 mb-0">Admin Users</h2>
+</div> -->
+
+<div class="card corridore_card">
+
+    <div class="card-header">
+        <h4 class="card-title">Admin Users</h4>
+        {% if perms.auth.add_group %}
+        <a id="role_create_btn" href="{% url 'mophy:add-admin-user' %}" class="btn btn-primary btn-xs content-justify-right style-button">ADD <span class="btn-icon-end">
+            <i class="fa fa-plus"></i></span>
+        </a>
+        {% endif %}
+    </div>
+
+ <div class="card-body">
+
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="table-hover fs-14 card-table newlayout-table " style="position:relative;">  
+        <table class="table dataTablesCard style-1 custom-tbl card-table previous-transactions display" id="example22" style="width: 100% !important;">
+            <thead>
+                <tr>   
+                    <th>S/N</th>
+                    <th>Role</th>                 
+                    <th>Name</th>                 
+                    <th>Email</th>                 
+                    <th>Date of Creation</th>
+                    <th class="admin_user_th">Status</th>
+                    <th class="admin_user_th">Action</th>
+                </tr>
+            </thead>
+            <tbody >
+                {% for user in user_list %}
+                <tr class="data-row">
+                    <td><span class="text-black font-w400 mb-0"> {{forloop.counter}}</span></td>
+                    <td><span class="text-black font-w400 mb-0">{{user.role}}</span></td>
+                    {% if user.name == None or user.name == " " %}
+                        <td><span class="text-black font-w400 mb-0">None</span></td>
+                    {% else %}
+                        <td><span class="text-black font-w400 mb-0"> {{user.name}}</span></td>
+                    {% endif %}
+                    <td><span class="text-black font-w400 mb-0"> {{user.email }}</span></td>   
+                    <td><span class="text-black font-w400 mb-0"> {{user.created_at}}</span></td>
+                    <td id="customer_td">
+                        <div class="form-check form-switch" onclick="delete_user('{{user.id}}', this)" data-delete-user="{{user.delete}}">
+                            {% if user.delete == False %}
+                                    <input type="checkbox" class="form-check-input" id="toggleCustomerBtn" onclick="return false;" onkeydown="return false;" checked>
+                                {% else %}
+                                    <input type="checkbox" class="form-check-input" id="toggleCustomerBtn" onclick="return false;" onkeydown="return false;">
+                                {% endif %}
+                                <!-- <label class="form-check-label" for="toggleCustomerBtn"></label> -->
+                            </a>
+                        </div>
+                    </td>
+                    <td id="admin_user_td">
+                        <span class="sweetalert">
+                            <a id="admin_user_edit_btn" href="{% url 'mophy:edit-admin-user' id=user.id %}" class="shadow sharp me-1" data-bs-toggle="tooltip"
+                                data-placement="top" title="Edit"> Edit
+                                <!-- <i class="fas fa-pencil-alt"></i> -->
+                            </a>
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}         
+              </tbody>
+        </table>  
+      </div>
+    </div>
+  </div>
+ </div>
+</div>
+
+{% endblock %}
+{% block additional_js %}
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        new DataTable('#example22', {
+            scrollX: true,
+            scrollCollapse: true,
+            scrollY: '530px',
+            pageLength: 20,
+            fixedHeader: true,
+            lengthChange: false,
+            responsive: true,
+            order: [], // Disable initial sorting
+            // columnDefs: [{
+            //     targets: '_all', 
+            //     orderable: true,
+            //     orderData: [5], // Set the order data (adjust index as needed)
+            //     orderSequence: ['desc', 'asc'] // Set the order sequence for sorting
+            // }]
+        });
+    });
+</script>
+
+<style>
+.dataTables_scrollHeadInner{
+    width: 100% !important;
+}
+table.table.dataTablesCard.style-1.custom-tbl.card-table.previous-transactions.display.dataTable.no-footer {
+    width: 100% !important;
+}
+table.table.dataTablesCard.style-1.custom-tbl.card-table.previous-transactions.display.dataTable.no-footer {
+    width: 100% !important;
+}
+</style>
+
+<script>
+    $('.sweet-success-cancel').on('click', function (event) {
+           event.preventDefault();
+           const url = $(this).attr('href');
+   
+           Swal.fire({
+               title: 'Are you sure?',
+               text: "You won't be able to revert this!",
+               type: "warning",
+               icon: 'question',
+               showCancelButton: true,
+               confirmButtonText: "Yes, delete it !!",
+               confirmButtonText: 'Delete',
+               confirmButtonColor: "#DD6B55"
+               
+           }).then((result) => {
+               if (result.value) {
+                   window.location.href = url;
+               } else if (result.dismiss === Swal.DismissReason.cancel) {
+                   event.preventDefault();
+               }
+           })
+       });
+   </script>
+
+<script>
+    const  delete_user =(customer_id, element)=> {
+        const delete_value = element.getAttribute('data-delete-user');
+        var success =  false
+        if (delete_value === 'True'){
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You want to enable this user!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, enable it!',
+                confirmButtonColor: '#DD6B55',
+                showLoaderOnConfirm: true,
+                preConfirm: function () {
+                    return $.ajax({
+                        type: "POST",
+                        url: "{% url 'mophy:enable-admin-user' id=0 %}".replace('0', customer_id),
+                        data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+                        success: function (data) {
+                            success = data.success
+                        }
+                    });
+                },
+                allowOutsideClick: false,
+            }).then(function (result) {
+                if (success === true) {
+                    Swal.fire('Enabled!', 'The user has been enabled.', 'success').then(function () {
+                        window.location.reload();
+                    });
+                } else {
+                    Swal.fire('Error', 'Failed to enable user.', 'error');
+                }
+            });
+        }
+        else{
+            Swal.fire({
+            title: 'Are you sure?',
+            text: "You want to disable this user!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, disable it!',
+            confirmButtonColor: '#DD6B55',
+            showLoaderOnConfirm: true,
+            preConfirm: function () {
+                return $.ajax({
+                    type: "POST",
+                    url: "{% url 'mophy:delete-admin-user' id=0 %}".replace('0', customer_id),
+                    data: { csrfmiddlewaretoken: '{{ csrf_token }}' },
+                    success: function (data) {
+                        success = data.success
+                    }
+                });
+            },
+            allowOutsideClick: false,
+        }).then(function (result) {
+            if (success === true) {
+                Swal.fire('Disabled!', 'The user has been disabled.', 'success').then(function () {
+                    window.location.reload();
+                });
+            } else {
+                Swal.fire('Error', 'Failed to disable user.', 'error');
+            }
+        });
+        }
+    }
+</script>
+
+
+{% endblock %}
+

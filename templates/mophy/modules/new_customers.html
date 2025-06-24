@@ -1,0 +1,102 @@
+{% extends 'mophy/elements/layouts/admin.html' %}
+
+{% load static %}
+
+{% block additional_css %}
+{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="/static/mophy/vendor/datatables/css/jquery.dataTables.min.css" >
+<link rel="stylesheet" href="/static/mophy/css/style.css">
+
+<!-- heading -->
+<div class="form-head mb-4">
+    <h2 class="text-black font-w600 mb-0">New Customers</h2>
+</div>
+
+<div class="card">
+ <div class="card-body">
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="table-hover fs-14 card-table" style="position:relative;">  
+        <table class="table dataTablesCard style-1 custom-tbl card-table previous-transactions display" id="example22" style="width: 100% !important;">
+            <thead>
+                <tr>       
+                    <th style="width: inherit !important;">S/N</th>
+                    <th style="width: inherit !important;">Cust Id</th>
+                    <th style="width: inherit !important;">Email</th>                 
+                    <th style="width: inherit !important;">KYC Status</th>
+                    <th style="width: inherit !important;">AML/PEP Status</th>
+                    <th style="width: inherit !important;">Date of Creation</th>
+                    <th style="width: inherit !important;">Action</th>
+                </tr>
+            </thead>
+            <tbody style="width: 100% !important;">
+                {% for user in user_list %}
+                <tr class="data-row">
+                  <td><a href="{% url 'mophy:user-details' id=user.customer_id %}"><span class="text-black font-w400 mb-0"> {{forloop.counter}}</span></a></td>
+                  <td><a href="{% url 'mophy:user-details' id=user.customer_id %}"><span class="text-black font-w400 mb-0"> {{user.customer_id}}</span></a></td>
+                  <td><a href="{% url 'mophy:user-details' id=user.customer_id %}"><span class="text-black font-w400 mb-0"> {{user.email }}</span></a></td>
+                    {% if user.is_digital_Id_verified == True %}
+                        <td><a href="{% url 'mophy:user-details' id=user.customer_id %}"><i class="fa fa-check text-success" style="font-size:20px;" aria-hidden="true"></i></a></td> 
+                    {% else %}
+                        <td><a href="{% url 'mophy:user-details' id=user.customer_id %}"><i class="fa fa-times text-danger" style="font-size:20px;" aria-hidden="true"></i></a></td>
+                    {% endif %}
+    
+                    {% if user.aml_pep_status == True %}
+                        <td><a href="{% url 'mophy:user-details' id=user.customer_id %}"><i class="fa fa-check text-success " style="font-size:20px;" aria-hidden="true"></i></a></td> 
+                    {% elif user.aml_pep_status == False %}
+                        <td><a href="{% url 'mophy:user-details' id=user.customer_id %}"><i class="fa fa-times text-danger" style="font-size:20px;" aria-hidden="true"></i></a></td>
+                    {% else %}
+                        <td><h6 class="text-black font-w400 mb-0">NA</h6></td>
+                    {% endif %}
+                    <td><a href="{% url 'mophy:user-details' id=user.customer_id %}"><span class="text-black font-w400 mb-0"> {{user.created_at }}</span></a></td>
+                    <td><a class="btn btn-danger" href="{% url 'mophy:delete-user' id=user.customer_id %}"><i class="fa-sharp fa-solid fa-trash" ></i></div></a> </td>
+                </tr>
+                {% endfor %}         
+              </tbody>
+        </table>  
+      </div>
+    </div>
+  </div>
+ </div>
+</div>
+
+{% endblock %}
+{% block additional_js %}
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+    new DataTable('#example22', {
+    scrollX: true,
+    scrollCollapse: true,
+    scrollY: '530px',
+    pageLength: 20,
+    fixedHeader: true,
+    order: [0, 'desc'],
+    lengthChange: false,
+    responsive: true,
+   
+});
+// setTimeout(()=>{
+//     $("#example22").addClass("customers");
+// },2000)
+    });
+</script>
+
+<style>
+    .dataTables_scrollHeadInner{
+    width: 100% !important;
+}
+table.table.dataTablesCard.style-1.custom-tbl.card-table.previous-transactions.display.dataTable.no-footer {
+    width: 100% !important;
+}
+table.table.dataTablesCard.style-1.custom-tbl.card-table.previous-transactions.display.dataTable.no-footer {
+    width: 100% !important;
+}
+</style>
+
+{% endblock %}
+

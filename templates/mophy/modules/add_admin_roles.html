@@ -1,0 +1,214 @@
+{% extends 'mophy/elements/layouts/admin.html' %}
+{% load static widget_tweaks %}
+
+
+{% block additional_css %}
+
+{% endblock %}
+
+{% block message %}
+{% include 'mophy/elements/alert.html' %}
+{% endblock %}
+
+{% block content %}
+
+<div class="alert alert-danger fs-5" role="alert" style="display: none;"></div>
+
+<div class="row justify-content-center h-100 align-items-center">
+  <div class="col-xl-12 col-lg-12">
+    <div class="card corridore_card">
+        <div class="card-header">
+            <h4 class="card-title text-black">Add Roles</h4>
+        </div>
+
+        <div class="card-body">
+          <div class="basic-form">
+            <!-- <form  method="post" action="{% url 'mophy:add-admin-roles' %}" enctype="multipart/form-data" novalidate autocomplete="off"> -->
+                {% csrf_token %}
+                <div class="row mb-5 select-row">
+                    <div class="col-12">
+                        <label class="form-label mt-2">Role</label>
+                    </div>
+                    <div class="col-12">
+                        <input class="form-control mb-1 input-custom" onclick="remove_error()" name="role" id="role" placeholder="Enter Role Name" required>
+                        <span class="text-danger" id="error_message"></span> 
+                    </div>
+                </div>
+                <span class="text-danger permission_error mb-5"></span> 
+
+                <div class="row">
+                    <div class="card-header">
+                        <h4 class="card-title text-black">Assign Permissions to Role</h4>
+                    </div>                 
+                    <div class="row">
+                        <table id="moduleTable" class="m-4">
+                            <thead>
+                                <tr>
+                                    <th><div class="form-check" id="main">&nbsp;
+                                        <input class="form-check-input" type="checkbox" value="all" id="main">
+                                        <label class="form-check-label" for="flexCheckDefault">Modules</label>
+                                        </div>
+                                    </th>
+                                    <th>Permissions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for module in modules %}
+                                <tr data-row-id="{{ module.id }}">
+                                    <td><div class="form-check" id="module">&nbsp;
+                                        <input class="form-check-input"  type="checkbox" onchange="get_module()" value={{module}} id="flexCheckDefault">
+                                        <label class="form-check-label" for="flexCheckDefault">{{module}}</label>
+                                        </div>
+                                    </td>
+                                    <td><div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="create" id="flexCheckDefault">
+                                        <label class="form-check-label" for="flexCheckDefault">Create</label>
+                                        </div>
+                                    </td>
+                                    <td><div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="edit" id="flexCheckDefault">
+                                        <label class="form-check-label" for="flexCheckDefault">Edit</label>
+                                        </div>
+                                    </td>
+                                    <td><div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="delete" id="flexCheckDefault">
+                                        <label class="form-check-label" for="flexCheckDefault">Delete</label>
+                                        </div>
+                                    </td>
+                                    <td><div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="view" id="flexCheckDefault" >
+                                        <label class="form-check-label" for="flexCheckDefault">View</label>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="row col-md-12">
+                    <div class="col-2">
+                        <button type="submit" onclick="add_admin_roles()" class="btn btn-primary mt-4 mb-5 style-button" style="width:80%;">Save</button>
+                    </div>
+                    <div class="col-2 ">
+                        <a href="{% url 'mophy:roles' %}"  class="btn btn-primary mt-4 mb-5 style-button">Cancel</a>
+                    </div>
+                    <div class="col-10"></div>
+                </div>
+            <!-- </form> -->
+          </div>
+        </div>
+    </div>
+  </div>
+</div>
+
+
+
+{% endblock %}
+
+
+{% block additional_js %}
+
+
+<script>
+function get_module(){
+    $('#moduleTable tbody tr').each(function () {
+    var row = $(this);
+    var moduleName = null
+    if (row.find('.form-check-input').prop('checked')) {
+        moduleName = row.find('td:eq(0)').text().trim();
+        $(this).find('.form-check-input:is([value="view"])').prop('checked', true);
+    }
+    else {
+        $(this).find('.form-check-input:is([value="view"])').prop('checked', false);
+    }
+});
+}
+</script>
+
+
+<script>
+    function remove_error(){
+        $('#error_message').hide();
+    }
+</script>
+
+<!-- to check all checkboxes -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const checkAllCheckbox = document.getElementById('flexCheckDefaultAll');
+        const checkboxes = document.querySelectorAll('.form-check-input');
+
+        checkAllCheckbox.addEventListener('change', function () {
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = checkAllCheckbox.checked;
+            });
+        });
+
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function () {
+                checkAllCheckbox.checked = [...checkboxes].every(checkbox => checkbox.checked);
+            });
+        });
+    });
+</script>
+
+<!-- add admin roles api -->
+<script>
+    function add_admin_roles() {
+        var role = $('#role').val();
+        var error_flag = false;
+
+        if(role === null || role === ''){
+            $('#error_message').html("Please enter role name"); $('#error_message').show();
+        }
+        else{
+            var array = [];
+            $('#moduleTable tbody tr').each(function () {
+                var row = $(this);
+                if (row.find('.form-check-input').prop('checked')) {
+                    var moduleName = row.find('td:eq(0)').text().trim();
+                    var permissions = [];
+                    row.find('.form-check-input:checked').each(function () {
+                        permissions.push($(this).val());
+                    });
+                    if (permissions.length === 1 && permissions[0].toLowerCase() === moduleName.split(" ")[0].toLowerCase()){ error_flag = true; $('.permission_error').html("Please select permissions for "+moduleName); $('.permission_error').show(); }
+                    else if (permissions.length ===  0){ error_flag = true;; $('.permission_error').html("Please select permissions for "+moduleName); $('.permission_error').show(); }
+                    array.push({'module':moduleName,'permissions':permissions})
+                }
+            });
+            console.log(array, "arrayaayayay")
+            if(array.length === 0){ error_flag = true; $('.permission_error').html("Please select modules for permissions"); $('.permission_error').show();}
+            if(error_flag == false){
+            $.ajax({
+                type: "POST",
+                url: "{% url 'mophy:add-admin-roles' %}",
+                data: {role: role, array:JSON.stringify(array), csrfmiddlewaretoken: '{{ csrf_token }}' },
+                success: function (data) {
+                    console.log(data, "data===")
+                    if (data.success === true) {
+                        window.location.href = "{% url 'mophy:roles'  %}";
+                    } else { $('#error_message').html(data.message); $('#error_message').show(); }
+                }
+            });
+        }
+        }
+    }
+    $(document).on('change', '#main', function () {
+        var isChecked = $(this).prop('checked');
+        // Check or uncheck all checkboxes in the rows based on the header checkbox
+        $('#moduleTable tbody tr').each(function () {
+            $(this).find('.form-check-input:not([value="all"])').prop('checked', isChecked);
+        });
+    });
+
+
+setTimeout(function () {
+    $('.permission_error').hide();
+}, 2000);
+
+</script>
+
+{% endblock %}
+

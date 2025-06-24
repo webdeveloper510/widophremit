@@ -1,0 +1,249 @@
+<head>
+    <link rel="stylesheet" href="style.css">
+    </head>
+    {% extends 'mophy/elements/layouts/admin.html' %}
+    
+    {% load static %}
+    
+    {% block additional_css %}
+    {% endblock %}
+    
+    {% block content %}
+
+    
+    <div style="display: none;" class="alert alert-danger alert-dismissible fade show" id="alert" role="alert">
+        <strong id="error_message"></strong> 
+    </div>
+        
+    
+    <div style="display: none;" class="alert alert-success alert-dismissible fade show" id="alert" role="alert">
+        <strong id="success_message"></strong> 
+    </div>
+    
+
+<div class="form-head mb-4">
+    <h2 class="text-black font-w600 mb-0">Zai Wallet </h2>
+</div>
+
+<div class="row">
+ <div class="col-xl-12 col-xxl-12">
+  <div class="card p-5">
+    <div class="row">
+      <div class="col-5">
+        <h5 class="text-black font-w600">Users</h4>
+            <div class="dropdown-menu-list">
+                 <select onchange="user_transfer()" id="transaction_id" name="transaction_id" class="form-control" required>
+                 {% for i in list %}
+                 <option  value={{i.transaction_id}}>{{i.customer_name}} ({{i.email}})</option>
+                 {% endfor %}
+                 </select>
+             </div>
+            <div class="show_balance">
+                <input type="text" id="show_balance" class="form-control" disbaled>
+            </div> 
+      </div>     
+      <div class="col-5 withdraw-amount">
+        <h5 class="text-black font-w600">Transfer Funds</h5>
+            {% csrf_token %}
+            <!-- <label for="inputAddress"><b>Amount</b></label> -->
+            <div class="with-balnc"><input type="number" onchange="check_amount()" name="amount" min="1" step=1 onkeypress="return !(event.charCode == 46)" class="form-control" id="inputAddress" placeholder="Enter Amount" required> 
+            <input type="text" id="subdomaintwo" value="AUD" disabled/> </div>      
+            <div class="withdraw-btn mt-2">
+                <button onclick="user_transfer(true)" name="submit" id="withdraw_amount" onclick="check_amount()"  class="btn btn-primary btn-lg fw-bold">Transfer</button>
+            </div>           
+      </div>
+    </div>
+  </div>
+ </div>
+</div>
+    
+<div id="loader" style="display:none" class="loader-overly" ><div class="loader" ></div></div>
+    
+{% endblock %}
+
+{% block additional_js %}
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script>
+    function withdrawFromZai(){
+        var withdrawAmount = $('#inputAddress').val();
+        if (withdrawAmount === null || withdrawAmount === ''){
+            $('#error_message').html("Please enter Amount");
+            $('#error_message').parent().show();
+            
+        }
+        else if (withdrawAmount === 0 || withdrawAmount === '0'){
+            $('#error_message').html("Amount must be greater than 0");
+            $('#error_message').parent().show();
+
+        }
+        else {
+            $('#loader').show();
+            $.ajax({
+            type: "POST",
+            url: "{% url 'mophy:zai' %}",
+            data: {amount:withdrawAmount,csrfmiddlewaretoken: '{{ csrf_token }}'},
+            
+            success: function(data){
+                $('#loader').hide();
+                var message ="";
+                if(data.success){
+                $('#success_message').html(data.message);
+                $('#success_message').parent().show();
+                $('#error_message').parent().hide();
+                }
+                else{
+                if (typeof data.message === 'object'){
+                    Object.keys(data.message).forEach(key=>{
+                        if(Array.isArray(data.message[key])){
+                            data.message[key].forEach(value=>{
+                                message += value;
+                            })
+                        }
+                    });
+                    $('#error_message').html(message);
+                }
+                else{
+                    $('#error_message').html(data.message);
+                }
+                
+                $('#error_message').parent().show();
+                $('#success_message').parent().hide();
+                }
+
+                setTimeout(()=>{
+                window.location.reload();
+                },2000);
+            }
+            });
+        }       
+    }
+</script>
+
+<script>
+    $(document).ready(function() {
+        new DataTable('#example22', {
+            scrollX: true,
+            scrollCollapse: true,
+            scrollY: '530px',
+            pageLength: 20,
+            fixedHeader: true,
+            lengthChange: false,
+            responsive: true,
+            order: [], // Disable initial sorting
+            // columnDefs: [{
+            //     targets: '_all', 
+            //     orderable: true,
+            //     orderData: [3], // Set the order data (adjust index as needed)
+            //     orderSequence: ['desc', 'asc'] // Set the order sequence for sorting
+            // }]
+        });
+    });
+</script>
+    
+<style>
+.dataTables_scrollHeadInner{
+width: 100% !important;
+}
+table.table.dataTablesCard.style-1.custom-tbl.card-table.previous-transactions.display.dataTable.no-footer {
+width: 100% !important;
+}
+table.table.dataTablesCard.style-1.custom-tbl.card-table.previous-transactions.display.dataTable.no-footer {
+width: 100% !important;
+}
+</style>
+    
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+ 
+<script>
+    
+    let errorText = false;
+    
+   function check_amount(){
+      var amount = $('#inputAddress').val();
+    //   firstTime = false;
+      console.log("type of number", typeof amount, amount)
+      if(isNaN(parseInt(amount))){
+         errorText = true
+         $('#error_message').html("Please enter an amount");
+         $('#error_message').parent().show();
+         setTimeout(function () {
+            $('#error_message').parent().hide();
+         }, 3000);
+         document.getElementById('inputAddress').value = '';
+
+      }
+      else if(amount < 1){
+         errorText = true
+         $('#error_message').html("Amount should be greater than 0.");
+         $('#error_message').parent().show();
+         setTimeout(function () {
+            $('#error_message').parent().hide();
+         }, 3000);
+         document.getElementById('inputAddress').value = '';
+
+      }
+      else errorText = false;
+   }
+
+function user_transfer(clickedFromSubmit) {
+    // if (errorText) return;
+    var transaction_id = $('#transaction_id').val();
+    var amount = $('#inputAddress').val();
+
+    if(clickedFromSubmit && isNaN(parseInt(amount))){
+         $('#error_message').html("Please enter amount.");
+         $('#error_message').parent().show();
+         setTimeout(function () {
+            $('#error_message').parent().hide();
+         }, 3000);
+         document.getElementById('inputAddress').value = '';
+
+      }
+    else if(clickedFromSubmit && amount ===0){
+         $('#error_message').html("Amount should be greater than 0.");
+         $('#error_message').parent().show();
+         setTimeout(function () {
+            $('#error_message').parent().hide();
+         }, 3000);
+         document.getElementById('inputAddress').value = '';
+
+      }
+     else {
+        $('#loader').show();
+        $.ajax({
+            type: "POST",
+            url: "{% url 'mophy:user-transfer' %}",
+            data: {amount:amount, transaction_id:transaction_id, csrfmiddlewaretoken: '{{ csrf_token }}'},
+            success: function (data) {
+                console.log(data)
+                if (data.success) {                    
+                    $('#loader').hide();
+                    document.getElementById('inputAddress').value = '';
+                }
+                if (data.success == false) {
+                    $('#loader').hide();
+                    $('#error_message').html(data.message);
+                    $('#error_message').parent().show();
+                    setTimeout(function () {
+                        $('#error_message').parent().hide();
+                    }, 2500);
+                    document.getElementById('inputAddress').value = '';
+                }
+            }
+
+                });    
+        } 
+    }
+
+</script>
+
+<script>
+    const elements = document.querySelectorAll('.comma-values');
+    elements.forEach(element => {
+        const originalValue = parseFloat(element.textContent.match(/\d+/)[0]);
+        const formattedValue = originalValue.toLocaleString();
+        element.textContent = element.textContent.replace(/\d+/, formattedValue);
+    });
+</script>
+
+{% endblock %}

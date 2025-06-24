@@ -1,0 +1,139 @@
+{% extends 'mophy/elements/layouts/admin.html' %}
+
+{% load static %}
+
+{% block additional_css %}
+{% endblock %}
+
+{% block content %}
+<link rel="icon" type="image/png" sizes="16x16" href="/static/mophy/images/footer-logo.svg" />   
+<link rel="stylesheet" href="/static/mophy/vendor/jqvmap/css/jqvmap.min.css" >
+<link rel="stylesheet" href="/static/mophy/vendor/chartist/css/chartist.min.css" >
+<link rel="stylesheet" href="/static/mophy/vendor/datatables/css/jquery.dataTables.min.css" >
+<link rel="stylesheet" href="/static/mophy/vendor/bootstrap-select/dist/css/bootstrap-select.min.css">
+<link rel="stylesheet" href="/static/mophy/css/style.css">
+
+<div class="card corridore_card">
+    <div class="card-header">
+        <h4 class="card-title">List Of Payout Account</h4>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item ">
+                <a href="{% url 'mophy:add-payout-account' %}" class="btn btn-primary style-button" id="btn333"><img src="/static/mophy//images/add-payoutuser.png">Add Payout Accounts</a>
+               </li>
+               <a class="text-black fw-bold payout-list-back" href="{% url 'mophy:confirm-details' %}" ><u >Back</u></a>
+            </ol>
+    </div>
+ <div class="card-body">
+  <div class="row newlayout-table">
+    <div class="col-lg-12">
+     
+     <div class="table-hover fs-14 card-table customer-table-row" id="custom-search2" style="position: relative;">    
+        <table class="table dataTablesCard style-1 custom-tbl card-table previous-transactions display" id="example22" style="width: 100% !important;">
+            <thead>
+                <tr>       
+                    <th>S/N</th>
+                    <th>Email</th>
+                    <th>Nick Name</th>
+                    <th>Date</th>
+                    <th>View Balance</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>               
+                {% for x in accounts_list %}
+                <tr class="data-row">
+                    <td><a href="#"><span class="text-black font-w400 mb-0">{{forloop.counter}}</span></a></td>
+                    <td><a href="{% url 'mophy:payout-transactions' id=x.zai_user_id %}"><span class="text-black font-w400 mb-0 text-decoration-underline">{{x.zai_email}}</span></a></td>
+                    <td><a href="#"><span class="text-black font-w400 mb-0">{{x.nick_name}}</span></a></td>
+                    <td><a href="#"><span class="text-black  font-w400 mb-0">{{x.created_at.date}}</span></a></td>
+                    <td>
+                        <a href="#">
+                            <span class="text-black font-w400 mb-0 text-decoration-underline ">
+                                <i id="eye-icon-{{x.zai_user_id}}" class="fa fa-eye" onclick="get_wallet_balance('{{x.zai_user_id}}')" aria-hidden="true"></i>
+                                <span id="wallet-balance-{{x.zai_user_id}}" class="wallet-balance"></span>
+                            </span>
+                        </a>
+                    </td>
+                    <td><a href="#"><span class="text-black font-w400 mb-0 text-decoration-underline">
+                        <a id="payout_edit_btn" href="{% url 'mophy:edit-payout-account' id=x.zai_user_id %}" class="shadow sharp me-1" data-bs-toggle="tooltip" data-placement="top" title="Edit"> Edit
+                        </a>
+                    </span></a></td>
+                   
+                </tr>
+                 {% endfor %}
+            </tbody>
+        </table>
+     </div>
+    </div>
+  </div>
+ </div>
+</div>
+
+<p id="old_csv_value" value="" style="display: none;"></p>
+
+{% endblock %}
+
+{% block additional_js %}
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        new DataTable('#example22', {
+            scrollX: true,
+            scrollCollapse: true,
+            scrollY: '530px',
+            pageLength: 20,
+            fixedHeader: true,
+            lengthChange: false,
+            responsive: true,
+            order: [], // Disable initial sorting
+            // columnDefs: [{
+            //     targets: '_all', 
+            //     orderable: true,
+            //     orderData: [3], // Set the order data (adjust index as needed)
+            //     orderSequence: ['desc', 'asc'] // Set the order sequence for sorting
+            // }]
+        });
+    });
+</script>
+
+
+<style>
+    .dataTables_scrollHeadInner{
+        width: 100% !important;
+    }
+    table.table.dataTablesCard.style-1.custom-tbl.card-table.previous-transactions.display.dataTable.no-footer {
+        width: 100% !important;
+    }
+    table.table.dataTablesCard.style-1.custom-tbl.card-table.previous-transactions.display.dataTable.no-footer {
+        width: 100% !important;
+    }
+</style>
+
+<script>
+    function get_wallet_balance(zai_user_id) {
+        $.ajax({
+            type: "POST",
+            url: "{% url 'mophy:get-payout-balance' %}",
+            data: {
+                zai_user_id: zai_user_id, 
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success: function (data) {
+                if (data.success) {
+                    $('#eye-icon-' + zai_user_id).hide();
+                    $('#wallet-balance-' + zai_user_id).html("AUD "+data.balance);
+                } else {
+                    alert('Failed to retrieve the balance.');
+                }
+            },
+            error: function () {
+                alert('An error occurred while fetching the balance.');
+            }
+        });
+    }
+</script>
+
+{% endblock %}
+
+

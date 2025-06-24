@@ -1,0 +1,366 @@
+{% extends 'mophy/elements/layouts/admin.html' %}
+{% load static widget_tweaks %}
+
+
+{% block additional_css %}
+
+{% endblock %}
+
+{% block message %}
+{% include 'mophy/elements/alert.html' %}
+{% endblock %}
+
+{% block content %}
+
+
+<!-- <div class="row mx-0">
+  <div class="col-sm-6 p-md-0">
+      <div class="welcome-text">
+          <h2 class="text-black fw-bold">Transaction Activity </h2>
+      </div>
+  </div>
+  <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex fw-bold">
+      <ol class="breadcrumb">
+      <li class="breadcrumb-item "><a class="text-black fw-bold" href="{% url 'mophy:index' %}" ><u >Back</u></a></li>
+      </ol>
+  </div>
+</div> -->
+<!-- card start -->
+<div class="card corridore_card">
+  <div class="card-header">
+    <h4 class="card-title">Transaction Activity </h4>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item "><a class="text-black fw-bold" href="{% url 'mophy:index' %}" ><u >Back</u></a></li>
+      </ol>
+</div>
+  <div class="card-body">
+    <form method="post" action="{% url 'mophy:transaction_activity_report' %}">
+      {% csrf_token %}
+      <!-- start of all filters -->
+      <div class="row select-row">
+        <div class="col-md-3">
+          <div class="form-group">
+            <label for="customers">Customers</label>
+            <select class="form-control" id="customer" name="customer">
+              {% for i in data.customers_list %}
+                  {% if i.customer_id == None %}
+                      <option value="" disabled selected>{{ i.email }}</option>
+                  {% else %}
+                      <option value="{{ i.customer_id }}">{{ i.email }}</option>
+                  {% endif %}
+              {% endfor %}
+          </select>
+            <!-- <select class="form-control" id="customer" name="customer">            
+              {% for i in data.customers_list %}
+                {% if i.customer_id == None %}
+                  <option value="" disabled selected>{{i.email}}</option>
+                {% else %}
+                  <option value={{i.customer_id}}>{{i.email}}</option>
+                {% endif %}
+              {% endfor %}   
+            </select> -->
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="form-group">
+            <label for="send_currency">Countries</label>
+            <select class="form-control" id="send_currency" name="send_currency">
+              {% for i in data.send_currency_list %}
+                {% if i.currency == None %}
+                  <option value="" disabled selected>{{i.country}}</option>
+                {% else %}
+                  <option value={{i.currency}}>{{i.country}}  ({{i.currency}})</option>
+                {% endif %}
+              {% endfor %}                   
+            </select>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="form-group">
+            <label for="receive_currency">Corridors</label>
+            <select class="form-control" id="receive_currency" name="receive_currency">
+              {% for i in data.receive_currency_list %}
+                {% if i.currency == None %}
+                  <option value="" disabled selected>{{i.country}}</option>
+                {% else %}
+                  <option value={{i.currency}}>{{i.country}}  ({{i.currency}})</option>
+                {% endif %}
+              {% endfor %}                    
+            </select>
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <div class="form-group">
+            <label for="transaction_time">Interval</label>
+            <select class="form-control" id="transaction_time" name="transaction_time">
+              {% for i in data.time_list %}
+                {% if i.value == None %}
+                  <option value="" disabled selected>{{i.option}}</option>
+                {% else %}
+                  <option value={{i.value}}>{{i.option}} </option>
+                {% endif %}
+              {% endfor %}        
+            </select>
+        </div>
+                
+        </div>
+      </div>
+      <!-- end of all filters div -->
+
+      <!-- filter and reset buttons -->
+      <div class="col-md-12">
+        <button class="form-control btn btn-primary tranct-activity style-button" type="submit" name="submit" style="margin-left:8px;"><a class= "text-white fw-bold " style="
+          display: block;  height: 40px; line-height: 40px;   top: -11px; position: relative; " href="{% url 'mophy:transaction_activity_report' %} ">Reset</a></button>
+        <button  class="form-control btn btn-primary tranct-activity style-button" type="submit" name="submit" style="font-weight:bold;">Filter</button>
+      </div>
+      <!-- end of filter and reset buttons -->
+    </form>
+
+      <br>
+      <br>
+
+      <!-- Doughnut canvas -->
+      <div class="row-col-md-12">         
+        {% if data.all_zero %}
+          <h2>{{data.all_zero}}</h2>
+        {% else %}
+          <canvas id="myChart" style="height:400px;"></canvas>
+        {% endif %}
+      </div>
+      <!-- end of doughnut canvas -->
+  </div>
+</div>
+<!-- card end -->
+
+<div id="loader" style="display:none" class="loader-overly" ><div class="loader" ></div></div>
+
+
+{% endblock %}
+
+{% block additional_js %}
+
+<script>
+  function activity_report(){
+    $('#loader').show();
+    var customer = $('#customers').val();
+    var payin_currency = $('#payin_currencies').val();
+    var payout_currency = $('#payout_currencies').val();
+    var filter_time = $('#filter_time').val();
+    $.ajax({
+      type: "POST",
+      url: "{% url 'mophy:transaction_activity_report' %}",
+      data: {customer:customer, payin_currency:payin_currency, payout_currency:payout_currency, filter_time: filter_time, csrfmiddlewaretoken: '{{ csrf_token }}'},
+      success: function (data){
+        if (data.success) {
+		      $('#loader').hide();
+
+        } // data.success if end
+      } //success end
+    }) //ajax end
+
+}
+
+</script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  const ctx = document.getElementById('myChart');
+  const contextData = JSON.parse('{{ context_json|safe }}');
+
+  const data = {
+    labels: [
+    'Payment Status',
+      'Pending Payment '+contextData.pending_transactions,
+      'Incomplete '+contextData.incomplete_transactions,
+      'Pending Review & Processing '+contextData.pending_review_and_processing_transactions,
+      'Processed '+contextData.processed_transactions,
+      'Cancelled '+contextData.cancelled_pm_transactions,
+
+      '',
+      'Risk Group',
+      'High Risk transactions '+contextData.high_risk_transactions,
+      'Very High Risk '+contextData.very_high_risk_transactions,
+      'Low Risk '+contextData.low_risk_transactions,
+      'Very Low Risk '+contextData.very_low_risk_transactions,
+      '',
+      'TM Status',
+      'Approved '+contextData.approved_transactions,
+      // 'TM Cancelled '+contextData.cancelled_transactions,
+      'Queued '+contextData.queued_transactions
+    ],
+    datasets: [{
+      data: [
+        0, // Placeholder for the group heading (1. PM status)
+
+        contextData.pending_transactions,
+        contextData.incomplete_transactions,
+        contextData.pending_review_and_processing_transactions,
+        contextData.processed_transactions,
+        contextData.cancelled_pm_transactions,
+
+
+        0, // Placeholder for the empty label
+        0, // Placeholder for the group heading (2. Risk Group)
+        contextData.high_risk_transactions,
+        contextData.very_high_risk_transactions,
+        contextData.low_risk_transactions,
+        contextData.very_low_risk_transactions,
+        0, // Placeholder for the empty label
+        0, // Placeholder for the group heading (3. TM Status)
+        contextData.approved_transactions,
+        contextData.cancelled_transactions,
+        contextData.queue_transactions,
+      ],
+      backgroundColor: [
+        'rgba(235, 255, 255, 0)', // Transparent for the group heading (1. TM status)
+        'rgba(200, 100, 8, 8)', // Color for the Pending label
+        'rgba(155, 130, 1, 6)', // Color for the Incomplete transactions label
+        'rgba(255, 193, 7, 1)', // Color for the Pending Review and Processing label
+        'rgba(0, 100, 0)', // Color for the processed label
+        'rgba(255, 0, 0)', // Color for the cancelled label
+
+        'rgba(255, 255, 255, 0)', // Transparent for the empty label
+        'rgba(255, 255, 255, 0)', // Transparent for the group heading (2. Risk Group)
+        'rgba(220, 101, 53)', // Color for High Risk label
+        'rgba(175, 65, 84)', // Color for Very High Risk label
+        'rgba(13, 202, 240)', // Color for Low Risk label
+        'rgba(189, 155, 25)', // Color for Very Low Risk label
+        'rgba(255, 255, 255, 0)', // Transparent for the empty label
+        'rgba(255, 255, 255, 0)', // Transparent for the group heading (3. TM Status)
+        'rgba(11, 156, 49)', // Color for Approved label
+        // 'rgba(128, 0, 0)', // Color for Cancel label
+        'rgba(106, 90, 205)', // Color for Queue label
+      ],
+      borderWidth: 1
+    }]
+  };
+
+  const options = {
+    cutoutPercentage: 25,
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: true,
+        position: 'right',
+        labels: {
+          generateLabels: function (chart) {
+            const data = chart.data;
+            if (data.labels.length && data.datasets.length) {
+              const labels = data.labels;
+              const dataset = data.datasets[0];
+
+              const legendItems = [];
+              let currentGroupHeading = '';
+
+              labels.forEach((label, index) => {
+                if (label.startsWith('1. TM status')) {
+                  currentGroupHeading = '1. TM status';
+                  legendItems.push({
+                    text: label,
+                    fillStyle: 'rgba(255, 255, 255, 0)', // Transparent for the group heading
+                    hidden: true,
+                    lineCap: 'butt',
+                    lineDash: [],
+                    lineDashOffset: 0,
+                    lineJoin: 'miter',
+                    lineWidth: 1,
+                    strokeStyle: 'rgba(255, 255, 255, 0)', // Transparent for the group heading
+                    pointStyle: undefined,
+                    rotation: 0
+                  });
+                } else if (label.startsWith('2. Risk Group')) {
+                  currentGroupHeading = '2. Risk Group';
+                  legendItems.push({
+                    text: label,
+                    fillStyle: 'rgba(255, 255, 255, 0)', // Transparent for the group heading
+                    hidden: true,
+                    lineCap: 'butt',
+                    lineDash: [],
+                    lineDashOffset: 0,
+                    lineJoin: 'miter',
+                    lineWidth: 1,
+                    strokeStyle: 'rgba(255, 255, 255, 0)', // Transparent for the group heading
+                    pointStyle: undefined,
+                    rotation: 0
+                  });
+                } else if (label.startsWith('3. TM Status')) {
+                  currentGroupHeading = '3. TM Status';
+                  legendItems.push({
+                    text: label,
+                    fillStyle: 'rgba(255, 255, 255, 0)', // Transparent for the group heading
+                    hidden: true,
+                    lineCap: 'butt',
+                    lineDash: [],
+                    lineDashOffset: 0,
+                    lineJoin: 'miter',
+                    lineWidth: 1,
+                    strokeStyle: 'rgba(255, 255, 255, 0)', // Transparent for the group heading
+                    pointStyle: undefined,
+                    rotation: 0
+                  });
+                } else {
+                  legendItems.push({
+                    text: label,
+                    fillStyle: dataset.backgroundColor[index], // Use the color specified in the dataset
+                    hidden: chart.getDatasetMeta(0).data[index].hidden,
+                    lineCap: 'butt',
+                    lineDash: [],
+                    lineDashOffset: 0,
+                    lineJoin: 'miter',
+                    lineWidth: 1,
+                    strokeStyle: dataset.backgroundColor[index], // Use the color specified in the dataset
+                    pointStyle: undefined,
+                    rotation: 0,
+                    group: currentGroupHeading
+                  });
+                }
+              });
+
+              return legendItems;
+            }
+            return [];
+          },
+          filter: function (legendItem, chartData) {
+            return legendItem.group !== undefined;
+          }
+        }
+      },
+      tooltip: {
+        enabled: true
+      }
+    },
+    scales: {
+      y: {
+        display: false
+      }
+    }
+  };
+
+  const chart = new Chart(ctx, {
+    type: 'doughnut',
+    data: data,
+    options: options
+  });
+</script>
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+<script>
+  // Initialize Select2
+  $(document).ready(function() {
+      $('#customer').select2();
+  });
+</script>
+<script>
+  var $j = jQuery.noConflict();
+  // Now, use $j instead of $
+</script>
+{% endblock %}

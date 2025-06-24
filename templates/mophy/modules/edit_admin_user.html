@@ -1,0 +1,149 @@
+{% extends 'mophy/elements/layouts/admin.html' %}
+{% load static widget_tweaks %}
+
+
+{% block additional_css %}
+
+{% endblock %}
+
+{% block message %}
+{% include 'mophy/elements/alert.html' %}
+{% endblock %}
+
+{% block content %}
+
+{% if error %}
+<div class="alert alert-danger fw-bold fs-4" id="error_message" role="alert">{{error}}</div>
+{% endif %}
+
+<div class="row justify-content-center h-100 align-items-center">
+  <div class="col-xl-12 col-lg-12">
+    <div class="card">
+        <div class="card-header">
+            <h4 class="card-title">Update Admin User Form</h4>
+        </div>
+        <div class="card-body">
+          <div class="basic-form">
+            <form  method="post" action="{% url 'mophy:edit-admin-user' id=user_obj.id %}"  enctype="multipart/form-data" novalidate autocomplete="off">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="row col-md-12">
+                        <div class="mb-4 col-md-4">
+                            <label class="form-label">First Name</label>
+                            <input onkeypress="hide_error(type='fn')" type="text" name="first_name" id="first_name" class="form-control mb-1 input-custom" maxlength="50" value='{{user_obj.First_name}}''>
+                            <span class="text-danger fn_error"></span>
+                        </div>
+                        <div class="mb-4 col-md-4">
+                            <label class="form-label">Last Name </label>
+                            <input type="text" onkeypress="hide_error(type='ln')" name="last_name" id="last_name" class="form-control mb-1 input-custom" maxlength="50" value="{{user_obj.Last_name}}">
+                            <span class="text-danger ln_error"></span>
+                        </div>                        
+                        <div class="mb-4 col-md-4">
+                            <label class="form-label">Email</label>
+                            <input type="email" onkeypress="hide_error(type='email')" name="email" id="email" class="form-control mb-1 input-custom" maxlength="50" value="{{user_obj.email}}">
+                        </div>             
+                    </div>
+
+                    <div class="row select-row">
+                      <div class="row col-md-12 mt-3 mb-1">                         
+                         <div class="mb-6 col-md-6">
+                          <label class="form-label">Current Role </label>
+                          <input class="form-control input-custom" name="currenct_role" value={{user_role}} disabled>
+                         </div>                            
+                         <div class="mb-6 col-md-6">
+                          <label class="form-label">Update Role </label>
+                          <select class="form-control mb-1" onchange="get_permission_list()" name="role" onclick="hide_error(type='role')" id="role" aria-label="Default select example">
+                              <option selected disabled>Choose Role</option>
+                            {% for i in roles_data %}
+                                <option value={{i.id}}>{{i.name}}</option>
+                            {% endfor %}
+                          </select>
+                          <span class="text-danger role_error"></span>
+                         </div> 
+                      </div>
+                    </div>
+
+                      </div>
+                    </div>
+                    <div class="row col-md-12" >
+                       
+                            <button type="submit"  class="btn btn-primary mt-4 mb-5 style-button">Save</button>
+                            <a href="{% url 'mophy:admin-users' %}" class="btn btn-primary mt-4 mb-5 style-button">Cancel</a>
+                        
+                        <div class="col-10"></div>
+                    </div>
+                </div>
+            </form>
+          </div>
+        </div>
+    </div>
+  </div>
+</div>
+
+<p value={{user_obj.id}} style="display: none;" id="user_id"></p>
+
+{% endblock %}
+
+
+{% block additional_js %}
+
+
+<script>
+  function remove_permissions(element) {
+  const permission = element.parentNode.textContent.trim();
+  $(element).parent().remove();
+}
+</script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
+
+<script>
+function edit_admin_user() {
+    var first_name = $('#first_name').val();
+    var last_name = $('#last_name').val();
+    var email = $('#email').val();
+    var role = $('#role').val();
+    var Element = document.getElementById("user_id");
+    var user_id = Element.getAttribute("value");
+    var url = "{% url 'mophy:edit-admin-user' id=0 %}".replace('0', user_id);
+    var error_flag = false;
+    const listItems = $('#user_permissions_list li');
+        const selected_permissions = [];
+        listItems.each(function () {
+            const listItemText = $(this).text().trim();
+            selected_permissions.push(listItemText)  });
+    if(role === null){
+      error_flag =true;
+        $('.role_error').html("Please select role");
+        $('.role_error').show();  
+    }
+    if(error_flag === false){
+      $.ajax({
+        type: "POST",
+        url: url,
+        data: {selected_permissions:selected_permissions, first_name:first_name, last_name:last_name, email:email, role:role, csrfmiddlewaretoken: '{{ csrf_token }}' },
+        success: function (data) {
+                console.log(data)
+                if (data.success) {
+                  $('#success_message').html(data.message);
+                  $('#success_message').show();
+                  window.setTimeout(function(){
+                    window.location.href = "{% url 'mophy:admin-users'  %}";
+                  }, 2000);
+                }
+                else{
+                  $('.email_error').html(data.message);
+                  $('.email_error').show();                }
+          }
+      })
+    }
+}
+</script>
+<script>
+     setTimeout(function () {
+           $('.alert').hide();
+        }, 3000);
+</script>
+{% endblock %}
+

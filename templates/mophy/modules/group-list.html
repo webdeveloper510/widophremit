@@ -1,0 +1,150 @@
+{% extends 'mophy/elements/layouts/admin.html' %}
+{% load static widget_tweaks %}
+
+
+{% block additional_css %}
+ 
+{% endblock %}
+
+
+{% block message %}
+{% include 'mophy/elements/alert.html' %}
+{% endblock %}
+
+
+{% block content %}
+
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">Manage Groups </h4>
+                {% if perms.auth.add_group %}
+                <a href="{% url 'mophy:group-add' %}" class="btn btn-primary btn-xs content-justify-right">ADD GROUP  <span class="btn-icon-end">
+                    <i class="fa fa-plus"></i></span>
+                </a>
+                {% endif %}
+
+
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-responsive-md ck-table">
+                        <thead>
+                            <tr>
+                                <th style="width:50px;">
+                                    <div class="custom-control custom-checkbox checkbox-primary">
+                                        <input type="checkbox" class="form-check-input" id="checkAll" required="">
+                                        <label class="custom-control-label" for="checkAll"></label>
+                                    </div>
+                                </th>
+                                <th scope="col">Group Name</th>
+                                <th scope="col">User Count</th>
+                                <th scope="col">Perms Count</th>
+                                {% if perms.auth.change_group or perms.auth.delete_group %}
+                                <th scope="col">Action</th>
+                                {% endif %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            
+                            {% for group in groups %}
+                            
+                            <tr>
+
+                                <td>
+                                    <div class="custom-control custom-checkbox checkbox-primary">
+                                        <input type="checkbox" class="form-check-input" id="customCheckBox2" required="">
+                                        <label class="custom-control-label" for="customCheckBox2"></label>
+                                    </div>
+                                </td>
+
+                                <td>{{ group.name }}</td>
+
+                                <td>
+                                    <span class={% if group.user_count == 0 %}
+                                    "badge badge-{{ colors.dark }}"
+                                    {% elif group.user_count > 0 and group.user_count < 10  %}
+                                    "badge badge-{{ colors.primary }}"
+                                    {% elif group.user_count >= 10 %}
+                                    "badge badge-{{ colors.success }}"
+                                    {% endif %}><i class="fa fa-users" aria-hidden="true"></i> &nbsp;{{ group.user_count }}</span>
+                                </td>
+
+                                
+
+                                 <td>
+                                    
+                                    
+                                    <span class={% if group.perms_count == 0 %}
+                                    "badge badge-{{ colors.dark }}"
+                                    {% elif group.perms_count > 0 and group.perms_count < 10  %}
+                                    "badge badge-{{ colors.primary }}"
+                                    {% elif group.perms_count >= 10 %}
+                                    "badge badge-{{ colors.success }}"
+                                    {% endif %}><i class="fa fa-lock" aria-hidden="true"></i> &nbsp;{{ group.perms_count }}</span> 
+                                </td>
+
+                                {% if perms.auth.change_group or perms.auth.delete_group %}
+                                <td>
+                                    <span class="sweetalert">
+
+                                        {% if perms.auth.change_group %}
+
+                                        <a href="{% url 'mophy:group-edit' id=group.id %}"class="btn btn-primary shadow btn-xs sharp me-1" data-bs-toggle="tooltip"
+                                            data-placement="top" title="Edit">
+                                            <i class="fas fa-pencil-alt"></i>
+                                        </a>
+                                        {% endif %}
+                                        {% if perms.auth.delete_group %}
+                                        <a href="{% url 'mophy:group-delete' id=group.id %}" class="btn btn-danger shadow btn-xs sharp sweet-success-cancel" data-bs-toggle="tooltip"
+                                            data-placement="top" title="Delete"><i class="fa fa-trash"></i>
+                                        </a>
+                                        {% endif %}
+                                    </span>
+                                </td>
+
+                                {% endif %}
+                            </tr>
+                           
+                            
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}
+
+
+{% block additional_js %}
+<script>
+    $('.sweet-success-cancel').on('click', function (event) {
+           event.preventDefault();
+           const url = $(this).attr('href');
+   
+           Swal.fire({
+               title: 'Are you sure?',
+               text: "You won't be able to revert this!",
+               type: "warning",
+               icon: 'question',
+               showCancelButton: true,
+               confirmButtonText: "Yes, delete it !!",
+               confirmButtonText: 'Delete',
+               confirmButtonColor: "#DD6B55"
+               
+           }).then((result) => {
+               if (result.value) {
+                   window.location.href = url;
+               } else if (result.dismiss === Swal.DismissReason.cancel) {
+                   event.preventDefault();
+               }
+           })
+       });
+   </script>
+   
+{% endblock %}
+
+

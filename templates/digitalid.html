@@ -1,0 +1,26 @@
+<html>
+<head>
+</head>
+<body>
+    <script src="https://digitalid-sandbox.com/sdk/app.js" async defer></script>
+    <div id="digitalid-verify"></div>
+    <script>
+    window.digitalIdAsyncInit = function () {
+        digitalId.init({
+        clientId : 'ctid5xTkDsQVgTySwxhMpKWUTE',
+        onComplete: function (response) { console.log(response)// your handler for verification completion events },
+           
+        // function onComplete(response) {
+        // The OAuth grant code you need to pass to your backend;
+        console.log(`Grant code: ${response.code}`); 
+        // Transaction id can be sent your backend for tracking   /auditing purposes, or else can be ignored if not required.
+        // console.log(`Transaction id: ${response.transaction_id}`);
+        // fetch('https://api.digitalid-sandbox.com/oauth2/token?redirect_uri=https://digitalid-sandbox.com/oauth2/echo&grant_type=authorization_code&code='+response.code,
+        //  {  method: 'POST'}).then(response => response.json()).then(json => console.log(`Verified as: ${json}`));
+        // }
+             },
+            });
+            };
+    </script>
+</body>
+</html>

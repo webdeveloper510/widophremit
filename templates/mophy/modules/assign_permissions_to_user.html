@@ -1,0 +1,158 @@
+{% extends 'mophy/elements/layouts/admin.html' %}
+{% load static widget_tweaks %}
+
+
+{% block additional_css %}
+
+{% endblock %}
+
+{% block message %}
+{% include 'mophy/elements/alert.html' %}
+{% endblock %}
+
+{% block content %}
+
+<div style="display: none;" class="alert alert-danger alert-dismissible fade show" id="alert" role="alert">
+   <strong id="error_message"></strong> 
+</div>
+   
+<div class="row justify-content-center h-100 align-items-center">
+  <div class="col-xl-12 col-lg-12">
+    <div class="card">
+        <div class="card-header">
+            <h4 class="card-title">Manage User Permissions</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+               <div class="row col-md-12 mt-3 mb-1">   
+                  <div class="col-6"><h4 class="fw-bold text-center">Add Permissions</h4></div>       
+                  <div class="col-6"><h4 class="fw-bold text-center">User Permissions</h4></div>       
+               </div>
+               <div class="row col-md-12">
+                  <div class="border col-6 overflow-auto p-3 text-black" style="max-width: 500px; max-height: 300px;">
+                        <ul>
+                           {% for i in permissions %}
+                              <li id="permissions_list">{{i}} <i onclick="permissions(this)" id="permission"  class="fa fa-plus text-white bg-primary" style="font-size:10px; padding: 3px; margin-left: 8px;" aria-hidden="true"></i></li>
+                           {% endfor %}
+                        </ul>
+                  </div>
+
+                  <div class="border col-6 overflow-auto p-3 " style="max-width: 500px; max-height: 300px;">
+                        <ul id="user_permissions_list">
+                           {% for i in user_permissions %}
+                              <li id="selected_permissions">{{i}}<i onclick="remove_permissions(this)" id="remove_permission"  class="fa-solid fa-minus text-white bg-primary" style="font-size:10px; padding: 3px; margin-left: 8px;" aria-hidden="true"></i></li>
+                           {% endfor %}
+                        </ul>
+                  </div>
+               </div>
+
+               <div class="row col-md-12">
+                  <div class="col-2">
+                     <a href="{% url 'mophy:admin-users' %}" >
+                        <button type="submit" class="btn btn-primary mt-4 mb-5 " style="width:80%;">Save</button>
+                     </a>
+                  </div>
+                  <div class="col-2 ">
+                        <a href="{% url 'mophy:admin-users' %}" style="width:80%;" class="btn btn-primary mt-4 mb-5">Cancel</a>
+                  </div>
+                  <div class="col-10"></div>
+               </div>
+            </div>
+        </div>
+    </div>
+  </div>
+</div>
+
+<p id="user_id" style="display: none;" data-id="{{id}}">{{id}}</p>
+
+{% endblock %}
+
+
+{% block additional_js %}
+
+<script>
+function permissions(element) {
+    const permission = element.parentNode.textContent.trim();
+    var user_id = document.getElementById('user_id').getAttribute('data-id');
+    console.log(user_id, permission, "permission = = = = = ");
+    var url = "{% url 'mophy:add-permissions' id=0 %}".replace('0', user_id);
+
+      $.ajax({
+         type: "POST",
+         url: url,
+         data: {permission: permission, csrfmiddlewaretoken: '{{ csrf_token }}' },
+         success: function (data) {
+            if(data.success === true){
+               console.log(data)
+               updatePermissionsList(data.user_permissions);
+            }
+            else{
+               $('#error_message').html(data.message);
+               $('#error_message').parent().show();
+               setTimeout(function () {
+                  $('#error_message').parent().hide();
+               }, 2000);
+            }
+        }
+    });
+}
+
+function updatePermissionsList(user_permissions) {
+    const ul = document.getElementById('user_permissions_list');
+    ul.innerHTML = ''; // Clear the existing list
+
+    user_permissions.forEach(permission => {
+        const li = document.createElement('li');
+        li.textContent = permission;
+
+        // Create the icon element
+        const icon = document.createElement('i');
+        icon.className = 'fa fa-minus text-white bg-primary';
+        icon.style.fontSize = '10px';
+        icon.style.padding = '3px';
+        icon.style.marginLeft = '8px';
+        icon.setAttribute('aria-hidden', 'true');
+
+        icon.addEventListener('click', function() {
+            remove_permissions(this.parentNode); 
+        });
+        li.appendChild(icon);
+        ul.appendChild(li);
+    });
+}
+</script>
+
+<script>
+   function remove_permissions(element) {
+       const permission = element.parentNode.textContent.trim();
+       var user_id = document.getElementById('user_id').getAttribute('data-id');
+       var url = "{% url 'mophy:add-permissions' id=0 %}".replace('0', user_id);
+         $.ajax({
+            type: "POST",
+            url: url,
+            data: {remove_permission: permission, csrfmiddlewaretoken: '{{ csrf_token }}' },
+            success: function (data) {
+               if(data.success === true){
+                  console.log(data)
+                  // setTimeout(function () {
+                  //    location.reload();}, 1000);
+                  updatePermissionsList(data.user_permissions);
+               }
+               else{
+                  $('#error_message').html(data.message);
+                  $('#error_message').parent().show();
+                  setTimeout(function () {
+                     $('#error_message').parent().hide();
+                  }, 2000);
+               }
+           }
+       });
+   }
+   
+   </script>
+   
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
+
+
+{% endblock %}

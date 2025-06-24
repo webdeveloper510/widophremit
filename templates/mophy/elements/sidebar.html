@@ -1,0 +1,147 @@
+{% load static %}
+
+<div class="deznav">
+  <div class="deznav-scroll">
+    <ul class="metismenu" id="menu"> 
+            <li id="dashboard_page">
+                <a {% if '/index/' in request.path %} class="mm-active" {% endif %} href="{% url 'mophy:index' %}"> 
+                    <i class="flaticon-381-networking"></i>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+            </li>
+            <li id="admin_user_page">
+                <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+                    <i class="flaticon-381-controls-3"></i>
+                    <span class="nav-text">Admin Users</span>
+                </a>
+                    <ul aria-expanded="false">
+                        <li id="role_view_page"><a href="{% url 'mophy:roles' %}">Roles</a></li>
+                        <li id="admin_user_view_page"><a href="{% url 'mophy:admin-users' %}">Users</a></li>
+                    </ul>
+            </li>
+            <li id="customer_view_page">
+                <a {% if '/users/' in request.path %}class="mm-active"{% endif %} href="{% url 'mophy:users' %}"> 
+                    <i class="flaticon-381-user-9"></i>
+                    <span class="nav-text">Customers</span>
+                </a>
+            </li>
+            <li id="transaction_view_page">
+                <a  {% if '/transactions/' in request.path %}class="mm-active"{% endif %} href="{% url 'mophy:transactions' %}"> 
+                    <i class="flaticon-381-transfer"></i>
+                    <span class="nav-text">Transactions</span>
+                </a>
+            </li>
+            <li id="payment_gateway_page" class="custom-menu">
+                <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+                    <i class="fa fa-wrench" aria-hidden="true"></i>
+                    <span class="nav-text">Service Providers</span>
+                </a>
+
+                <!-- <ul aria-expanded="false"  class="second_ul">
+                    <li>
+                        <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+                            <span class="nav-text">Payout Partners</span>
+                        </a>
+                            <ul aria-expanded="false">
+                                <li id="currency_cloud_view_page"><a href="{% url 'mophy:currency-cloud' %}">Currency Cloud</a></li>
+                                <li><a href="{% url 'mophy:index' %}">Circle</a></li>
+                                <li><a href="{% url 'mophy:index' %}">MFS</a></li>
+                                <li><a href="{% url 'mophy:index' %}">Bank Settings</a></li>
+                            </ul>
+                    </li>
+                </ul> -->
+
+                <ul aria-expanded="false">
+                    <li id="payment_gateway_page"><a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+                        <span class="nav-text">Payment Gateways</span>
+                    </a>
+                        <ul aria-expanded="false">
+                            <!-- <li><a href="{% url 'mophy:stripe' %}">Stripe</a></li> -->
+                            <li id="zai_view_page"><a href="{% url 'mophy:zai-page' %}">Zai</a></li>
+                            <li id="zai_view_page"><a href="{% url 'mophy:confirm-details' %}">Zai Payouts</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+            <li id="compliance_page">
+                <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+                    <i class="fa fa-book" aria-hidden="true"></i>
+                    <span class="nav-text">Compliance</span>
+                </a>
+                    <ul aria-expanded="false">
+                        <li id="veriff_view_page"><a href="{% url 'mophy:veriff' %}">Veriff</a></li>
+                        <!-- <li><a href="{% url 'mophy:index' %}">KYC/ ID Verification</a></li>
+                        <li><a href="{% url 'mophy:index' %}">AML/ PEP</a></li> -->
+                        <li id="transaction_monitoring_view_page"><a href="{% url 'mophy:transaction-monitoring' %}">Transaction Monitoring</a></li>
+                        <!-- <li><a href="{% url 'mophy:austrac' %}">AUSTRAC</a></li> -->
+                    </ul>
+            </li>
+            <li id="forex_view_page">
+                <a class="mm-active" href="{% url 'mophy:forex-details' %}"> 
+                    <i class="fa fa-exchange" aria-hidden="true"></i>
+                    <span class="nav-text">Forex Detail</span>
+                </a>
+            </a>
+            </li>
+            <li id="activity_report_view_page">
+                <a class="mm-active" href="{% url 'mophy:transaction_activity_report' %}"> 
+                    <i class="fa fa-line-chart" aria-hidden="true"></i>
+                    <span class="nav-text">Activity Report</span>
+                </a>
+            </li>
+            <li id="activity_report_view_page">
+                <a class="mm-active" href="{% url 'mophy:blogs-list' %}"> 
+                    <i class="fab fa-blogger-b" aria-hidden="true"></i>
+                    <span class="nav-text">Blogs</span>
+                </a>
+            </li>
+            <li id="family_friends_page">
+                <a class="has-arrow ai-icon" href="javascript:void()" aria-expanded="false">
+                    <i class="fa fa-users"></i>
+                    <span class="nav-text">Refer Family & Friends</span>
+                </a>
+                    <ul aria-expanded="false">
+                        <li id="loyality_program_view_page"><a href="{% url 'mophy:loyality-program' %}">Loyality Program</a></li>
+                        <li id="loyality_program_view_page"><a href="{% url 'mophy:customer-referrals' %}">Customer Referrals</a></li>
+                    </ul>
+            </li>
+    </ul>
+
+<!--Modules Demo End --> 
+    <div class="copyright">
+        <p><strong>WidophRemit Admin Dashboard</strong><br> © <span id="year"></span> All Rights Reserved</p>
+        <p class="made-text"><span class="heart heart-blast"></span> Made with by WidophRemit</p>
+    </div>
+  </div>
+</div>
+
+<script>
+    var year = new Date().getFullYear();
+    document.getElementById("year").innerHTML = year;
+  </script>
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(window).on('load', function() {
+        // Check if parent li has class "mm-active" and add class "mm-show" to children ul elements
+        $('.mm-active').each(function() {
+            $(this).children('ul').addClass('mm-show');
+        });
+    });
+
+    const idleTimeoutDuration =  30 * 60 * 1000; 
+        let idleTimer;
+        function resetIdleTimer() {
+            clearTimeout(idleTimer); 
+            idleTimer = setTimeout(logout, idleTimeoutDuration); 
+        }
+        function logout() {
+          //  document.cookie = "sessionid= ; max-age=0; path=/adminpanel/login"
+            window.location.href ="/adminpanel/logout";
+        }
+        window.addEventListener("mousemove", resetIdleTimer);
+        window.addEventListener("keydown", resetIdleTimer);
+        resetIdleTimer();
+
+</script>

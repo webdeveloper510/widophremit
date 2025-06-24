@@ -1,0 +1,209 @@
+{% extends 'mophy/elements/layouts/admin.html' %}
+
+{% load static %}
+
+{% block additional_css %}
+{% endblock %}
+
+{% block content %}
+
+
+<link rel="stylesheet" href="/static/mophy/vendor/datatables/css/jquery.dataTables.min.css" >
+<link rel="stylesheet" href="/static/mophy/css/style.css">
+
+
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="card corridore_card">
+
+      <div class="card-header">
+        <h4 class="card-title">Add Blog</h4>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item "><a class="text-black fw-bold" href="{% url 'mophy:blogs-list' %}" ><u >View Blogs</u></a></li>
+          </ol>
+    </div>
+
+    <hr>
+    
+      <div class="card-body"> 
+        <div class="row">
+            <div class="col-xl-12">
+                
+                    <div class="row">
+                        <div class="col-md-12 col-lg-8">
+                            <div class="form-group">
+                                <label for="name">Blog Name</label>
+                                <input type="text" class="form-control input-custom" id="name" placeholder="name">
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">Blog Image</label>
+                                <input type="file" class="form-control input-custom" id="image" accept="image/*" placeholder="">
+                            </div>
+                            <div class="form-group">
+                                <label for="name">Short Description</label>
+                                <input type="text" class="form-control input-custom" id="short_description" placeholder="">
+                            </div>
+                            <div class="form-group">
+                              <label>Description</label>
+                              <textarea id="editor"></textarea>
+                            </div>
+                            <hr>
+                            <button type="submit" class="btn btn-primary style-button" id="submit-button">Submit</button>
+                        </div>
+                    </div>    
+            </div>
+        </div>	
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+{% endblock %}
+
+{% block additional_js %}
+
+<script src="https://cdn.tiny.cloud/1/qagffr3pkuv17a8on1afax661irst1hbr4e6tbv888sz91jc/tinymce/6/tinymce.min.js"></script>
+
+<script>
+           tinymce.init({
+            selector:'#editor',
+            menubar: false,
+            statusbar: false,
+            plugins: 'autoresize anchor autolink charmap code codesample directionality fullpage help hr image imagetools insertdatetime link lists media nonbreaking pagebreak preview print searchreplace table template textpattern toc visualblocks visualchars',
+            toolbar: 'h1 h2 bold italic strikethrough blockquote bullist numlist backcolor | link image media | removeformat help fullscreen ',
+            skin: 'bootstrap',
+            toolbar_drawer: 'floating',
+            min_height: 200,           
+            autoresize_bottom_margin: 16,
+            setup: (editor) => {
+                editor.on('init', () => {
+                    editor.getContainer().style.transition="border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out"
+                });
+                editor.on('focus', () => {
+                    editor.getContainer().style.boxShadow="0 0 0 .2rem rgba(0, 123, 255, .25)",
+                    editor.getContainer().style.borderColor="#80bdff"
+                });
+                editor.on('blur', () => {
+                    editor.getContainer().style.boxShadow="",
+                    editor.getContainer().style.borderColor=""
+                });
+            }
+        });
+</script>
+
+
+<!---------- Add Blog ------------>
+<script>
+  document.getElementById('submit-button').addEventListener('click', function(event) {
+      event.preventDefault();
+  
+      var nameField = $('#name');
+      var shortDescription = $('#short_description');
+      var descriptionEditor = tinymce.get('editor');
+      var descriptionHtml = descriptionEditor.getContent(); 
+      var imageField = $('#image');
+      var imageFile = imageField[0].files[0];
+      var allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+      var error = false;
+
+      // Clear previous error messages
+      nameField.removeClass('is-invalid');
+      $('#name-error').remove();
+
+      shortDescription.removeClass('is-invalid');
+      $('#short-description-error').remove();
+  
+      $('#description-error').remove();
+      $('#editor').removeClass('is-invalid');
+  
+      imageField.removeClass('is-invalid');
+      $('#image-error').remove();
+  
+      // Validate fields
+      if (!nameField.val()) {
+          error = true;
+          nameField.addClass('is-invalid'); 
+          nameField.after('<div id="name-error" class="invalid-feedback">Name is required.</div>'); // Show error message
+      }
+      if (!shortDescription.val()) {
+          error = true;
+          shortDescription.addClass('is-invalid'); 
+          shortDescription.after('<div id="short-description-error" class="invalid-feedback">Short Description is required.</div>'); // Show error message
+      }
+      if (!descriptionHtml) {
+          error = true;
+          $('#editor').addClass('is-invalid'); 
+          $('#editor').after('<div id="description-error" class="invalid-feedback">Description is required.</div>'); // Show error message
+      }
+      if (!imageFile) {
+        error = true;
+        imageField.addClass('is-invalid'); 
+        imageField.after('<div id="image-error" class="invalid-feedback">Image is required.</div>'); // Show error message
+      } else if (!allowedTypes.includes(imageFile.type)) {
+          error = true;
+          imageField.addClass('is-invalid'); 
+          imageField.after('<div id="image-error" class="invalid-feedback">Please upload a valid image file (JPEG, JPG, PNG).</div>'); // Show error message
+      }
+
+      if (error) {
+        return;
+      } else {
+        var formData = new FormData();
+        formData.append('name', nameField.val());
+        formData.append('short_description', shortDescription.val());
+        formData.append('description', descriptionHtml);
+        formData.append('image', imageFile);
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+        // Make AJAX request
+        $.ajax({
+            type: "POST",
+            url: "{% url 'mophy:add-blog' %}",
+            data: formData,
+            processData: false, 
+            contentType: false, 
+            success: function (data) {
+              if (data.success === true) {  
+                $('#loader').hide(); 
+                window.location.href = "{% url 'mophy:blogs-list' %}"; 
+              } else {
+                $('#error').show(); 
+                $('#loader').hide(); 
+                $('#error').html(data.message);  
+                setTimeout(function () { $('#error').hide(); }, 3000);
+              }
+            }
+        });
+      }
+  });
+  
+  $('#name').on('input', function() {
+      var nameField = $(this);
+      nameField.removeClass('is-invalid');
+      $('#name-error').remove();
+  });
+
+  $('#short_description').on('input', function() {
+      var nameField = $(this);
+      nameField.removeClass('is-invalid');
+      $('#short-description-error').remove();
+  });
+  
+  $('#editor').on('keyup', function() {
+      $('#editor').removeClass('is-invalid');
+      $('#description-error').remove();
+  });
+  
+  $('#image').on('change', function() {
+      var imageField = $(this);
+      imageField.removeClass('is-invalid');
+      $('#image-error').remove();
+  });
+</script>
+
+{% endblock %}
+

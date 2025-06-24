@@ -1,0 +1,462 @@
+{% extends 'mophy/elements/layouts/admin.html' %}
+
+{% load static %}
+
+{% block additional_css %}
+<link rel="stylesheet" href="/static/mophy/vendor/datatables/css/jquery.dataTables.min.css" >
+<link rel="stylesheet" href="/static/mophy/css/style.css">
+
+{% endblock %}
+
+{% block content %}
+
+<!-- <div class="row mx-0">
+    <div class="col-sm-6 p-md-0">
+        <div class="welcome-text mb-4">
+            <h2 class="text-black fw-bold">Transaction Monitoring</h2>
+        </div>
+    </div>
+    <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex fw-bold">
+        <ol class="breadcrumb">
+        <li class="breadcrumb-item "><a class="text-black fw-bold" href="{% url 'mophy:index' %}" ><u >Back</u></a></li>
+        </ol>
+    </div>
+</div> -->
+<div class="card corridore_card">
+    <div class="card-header">
+        <h4 class="card-title">Transaction Monitoring</h4>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item "><a class="text-black fw-bold" href="{% url 'mophy:index' %}" ><u >Back</u></a></li>
+          </ol>
+    </div>
+    <div class="card-body "> 
+        
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="col-xl-12  col-xxl-12 col-md-12">
+                    <div class="row g-3">
+                        <div class="col-sm-3">
+                            <a href="{% url 'mophy:approved-transactions' %}">
+                                <div class="bg-success rounded text-center p-3 graph-approved">
+                                    <div class="d-inline-block position-relative donut-chart-sale mb-3">
+                                        <span class="donut1" data-peity='{ "fill": ["rgb(43, 193, 85)", "rgb(43, 193, 85, 40%)"],   "innerRadius": 33, "radius": 10}'>{{high}}/8</span>
+                                        <small class="text-black fw-bolder fs-3">{{approved_transactions}}</small>
+                                    </div>
+                                    <span class="fs-18 text-black d-block">Approved</span>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-sm-3">
+                            <a href="{% url 'mophy:cancelled-transactions' %}">
+                                <div class="bg-danger rounded text-center p-3 graph-cancelled">
+                                    <div class="d-inline-block position-relative donut-chart-sale mb-3">
+                                        <span class="donut1" data-peity='{ "fill": ["rgb(254, 128, 36)", "rgb(254, 128, 36, 40%)"],   "innerRadius": 33, "radius": 10}'>{{very_high}}/8</span>
+                                        <small class="text-black fw-bolder fs-3">{{cancelled_transactions}}</small>
+                                    </div>
+                                    <span class="fs-18 text-black d-block">Cancelled</span>
+                                </div>
+                            </a>
+                        </div>
+                        
+                        <div class="col-sm-3">
+                            <a href="{% url 'mophy:queue-transactions' %}">
+                                <div class="bg-secondary rounded text-center p-3 graph-queued">
+                                    <div class="d-inline-block position-relative donut-chart-sale mb-3">
+                                        <span class="donut1" data-peity='{ "fill": ["rgb(57, 165, 212)", "rgb(57, 165, 212, 40%)"],   "innerRadius": 33, "radius": 10}'>{{high}}/8</span>
+                                        <small class="text-black fw-bolder fs-3">{{queue_transactions}}</small>
+                                    </div>
+                                    <span class="fs-18 text-black d-block">Queued</span>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-sm-3">
+                            <a href="{% url 'mophy:transactions' %}">
+                                <div class="bg-info rounded text-center p-3 graph-all">
+                                    <div class="d-inline-block position-relative donut-chart-sale mb-3">
+                                        <span class="donut1" data-peity='{ "fill": ["rgb(100, 20, 233)", "rgb(100, 20, 233, 10%)"],   "innerRadius": 33, "radius": 10}'>{{low}}/10</span>
+                                        <small class="text-black fw-bolder fs-3">{{all_transactions}}</small>
+                                    </div>
+                                    <span class="fs-18 text-black d-block">View All</span>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>	
+    </div>
+</div>
+
+
+<div class="row">
+<div class="col-xl-12">
+    
+    <div class="card">
+     <!-- <div class="card-body "> 
+            <form method="post" action="{% url 'mophy:transaction-monitoring' %}">
+                {% csrf_token %}
+                <div class="row">        
+                <div class="col-md-4">
+                <div class="form-group">
+                    <label for="selectCurrency">Send Currency</label>
+                    <select class="form-control" id="selectCurrency" name="send_currency" required>
+                    {% if send_currency %}
+                        <option value="">{{send_currency}}</option>
+                    {% else %}
+                        <option value="">Choose a currency</option>
+                    {% endif %}
+                      <option value="AUD">Australian Dollar (AUD)</option>
+                      <option value="NZD">New Zealand Dollar (NZD)</option>
+                     
+                    </select>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="selectCurrency">Receive Currency</label>
+                    <select class="form-control" id="selectCurrency" name="receive_currency" required>
+                    {% if receive_currency %}
+                        <option >{{receive_currency}}</option>
+                    {% else %}
+                        <option >Choose a currency</option>
+                    {% endif %}
+                      <option value="KES">Kenya (KES)</option>
+                      <option value="GHS">Ghana (GHS)</option>
+                      <option value="PHP">Philippines (PHP)</option>
+                      <option value="NGN">Nigeria (NGN)</option>
+                      <option value="VND">Vietnam (VND)</option>
+                      <option value="THB">Thailand (THB)</option>
+                    </select>
+                </div>
+            </div>
+            
+              <div class="col-md-4 custom-date-picker">
+                      <label class="form-label">Date</label>
+                      {% if date %}
+                          <input type="date" value={{date}} class="form-control" name="date"/>
+                      {% else %}
+                      <input type="date" class="form-control" name="date"/>
+                      {% endif %}
+              </div>
+              <div class="col-md-12">
+              <button class="form-control btn btn-primary tranct-activity" type="submit" name="submit">Filter</button>
+            </div>
+            
+                </div>
+            
+            
+              </form>
+            </div> -->
+
+            <div class="card-header">
+                {% comment %} <h4 class="card-title">{{ user_obj.groups.all }}</h4> {% endcomment %}
+                <h4 class="fw-bold mb-0">Transactions with Risk Group </h4>
+                </div>
+            
+            <div class="card-body">
+                <div class="row align-items-center">
+                <div class="col-xl-12 col-xxl-12 col-md-12">
+
+                <!-- Filters div start -->
+
+                <form method="post" action="{% url 'mophy:transaction-monitoring' %}">
+                {% csrf_token %}
+                <div class="row mb-3 select-row">
+                    
+            <div class="col-md-4">
+            <div class="form-group fw-bold">
+                <label for="selectCurrency">Send Currency</label>
+                <select class="form-control" id="send_currency" name="send_currency">
+                {% for i in send_currency_list %}
+                    {% if i.currency == None %}
+                        <option value="" disabled selected>{{i.country}}</option>
+                    {% else %}
+                        <option value={{i.currency}}>{{i.country}} ({{i.currency}})</option>
+                    {% endif %}
+                {% endfor %}
+                
+                </select>
+            </div>
+            </div>
+    
+            <div class="col-md-4">
+                <div class="form-group fw-bold">
+                    <label for="selectCurrency">Receive Currency</label>
+                    <select class="form-control" id="receive_currency" name="receive_currency" required>
+                    {% for i in receive_currency_list %}
+                        {% if i.currency == None %}
+                        <option value="" disabled selected>{{i.country}}</option>
+                        {% else %}
+                        <option value={{i.currency}}>{{i.country}} ({{i.currency}}) </option>
+                        {% endif %}
+                    {% endfor %}
+                    </select>
+                </div>
+            </div>
+        
+
+    
+        <div class="col-md-4">
+            <a class= "form-control mt-4 btn btn-primary tranct-activity style-button"  href="{% url 'mophy:transaction-monitoring' %} ">Reset</a>
+            <button class="form-control mt-4 btn btn-primary tranct-activity style-button"  type="submit" name="submit">Filter</button>
+                 </div>
+                    </div>
+                    </form>
+                    <!-- Filter div end of risk group -->
+                    <div class="row label-layout">
+                    <div class="d-flex col-xl-3 col-xxl-3  col-md-3 col-sm-6">
+                    <svg class="me-3" width="14" height="54" viewBox="0 0 14 54" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="-6.10352e-05" width="14" height="54" rx="7" fill="#AC39D4"/>
+                    </svg>
+                    <div>
+                    <p class="fs-14 mb-2 fw-bold">Very High Level</p>
+                    <span class="fs-14 font-w500"><span class="text-black me-2">
+                    <!-- <h6 class=" fs-14 text-black fs-5">Pending: {{very_high_pending_transactions}} </h6> -->
+                    <p class=" fs-14 text-black fs-5 m-0">Approved: <b>{{very_high_approved_transactions}}</b> </p>
+                    <p class=" fs-14 text-black fs-5 m-0">Cancelled: <b>{{very_high_cancelled_transactions}}</b> </p>
+                    <p class=" fs-14 text-black fs-5 m-0">Queued: <b>{{very_high_queue_transactions}}</b> </p>
+                    
+                    </div>
+                    </div>
+                    <div class="d-flex col-xl-3 col-xxl-3  col-md-3 col-sm-6">
+                    <svg class="me-3" width="14" height="54" viewBox="0 0 14 54" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="-6.10352e-05" width="14" height="54" rx="7" fill="#40D4A8"/>
+                    </svg>
+                    <div>
+                    <p class="fs-14 mb-2 fw-bold">High Level</p>
+                    <span class="fs-14 font-w500"><span class="text-black me-2">
+                    <!-- <h6 class=" fs-14 text-black fs-5">Pending: {{high_pending_transactions}} </h6> -->
+                    <p class=" fs-14 text-black fs-5 m-0">Approved: <b>{{high_approved_transactions}}</b> </p>
+                    <p class=" fs-14 text-black fs-5 m-0">Cancelled: <b>{{high_cancelled_transactions}} </b></p>
+                    <p class=" fs-14 text-black fs-5 m-0">Queued: <b>{{high_queue_transactions}}</b> </p>
+                    
+                    </div>
+                    </div>
+                    <div class="d-flex col-xl-3 col-xxl-3  col-md-3 col-sm-6">
+                    <svg class="me-3" width="14" height="54" viewBox="0 0 14 54" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="-6.10352e-05" width="14" height="54" rx="7" fill="#1EB6E7"/>
+                    </svg>
+                    <div>
+                    <p class="fs-14 mb-2 fw-bold">Very Low Level</p>
+                    <span class="fs-14 font-w500"><span class="text-black me-2">
+                    <!-- <h6 class=" fs-14 text-black fs-5">Pending: {{very_low_pending_transactions}}</h6> -->
+                    <p class=" fs-14 text-black fs-5 m-0">Approved: <b>{{very_low_approved_transactions}}</b></p>
+                    <p class=" fs-14 text-black fs-5 m-0">Cancelled: <b>{{very_low_cancelled_transactions}}</b></p>
+                    <p class=" fs-14 text-black fs-5 m-0">Queued: <b>{{very_low_queue_transactions}}</b> </p>
+                    
+                    </div>
+                    </div>
+                    <div class="d-flex col-xl-3 col-xxl-3  col-md-3 col-sm-6">
+                    <svg class="me-3" width="14" height="54" viewBox="0 0 14 54" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="-6.10352e-05" width="14" height="54" rx="7" fill="#461EE7"/>
+                    </svg>
+                    <div>
+                    <p class="fs-14 mb-2 fw-bold">Low Level</p>
+                    <span class="fs-14 font-w500"><span class="text-black me-2">
+                        <!-- <h6 class=" fs-14 text-black fs-5">Pending: {{low_pending_transactions}}</h6> -->
+                        <p class=" fs-14 text-black fs-5 m-0">Approved: <b>{{low_approved_transactions}} </b></p>
+                        <p class=" fs-14 text-black fs-5 m-0">Cancelled: <b>{{low_cancelled_transactions}}</b></p>
+                        <p class=" fs-14 text-black fs-5 m-0">Queued: <b>{{low_queue_transactions}}</b></p>
+                    
+                    </div>
+                    </div>
+                    </div>
+                    </div>
+                    
+                    </div>
+                    </div>
+                    </div>
+</div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                {% comment %} <h4 class="card-title">{{ user_obj.groups.all }}</h4> {% endcomment %}
+                <h4 class="fw-bold">Pending Payments ({{total_pending_transactions}})</h4>
+            </div>
+            <div class="card-body "> 
+                <div class="row newlayout-table">
+                 <div class="col-xl-12">
+                    <form method="post" action="{% url 'mophy:transaction-monitoring' %}">
+                        {% csrf_token %}
+                        <div class="row select-row">
+                            <div class="col-md-4">
+                            <div class="form-group fw-bold">
+                                <label for="selectCurrency">TM Status</label>
+                                <select class="form-control" id="tm_status" name="tm_status">
+                                {% for i in tm_status_list %}
+                                    {% if i.value == None %}
+                                        <option value="" disabled selected>{{i.option}}</option>
+                                    {% else %}
+                                        <option value={{i.value}}>{{i.option}}</option>
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                </select>
+                            </div>
+                            </div>
+                    
+                            <div class="col-md-4">
+                                <div class="form-group fw-bold">
+                                    <label for="selectCurrency">Corridors</label>
+                                    <select class="form-control" id="corridor" name="corridor" required>
+                                    {% for i in corridors_list %}
+                                        {% if i.currency == None %}
+                                        <option value="" disabled selected>{{i.country}}</option>
+                                        {% else %}
+                                        <option value={{i.currency}}>{{i.country}} </option>
+                                        {% endif %}
+                                    {% endfor %}
+                                    
+                                    </select>
+                                </div>
+                            </div>
+                        
+                            <div class="col-md-4">
+                                <a class= "form-control mt-4 btn btn-primary tranct-activity style-button" href="{% url 'mophy:transaction-monitoring' %} ">Reset</a> 
+                                <button class="form-control mt-4 btn btn-primary tranct-activity style-button" type="submit" name="submit">Filter</button>
+                            </div>
+                    </div>
+                    </form>
+                
+                    <div class="table-hover fs-14 card-table" style="position: relative;">      
+                        <table class="table dataTablesCard style-1 custom-tbl card-table previous-transactions display" id="example22"  style="width: 100% !important;">
+                            <thead>
+                                <tr>                 
+                                    <th>Transaction ID</th>
+                                    <th>Date</th>
+                                    <th>Payin</th>
+                                    <th>Payout</th>
+                                    <th>TM Label</th>
+                                    <th>TM Status</th>
+                                    <th>Payment Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in pending_transactions %}                    
+                                <tr class="data-row">
+                                <td><span class="text-black font-w60">{{p.transaction_id}}</span></a></td>
+                                <td><span class="text-black font-w60">{{p.date}}</span></a></td>
+                                <td><span class="text-black font-w60">{{p.send_currency}} {{p.amount}} </span></a></td>
+                                <td><span class="text-black font-w60">{{p.receive_currency}} {{p.receive_amount}}</span></a></td>
+                                <td><span class="text-black font-w60">{{p.tm_label}}</span></a></td>
+                                <td><span class="text-black font-w60">{{p.tm_status}}</span></a></td>
+                                <td><span class="text-black font-w60">{{p.payment_status}}</span></a></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                 </div>
+                </div>
+            </div>	
+        </div>
+    </div>
+</div>
+    
+
+
+{% endblock %}
+
+{% block additional_js %}
+
+<!-- Donut Chart -->
+<script src="/static/mophy/vendor/chart.js/Chart.bundle.min.js"></script>
+<script src="/static/mophy/vendor/peity/jquery.peity.min.js"></script>
+<script src="/static/mophy/vendor/apexchart/apexchart.js"></script>
+<script src="/static/mophy/js/dashboard/dashboard-1.js"></script>
+
+<!-- Datat Table -->
+
+<script>
+    $(document).ready(function() {
+        $('#pending_transactions').change(function() {
+            var selectedOption = $(this).val();
+
+            // Make an AJAX request to the Django view with the selected option value
+            $.ajax({
+                url: "{% url 'mophy:transaction-monitoring' %}",
+                type: 'POST',
+                data: {
+                    'selected_option': selectedOption,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'  // Include the CSRF token
+                },
+                success: function(response) {
+                    // Handle the response from the Django view
+                    // ...
+                }
+            });
+        });
+    });
+</script>
+
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        new DataTable('#example22', {
+            scrollX: true,
+            scrollCollapse: true,
+            scrollY: '530px',
+            pageLength: 20,
+            fixedHeader: true,
+            lengthChange: false,
+            responsive: true,
+            order: [1], // Disable initial sorting
+            // columnDefs: [{
+            //     targets: '_all', 
+            //     orderable: true,
+            //     orderData: [1], // Set the order data (adjust index as needed)
+            //     orderSequence: ['desc', 'asc'] // Set the order sequence for sorting
+            // }]
+        });
+    });
+</script>
+   
+<style>
+    .dataTables_scrollHeadInner{
+    width: 100% !important;
+}
+table.table.dataTablesCard.style-1.custom-tbl.card-table.previous-transactions.display.dataTable.no-footer {
+    width: 100% !important;
+}
+table.table.dataTablesCard.style-1.custom-tbl.card-table.previous-transactions.display.dataTable.no-footer {
+    width: 100% !important;
+}
+</style>
+
+<script>
+    const elements = document.querySelectorAll('.comma-values');
+    elements.forEach(element => {
+        const originalValue = parseFloat(element.textContent.match(/[\d.]+/)[0]);
+        let formattedValue;
+        if (originalValue < 1) {
+            formattedValue = originalValue.toFixed(4);
+        } else {
+            formattedValue = originalValue.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+
+        element.textContent = formattedValue;
+    });
+</script>
+
+<script>
+    const TdElements = document.querySelectorAll('td .comma-values');
+
+    TdElements.forEach(element => {
+        const originalValue = parseFloat(element.textContent.match(/[\d.]+/)[0]);
+        let formattedValue;
+        if (originalValue < 1) {
+            formattedValue = originalValue.toFixed(4);
+        } else {
+            formattedValue = originalValue.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+
+        element.textContent = formattedValue;
+    });
+</script>
+
+{% endblock %}

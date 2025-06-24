@@ -1,0 +1,130 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Notification</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style type="text/css">
+      @import url("http://fonts.cdnfonts.com/css/pf-din-text-cond-pro-medium");
+      @import url("http://fonts.cdnfonts.com/css/pf-din-text-comp-pro-light");
+      @import url("http://db.onlinewebfonts.com/c/2090551770be22b09600a40b0b4673b7?family=Avenir+Medium");
+    </style>
+  </head>
+
+  <body style="margin: 0; padding: 0">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr>
+        <td>
+          <table
+          bgcolor="#fff4f2"
+            align="center"
+            border="0"
+            cellpadding="0"
+            cellspacing="0"
+            width="600"
+            style="border-collapse: collapse"
+          >
+                  <!-- logo on top -->
+                  <tr>
+                    <td align="center" style="padding-top: 50px; padding-bottom:20px;">
+                      <!-- <img src = "https://api.gormefoods.com/media/email_template/logo_uYX8kGI.png"> -->
+      
+                      <img  src="{{data.Verify_Email_Logo}}"alt="top img" style="display: block; width: 100px;"   />
+                    </td>
+                  </tr>
+                  <!-- space -->
+                  <tr>
+                    <td align="center">
+                      <table
+                        width="80%"
+                        align="center"
+                        border="0"
+                        cellpadding="0"
+                        cellspacing="0"
+                      >
+                        <tr
+                          style="
+                            font-family: 'Avenir Medium', sans-serif;
+                            font-size: 16px;
+                            color: #191970;
+                            padding-right: 56px;
+                            padding-left: 56px;
+                            padding-top: 25px;
+                            text-align: center;
+                          "
+                        >
+                          <td style="padding: 30px padding-bottom: 20px;">
+                            <!-- <img src="{{data.New_Customer}}" alt="new user" width="70%"/> -->
+                            <p
+                              style="font-size: 24px;margin: 0;background: #cccccc38; color: #191970 ;padding-top: 5px;padding-bottom: 5px;border: 1px solid #cccccc38;">
+                              <strong> New Customer Registration </strong>
+                            </p>
+                            <p style="padding-top: 2em; text-align:left; margin: 0;">
+                              Hello Obi Orji-Ukabiala,</p>
+
+                              <p style="padding-top: 2em; text-align:left; margin: 0;">We are pleased to inform you that a new customer has registered on our website. Here are the user details:</p>
+                              
+                              <!-- Name: [User's Name]<br/> -->
+                              <p style="padding-top: 2em; text-align:left; margin: 0;">Email: {{customer.email}}<br/>
+                              Registration Date: {{customer.created_at}}<br/>
+                              Location: {{customer.location}}<br/></p>
+                              
+                              <p style="padding-top: 2em; text-align:left; margin: 0;">Please review this information and take any necessary actions.</p>
+                              
+                              <p style="padding-top: 2em; text-align:left; margin: 0; margin-bottom: 20px;">Best regards,<br/>
+                              <strong> WidophRemit </strong> </p>
+                           
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                    </tr>
+                  <!-- space -->
+                  <tr>
+                    <td
+                      style="
+                        font-family: 'Avenir Medium', sans-serif;
+                        font-size: 11px;
+                        color: white;
+                        text-align: center;
+                      "
+                    >
+                    <table bgcolor="#6414e9" width="100%" style="padding: 44px 50px 30px;">
+                      <tr>
+                        <td>
+                          <div style="font-size:11px;color:#ffffff;line-height:20px">
+                            <p style="margin-top: 0; margin-bottom: 13px; outline:none;padding:0; font-family: Arial,helvetica,sans-serif;">WidophRemit Solutions PTY LTD (ACN 646058433)<br>
+                            WidophRemit is registered and regulated by AUSTRAC under the AML/CTF Act 2006 of Australia with registration number: IND100729095-001
+                            
+                            </p>
+                            </div>
+                            
+                            <div class="social-links mt-3" id="social-media">
+                              <a class="twitter" target="_blank" href="https://twitter.com/remitassure" style="display: inline-block !important;">
+                              <img src="{{data.Twitter}}" style="width: 30px; margin: 5px;">
+                              </a>
+                                
+                              <a class="facebook" target="_blank" href="https://www.facebook.com/remitassure" style="display: inline-block !important;">
+                              <img src="{{data.Facebook}}" style="width: 30px; margin: 5px;">
+                              </a>
+                              
+                              <a class="instagram" target="_blank" href="https://www.instagram.com/media.remitassure/" style="display: inline-block !important;">
+                               <img src="{{data.Instagram}}" style="width: 30px; margin: 5px;"> 
+                              </a>
+                              
+                              <a class="linkedin" target="_blank" href="https://www.linkedin.com/company/remitassure/" style="display: inline-block !important;">
+                                <img src="{{data.Linkedin}}" style="width: 30px; margin: 5px;">
+                              </a>
+                            </div>
+                        </td>
+                      </tr>
+                  <!-- space -->
+                </table>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

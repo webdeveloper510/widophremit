@@ -1,0 +1,295 @@
+<head>
+   <link rel="stylesheet" href="style.css">
+</head>
+{% extends 'mophy/elements/layouts/admin.html' %}
+{% load static %}
+{% block additional_css %}
+{% endblock %}
+{% block content %}
+<div style="display: none;" class="alert alert-danger alert-dismissible fade show" id="alert" role="alert">
+   <strong id="error_message"></strong> 
+</div>
+<div style="display: none;" class="alert alert-success alert-dismissible fade show" id="alert" role="alert">
+   <strong id="success_message"></strong> 
+</div>
+<div class="row  mx-0">
+   <div class="col-sm-6 p-md-0">
+   <div class="welcome-text mb-4">
+   <h2 class="text-black fw-bolder fs-3">My Wallets</h2>
+  </div>
+  </div>
+  <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex fw-bold">
+      <ol class="breadcrumb">        
+          <li class="breadcrumb-item"><a href="{% url 'mophy:zai' %}"  class="fs-3" ><u>Back</u></a></li>
+      </ol>
+  </div>
+</div>
+
+<script>
+  function back(){
+     history.back()
+  }
+</script>
+
+<div class="row">
+<div class="col-xl-12 col-xxl-12">
+
+      <div class="card stacked-2" id="zai-card-header">
+         <div class="card-header flex-wrap border-0 pb-0 align-items-end">
+            <div class="row">
+              <h2 class="text-black font-w600 mb-0">WidophRemit Wallets </h2>
+               {% for i in data %}
+               <div class="col-4" style="padding-left: 0;">
+                  <div class="my-wallet-div">
+                     <h5 class="text-black fw-bold">Wallet {{forloop.counter}}</h5>
+                  </div>
+                  <div class="mb-3 me-3 my-wallet-inner">
+                     <img class="wallet-icon" src="{% static 'mophy/images/wallet-bg.png' %}"> 
+                     <div class="me-auto wallet-bal">                                       
+                        <span class="comma-values text-num wallet-blance">{{i.wallet_balance}} AUD</span>
+                        <p id="source_id" value={{i.zai_user_id}} class="bank-name fw-bold">{{i.bank_name}}</p>
+                     </div>
+                  </div>
+                  <div id="zai_create_btn" class="transfer-btns">
+                     <button class="transfer" id="transfer" data-zai-user-id={{i.zai_user_id}}  onclick="send_id(this)"><img src="{% static 'mophy/images/transfer.png' %}"><a href="{% url 'mophy:zai-transfer' id=i.zai_user_id %}"  class="text-white">Transfer</a></button>
+                     <a href="{% url 'mophy:zai' %}" class="text-black text-black-one"><button class="withdraw"><img src="{% static 'mophy/images/down.png' %}">Withdraw</button></a>
+                  </div>
+               </div>
+               {% endfor %}                      
+            </div>
+         </div>
+      </div>
+
+      <br>
+      <div style="display: none;" class="alert alert-danger alert-dismissible fade show" id="alert" role="alert">
+        <strong id="wallet_error_message"></strong> 
+     </div>
+      <!-- User Wallets -->
+      <div class="card stacked-2 pb-5 mb-5" id="zai-card-header">
+        <div class="card-header flex-wrap border-0 pb-0 align-items-end">
+           <div style="display: none;" class="alert alert-danger alert-dismissible fade show" id="alert" role="alert">
+              <strong id="user_error_message"></strong> 
+           </div>
+           <div style="display: none;" class="alert alert-success alert-dismissible fade show" id="alert" role="alert">
+              <strong id="user_success_message"></strong> 
+           </div>
+
+           <div class="row">
+               <div class="col-7"><h2 class="text-black font-w600 mb-0">User Wallets </h2><br></div>
+               <div class="col-5"><h2 class="text-black font-w600 mb-0">WidophRemit Wallets </h2><br></div>
+           </div>
+
+           <div class="row custom-input">
+               <div class="col-6" style="justify-content: space-around; display: flex; align-items: center;">
+                  <input type="text" id="search_user_id" placeholder="Enter User ID" style=" width: 30%; float: left;" class="form-control">
+                  <input type="text" id="search_email" placeholder="Enter User Email" style="width: 45%; float: left;" class="form-control">
+                  <button class="btn btn-primary fs-6 fw-bold" onclick="search()" style="padding: 5px; width: 17%; float: left;">Search</button>
+               </div>
+               <div class="col-1"></div>
+               <div class="col-5 dropdown-menu-list">
+                  <select onchange="get_balance()" id="ra_user_id" name="ra_user_id" class="form-control" required>
+                     <option selected disabled>Select WidophRemit user</option>
+                     {% for i in data %}
+                     <option value={{i.zai_user_id}}>{{i.bank_name}} ({{i.zai_email}})</option>
+                     {% endfor %}
+                  </select>
+               </div>
+            </div>
+
+            <div class="row mt-4" style="justify-content: space-between;">
+               <div class="col-6">
+                  <div class="mb-3 me-3 my-wallet-inner">
+                     <img class="wallet-icon" src="/static/mophy/images/wallet-bg.png"> 
+                     <div class="me-auto wallet-bal">                                       
+                        <span id="search_balance" class="comma-values text-num wallet-blance"></span>
+                        <p id="search_card_email" class="bank-name fw-bold"></p>
+                     </div>
+                  </div>
+               </div>
+               <div class="col-1 transfer2">
+                  <i class="fa-solid fa-right-left" style="color: #000; padding-bottom: 25px;"></i>
+               </div>
+               <div class="col-5">
+                  <div class="mb-3 me-3 my-wallet-inner">
+                     <img class="wallet-icon" src="/static/mophy/images/wallet-bg.png"> 
+                     <div class="me-auto wallet-bal">                                       
+                        <span id="ra_balance" class="comma-values text-num wallet-blance"></span>
+                        <p id="ra_email" value="6569edd28e93c53f503c1b0bcd5c507c" class="bank-name fw-bold"></p>
+                     </div>
+                  </div>
+
+               </div>
+            </div>
+        
+            <div class="row mt-4">
+               <div class="col-7"></div>
+               <div class="col-5">
+                  <div class="with-balnc" style="width: 60%; float: left;">
+                     <input type="number" name="amount" min="1" step=1 onkeypress="return !(event.charCode == 46)" valur="1" pattern="[0-9]" class="form-control transfer-amount" id="inputAddress" style="width: 150px; padding: 5px 10px; font-size: 18px !important;" placeholder="Enter Amount" required> 
+                     <input type="text"  id="subdomaintwo" style="font-size: 18px;" value="AUD" disabled/> </div>               
+                     <div style="width: 40%; float: left;"><button id="zai_create_btn" onclick="user_wallet_transfer()" name="submit" id="transfer_amount" class="btn btn-primary fw-bold" style="width: 100%; font-size: 16px; padding: 7px 10px;">Transfer Funds</button></div>
+               </div>
+            </div>
+
+        </div>
+     </div>
+
+
+<div id="loader" style="display:none" class="loader-overly" >
+   <div class="loader" ></div>
+</div>
+
+
+<script>
+function search(){
+   var zai_user_id = $('#search_user_id').val();
+   var zai_email = $('#search_email').val();
+   var error_flag = false;
+   console.log(error_flag, zai_user_id, zai_email, "=============")
+
+   if (String(zai_user_id) === '' && String(zai_email) === '' ){
+      error_flag = true
+      $('#user_error_message').html("Please enter User ID or Email."); $('#user_error_message').parent().show();
+      setTimeout(function () { $('#user_error_message').parent().hide();  }, 2500);
+   }
+   if (error_flag === false){
+   $('#loader').show();
+   $.ajax({
+      type: "POST",
+      url: "{% url 'mophy:search-zai-user' %}",
+      data: {zai_user_id:zai_user_id, zai_email:zai_email, csrfmiddlewaretoken: '{{ csrf_token }}'},         
+      success: function(data){
+         if(data.success === true){
+            console.log(data.zai_user_id)
+            $('#loader').hide();
+            $('#search_balance').text(data.wallet_balance + " AUD");
+            $('#search_card_email').text(data.zai_email);
+            $('#search_user_id').val(data.zai_user_id);
+            $('#search_email').val(data.zai_email);
+         }
+         else{
+            $('#loader').hide();
+            $('#user_error_message').html(data.message);
+            $('#user_error_message').parent().show();
+            setTimeout(function () { $('#user_error_message').parent().hide(); }, 3000);
+            document.getElementById('search_email').value = '';
+            document.getElementById('search_user_id').value = '';
+         }
+      }
+   })
+}
+}
+</script>
+
+<script>
+   function send_id(button){
+      var source_id = button.getAttribute('data-zai-user-id');
+     
+       };
+</script>
+
+<script>
+  const elements = document.querySelectorAll('.comma-values');
+  elements.forEach(element => {
+      const originalValue = parseFloat(element.textContent.match(/\d+/)[0]);
+      const formattedValue = originalValue.toLocaleString();
+      element.textContent = element.textContent.replace(/\d+/, formattedValue);
+  });
+</script>
+
+
+<script>
+function get_balance(){
+  var ra_user_id = $('#ra_user_id').val();
+  console.log(ra_user_id)
+  $('#loader').show();
+  $.ajax({
+     type: "POST",
+     url: "{% url 'mophy:get-balance' %}",
+     data: {ra_user_id:ra_user_id, csrfmiddlewaretoken: '{{ csrf_token }}' },
+     success: function (data) {
+        $('#loader').hide();
+        if (data.success === true) {
+            $('#ra_balance').text(data.wallet_balance + " AUD"); 
+            $('#ra_email').text(data.zai_email); 
+        } 
+     },
+  });
+}
+
+</script>
+
+<script>
+  function user_wallet_transfer(){
+  var zai_email = $('#search_email').val();
+  var amount = $('#inputAddress').val();
+  var ra_user_id = $('#ra_user_id').val();
+  var error_flag = false;
+  if (zai_email === '' || zai_email === null){
+      error_flag = true;  $('#loader').hide(); document.getElementById('inputAddress').value = '';
+      $('#user_error_message').html("Please enter user ID and email."); $('#user_error_message').parent().show();
+      setTimeout(function () { $('#user_error_message').parent().hide(); }, 3000);
+      }
+   if (ra_user_id === '' || ra_user_id === null){
+      error_flag = true;  $('#loader').hide(); document.getElementById('inputAddress').value = '';
+      $('#user_error_message').html("Please select WidophRemit wallet."); $('#user_error_message').parent().show();
+      setTimeout(function () { $('#user_error_message').parent().hide(); }, 3000);
+      }
+  if(isNaN(amount)){
+      error_flag = true;
+        $('#user_error_message').html("Please enter amount.");
+        $('#user_error_message').parent().show();
+        setTimeout(function () {
+           $('#user_error_message').parent().hide();
+        }, 3000);
+        document.getElementById('inputAddress').value = '';
+     }
+     else if(amount < 1){
+      error_flag = true
+        errorText = true
+        $('#user_error_message').html("Amount should be greater than 0.");
+        $('#user_error_message').parent().show();
+        setTimeout(function () {
+           $('#user_error_message').parent().hide();
+        }, 3000);
+        document.getElementById('inputAddress').value = '';
+     }
+     if( error_flag === false){
+     $('#loader').show();
+     $.ajax({
+        type: "POST",
+        url: "{% url 'mophy:user-transfer' %}",
+        data: {ra_user_id:ra_user_id, amount:amount, zai_email:zai_email, csrfmiddlewaretoken: '{{ csrf_token }}'},         
+        success: function(data){
+           if(data.success){
+              $('#loader').hide();
+              $('#user_success_message').html(data.message);
+              $('#user_success_message').parent().show();
+              $('#user-transfer-btn').hide();
+              $('#balance').show();
+              $('#balance').text("Wallet balance: "+ data.balance + " AUD");
+              $('#ra_balance').show();
+              $('#ra_balance').text("Wallet balance: "+ data.ra_balance + " AUD");
+              document.getElementById('inputAddress').value = '';
+              }                  
+              setTimeout(()=>{
+              window.location.reload();
+              },1800);
+           if(data.success === false ){
+              $('#loader').hide();
+              $('#user_error_message').html(data.message);
+              $('#user_error_message').parent().show();
+              setTimeout(function () {
+                 $('#user_error_message').parent().hide();
+              }, 3000);
+              // document.getElementById('inputAddress').value = '';
+              //  setTimeout(()=>{
+              // window.location.reload();
+              // },2000);     
+        }
+     }
+     });  
+  }
+}
+</script>
+{% endblock %}

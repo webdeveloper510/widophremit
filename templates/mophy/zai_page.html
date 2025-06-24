@@ -1,0 +1,759 @@
+{% extends 'mophy/elements/layouts/admin.html' %}
+{% load static %}
+{% block additional_css %}
+{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="/static/mophy/vendor/datatables/css/jquery.dataTables.min.css" >
+
+<div class="first-sec">
+ <div class="top-header">
+   <div class="zai-select">
+     <div class="heaidng-zai">Zai Wallet</div>
+       <select onchange="get_wallet_balance(this.value, 'default')">
+           {% for i in bank_list %}
+               <option value={{i.zai_user_id}}>{{i.bank_name}} ({{i.zai_email}})</option>
+           {% endfor %}
+       </select>
+   </div>
+       <div class="total_money">
+   <p id="DefaultBalance">AUD {{default_balance}}</p>
+   <span class="fs-5">Available Balance</span>
+   </div>
+ </div>
+<div class="container1">
+<div class="tablebottom_btn">
+<div class="card">
+<div class="out_three" id="zai_create_btn">
+   <div class="row">
+       <div class="col-12">
+           <button variant="primary" type="submit" class="Wallet_btn s_wallet" id="btn1" onclick="GetWithdrawBanks('1')"><img src="/static/mophy/images/zai1.png" alt="img" />WidophRemit Wallet To Wallet Transfer</button>
+           <button variant="primary" type="submit" class="Wallet_btn d_wallet " id="btn2" onclick="GetWithdrawBanks('2')"><img src="/static/mophy/images/zai2.png" alt="img" />Withdraw Funds</button>
+           <button variant="primary" type="submit" class="Wallet_btn t_wallet mt-1" id="btn3" onclick="GetWithdrawBanks('3')"><img src="/static/mophy/images/zai3.png" alt="img" />User Wallet To WidophRemit Wallet Transfer</button> 
+       </div>
+       <div class="col-12 mt-3 " style="display: none;" id="BackBtn">
+           <a href="{% url 'mophy:zai-page' %}" class="fs-3" >
+           <button variant="primary" class="btn btn-primary style-button" id="btn3" >Back</button></a>
+       </div>
+   </div>
+</div>
+</div>
+</div>
+
+<!-- Start Transaction History Table -->
+<div class="zai-table">
+   <div class="card corridore_card">
+       <div class="card-header">
+           <h4 class="card-title">Transaction History</h4>
+       </div>
+       <div class="card-body">
+           <div class="row newlayout-table">
+             <div class="col-lg-12">
+<div class="table-hover fs-14 card-table" id="custom-search1" style="position: relative;">    
+   <table class="table dataTablesCard style-1 custom-tbl card-table previous-transactions display" id="example22" style="width: 100% !important;">
+   <thead>
+       <tr>       
+           <th>S/N</th>
+           <th>Type</th>
+           <th>Source</th>
+           <th>Destination</th>
+           <th>Date</th>
+           <th>Amount</th>
+           <th>Wallet Balance</th>
+       </tr>
+   </thead>
+   <tbody>               
+       {% for t in withdraw_data %}
+       <tr class="data-row">
+           <td><span class="text-black text-center font-w400 mb-0">{{forloop.counter}}</span></td>
+           <td><span class="text-black text-capitalize font-w400 mb-0">{{t.type}}</span></td>
+           {% if '@' in t.source_id %}
+               <td><span class="text-black font-w400 mb-0">{{t.source_id}}</span></td>
+           {% else %}
+               <td><span class="text-black text-capitalize font-w400 mb-0">{{t.source_id}}</span></td>
+           {% endif %}
+           <td><span class="text-black text-capitalize font-w400 mb-0">{{t.destination_id}}</span></td>
+           <td><span class="text-black font-w400 mb-0">{{t.date}}</span></td>
+           <td><span class="comma-values text-black font-w400 mb-0">AUD {{t.amount}}</span></td>
+           <td><span class="comma-values text-black font-w400 mb-0">AUD {{t.wallet_balance}}</span></td>
+       {% endfor %}         
+   </tbody>
+   </table>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- End Transaction History Table -->
+
+<div class="tablebottom_btn_sec">
+<div id="exTab1">
+ <div class="clearfix">
+
+   <!-- Start Tab 1 wallet to wallet transfer -->
+   <div class="tab-pane" id="tab1">
+       <div class="tab-bg">
+           <h1>WidophRemit Wallet To Wallet Transfer</h1>
+       </div>
+
+       <div class="col-md-12">
+       <div class="card">
+       <div class="card-body">
+           <!-- Start Error and Success Messages 1-->
+           <div style="display: none;" class="alert alert-danger alert-dismissible fade show" id="alert" role="alert">
+               <strong id="SearchErrorMessage1"></strong> 
+           </div>
+           <div style="display: none;" class="alert alert-success alert-dismissible fade show" id="alert" role="alert">
+               <strong id="SearchSuccessMessage1"></strong> 
+           </div>
+           <!-- End Error and Success Messages 1-->
+
+       
+           <!-- Start Tab 1 Search Section -->
+           <div class="card-header">
+               <b>Transfer From</b> (Sender Details)
+           </div>
+
+           <div class="sender-details">
+               <div class="wallet-transfer">
+                   <input id="SearchUserId1" type="text" placeholder="Enter User ID" />
+                   <input id="SearchEmail1" type="text" placeholder="Enter User Email" />
+                   <button variant="primary" type="submit" class="Search-btn " onclick="SearchRaWallet('search1')">Search</button>
+               </div>
+
+           <div class="available_amount_row">
+               <!-- <h6 class="card-subtitle mb-2 text-muted">Transaction Account</h6> -->
+               <p class="card-text" id="SearchBankName1"></p>
+               <p class="card-text" id="SearchAccountName1"></p>
+               <p class="card-text" id="SearchBalance1"></p>
+           </div>
+       <!-- End Tab 1 Search Buttons -->
+       </div>
+       </div>
+       </div>
+       </div>
+
+   <!-- Start Tab 1 RA wallet transfers -->
+   <div class="col-md-12 add-arrow">
+    <div class="card">
+      <div class="card-body">
+           <div class="card-header">
+               <b>Transfer To</b> (Receiver Details)
+           </div>
+
+       <div class="sender-details">
+           <!-- Start Error Messages -->
+           <div style="display: none;" class="alert alert-danger alert-dismissible fade show" id="alert" role="alert">
+               <strong id="RaError1"></strong> 
+           </div>
+           <div style="display: none;" class="alert alert-success alert-dismissible fade show" id="alert" role="alert">
+               <strong id="RaSuccess1"></strong> 
+           </div>  
+           <!-- End Error Messages -->
+
+           <!-- <h6 class="card-subtitle mb-2 text-muted">Transaction Account</h6> -->
+           <select class="form-select", id="RaList1"  onchange="get_wallet_balance(this.value, 'RaList1')">
+           </select>
+           <p class="card-text" id="RaBalance1"></p>
+
+           <div class="send-money-action">
+               <div class="d-flex"><input type="number" placeholder="Enter Amount" id="Amount1"/><label>AUD<label></div>
+               <button variant="primary" type="submit" class="Search-btn" id="TransferButton1" onclick="TransferRaFunds()">Transfer <img src="{% static 'mophy/images/Union2.png' %}"></button>
+           </div>
+       </div>
+      </div>
+    </div>
+   </div>
+   <!-- End Tab 1 Transsfer 2 -->
+   </div>
+   <!-- End Tab 1 wallet to wallet transfer -->
+
+   <!-- Start Tab 2 Withdraw Funds -->
+   <div class="tab-pane" id="tab2">
+       
+       <div class="tab-bg">
+       <h1>Withdraw Funds</h1>
+       </div>
+
+       <div class="col-md-12">
+         <div class="card">
+           <div class="card-body">
+               <div class="card-header">
+                   <b>My Wallets</b> 
+               </div>
+
+           <div class="sender-details">
+           <!-- <h6 class="card-subtitle mb-2 text-muted">Transaction Account</h6> -->
+
+           <select class="form-select" id="RaList2" onchange="get_wallet_balance(this.value, 'RaList2')">
+           </select>
+           <p class="card-text" id="RaBalance2"></p>
+           </div>
+           </div>
+         </div>
+       </div>
+
+       <div class="col-md-12 add-arrow2">
+         <div class="card">
+           <div class="card-body">
+               <div class="card-header">
+                   <b>Withdraw Amount</b>
+               </div>
+           <br>
+           <!-- Start Error Messages -->
+           <div style="display: none;" class="alert alert-danger alert-dismissible fade show" id="alert" role="alert">
+               <strong id="RaError2"></strong> 
+           </div>
+           <div style="display: none;" class="alert alert-success alert-dismissible fade show" id="alert" role="alert">
+               <strong id="RaSuccess2"></strong> 
+           </div>  
+           <!-- End Error Messages -->
+           <div class="send-money-action1">
+           <div class="d-flex"><input type="number" placeholder="Enter Amount" id="Amount2"/><label>AUD<label></div>
+           <button variant="primary" type="submit" class="Search-btn" onclick="WithdrawFunds()">Withdraw Funds <img src="{% static 'mophy/images/Union2.png' %}"></button>
+           </div>
+           </div>
+         </div>
+       </div>
+
+
+  
+
+   </div>
+   <!-- End Tab 2 Withdraw Funds -->
+
+   <!-- Start Tab 3 User wallet to RA -->
+   <div class="tab-pane" id="tab3">
+   
+       <div class="tab-bg">
+           <h1>User Wallet To Remitassure Wallet</h1>
+       </div>
+      <div class="col-md-12">
+        <div class="card">
+           <div class="card-body">
+               <div class="card-header">
+                   <b>Transfer From</b> (User Wallet)
+               </div>
+
+               <div class="sender-details">
+                   <!-- Start Error and Success Messages 1-->
+                   <div style="display: none;" class="alert alert-danger alert-dismissible fade show" id="alert" role="alert">
+                       <strong id="SearchErrorMessage3"></strong> 
+                   </div>
+                   <div style="display: none;" class="alert alert-success alert-dismissible fade show" id="alert" role="alert">
+                       <strong id="SearchSuccessMessage3"></strong> 
+                   </div>
+                   <!-- End Error and Success Messages 1-->
+               
+                 <div class="wallet-transfer">
+                       <input id="SearchUserId3" type="text" placeholder="Enter User ID" />
+                       <input id="SearchEmail3" type="text" placeholder="Enter User Email" />
+                       <button variant="primary" type="submit" class="Search-btn" onclick="SearchUserWallet()">Search</button>
+                 </div>
+
+                 <div class="available_amount_row">
+                   <!-- <h6 class="card-subtitle mb-2 text-muted">Transaction Account</h6> -->
+                   <p class="card-text" id="SearchBalance3"></p>
+                 </div>
+               </div>
+           </div>
+        </div>
+      </div>
+
+       <div class="col-md-12 add-arrow">
+         <div class="card">
+           <div class="card-body">
+
+               <!-- Start Error Messages -->
+               <div style="display: none;" class="alert alert-danger alert-dismissible fade show" id="alert" role="alert">
+                   <strong id="RaError3"></strong> 
+               </div>
+               <div style="display: none;" class="alert alert-success alert-dismissible fade show" id="alert" role="alert">
+               <strong id="RaSuccess3"></strong> 
+               </div> 
+               <!-- End Error Messages -->
+               
+               <div class="card-header">
+               <b>Transfer To</b> (WidophRemit Wallets)
+               </div>
+
+               <div class="sender-details">
+                   <select class="form-select", id="RaList3"  onchange="get_wallet_balance(this.value, 'RaList3')">
+                   </select>
+                   <!-- <h6 class="card-subtitle mb-2 text-muted">Transaction Account</h6> -->
+                   <p class="card-text" id="RaBalance3"></p>
+
+                   <div class="send-money-action wallets_send_money">
+                       <div class="d-flex"><input type="number" placeholder="Enter Amount" id="Amount3"><label>AUD<label></div>
+                       <button variant="primary" type="submit" class="Search-btn " onclick="TransferUserFunds()">Transfer <img src="{% static 'mophy/images/Union2.png' %}"></button>
+                   </div>
+                   
+               </div>
+           </div>
+         </div>
+       </div>
+   
+   </div>
+   <!-- End Tab 3 User wallet to RA -->
+
+ </div>
+</div>
+</div>
+
+
+</div>
+</div>
+  
+
+<!-- Loader -->
+<div id="loader" style="display:none" class="loader-overly" ><div class="loader" ></div>
+
+
+{% endblock %}
+
+{% block additional_js %}
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Start DataTable  -->
+<script>
+$(document).ready(function() {
+   new DataTable('#example22', {
+       scrollX: true,
+       scrollCollapse: true,
+       scrollY: '530px',
+       pageLength: 20,
+       fixedHeader: true,
+       lengthChange: false,
+       responsive: true,
+       order: [], // Disable initial sorting
+   });
+});
+</script>
+<!-- End DataTable  -->
+
+<script>
+$(document).ready(function(){
+// Function to show/hide tabs based on button clicks
+function showTab(tabId) {
+// Hide all tabs
+$(".zai-table").slideUp();
+// Show the clicked tab
+$("#" + tabId).show();
+}
+function activateButton(buttonId) {
+// Remove active class from all buttons
+$("button").removeClass("active-btn");
+// Add active class to the clicked button
+$("#" + buttonId).addClass("active-btn");
+}
+// Attach click event handler to button #btn1
+$("#btn1").click(function(){
+showTab("tab1"); // Show Tab 1
+$("#tab2").hide();
+$("#tab3").hide();
+activateButton("btn1"); // Activate Button 2
+});
+
+// Attach click event handler to button #btn2
+$("#btn2").click(function(){
+showTab("tab2");// Show Tab 2
+$("#tab1").hide();
+$("#tab3").hide();  
+activateButton("btn2"); // Activate Button 2
+});
+
+// Attach click event handler to button #btn3
+$("#btn3").click(function(){
+showTab("tab3"); // Show Tab 3
+$("#tab1").hide();
+$("#tab2").hide();
+activateButton("btn3"); // Activate Button 2
+});
+});
+</script>
+
+<script>
+new DataTable('#example');
+</script>
+
+<!-- Get zai wallt balance and email  -->
+<script>
+   function get_wallet_balance(zai_user_id, type){
+       $('#loader').show();
+       $.ajax({
+           type: "POST",
+           url: "{% url 'mophy:wallet-balance' %}",
+           data: {zai_user_id: zai_user_id, csrfmiddlewaretoken: '{{ csrf_token }}'},
+           success: function (data) {
+               if (data.success){ 
+                   if (type === 'RaList1'){
+                       $('#RaBalance1').html("Balance: AUD "+data.balance); 
+                   }
+                   else if (type === 'RaList2'){
+                       $('#RaBalance2').html("Balance: AUD "+data.balance); 
+                   }
+                   else if (type === 'RaList3'){
+                       $('#RaBalance3').html("Balance: AUD "+data.balance); 
+                   }
+                   else{
+                       $('#DefaultBalance').html("Balance: AUD "+data.balance ); 
+                   }
+               }
+           $('#loader').hide();
+               }
+           })
+   }
+</script>
+
+<!-- Search user id and email for WidophRemit wallets  -->
+<script>
+   function SearchRaWallet(type){
+       var error_flag = false
+       var zai_user_id = String($('#SearchUserId1').val()).trim();
+       var zai_email = String($('#SearchEmail1').val()).trim();
+       
+       if (zai_user_id === '' && zai_email === ''){
+           error_flag = true
+           $('#SearchErrorMessage1').html('Please enter User ID or User Email.');
+           $('#SearchErrorMessage1').parent().show();
+           setTimeout(function () {$('#SearchErrorMessage1').parent().hide();}, 3000);
+       }
+                
+       if (error_flag === false){
+           $('#loader').show();
+           $.ajax({
+               type: "POST",
+               url: "{% url 'mophy:search-ra-wallet' %}",
+               data: {zai_user_id: zai_user_id, zai_email:zai_email, csrfmiddlewaretoken: '{{ csrf_token }}'},
+               success: function (data) {
+                   if (data.success){
+                       $('#SearchBankName1').html("Balance: "+data.bank_name); 
+                       $('#SearchAccountName1').html("Balance: "+data.account_name); 
+                       $('#SearchBalance1').html("Balance: AUD "+data.balance);                         
+
+                       if (data.bank_name !== null){
+                           $('#SearchBankName1').html("Bank Name: "+data.bank_name);
+                       }
+                       if (data.account_name !== null){
+                           $('#SearchAccountName1').html("Account Name: "+data.account_name);
+                       }
+                       document.getElementById('SearchUserId1').value = data.zai_user_id;
+                       document.getElementById('SearchEmail1').value = data.email;
+                   }
+                   else{
+                       $('#SearchErrorMessage1').html(data.message);
+                       $('#SearchErrorMessage1').parent().show();
+                       document.getElementById('SearchUserId1').value = '';
+                       document.getElementById('SearchEmail1').value = '';
+                       setTimeout(function () {$('#SearchErrorMessage1').parent().hide();}, 3000);  
+                   }
+                   $('#loader').hide();
+                   }
+               })
+       }
+   }
+</script>
+
+<!-- List to show in withdraw section -->
+<script>
+   function GetWithdrawBanks(type){   
+       const BackBtn = document.getElementById('BackBtn');  
+       BackBtn.style.display = 'inline-block'; 
+       var selectElement;
+
+       $('#SearchBankName1').html(''); 
+       $('#SearchAccountName1').html(''); 
+       $('#SearchBalance1').html(''); 
+       $('#SearchBalance3').html(''); 
+
+       document.getElementById('Amount1').value = '';
+       document.getElementById('Amount2').value = '';
+       document.getElementById('Amount3').value = '';
+
+       document.getElementById('SearchUserId1').value = '';
+       document.getElementById('SearchUserId3').value = '';
+
+       document.getElementById('SearchEmail1').value = '';
+       document.getElementById('SearchEmail3').value = '';
+
+       
+
+       if (type === '1'){  
+           selectElement = document.getElementById('RaList1'); 
+       }
+       else if (type === '2'){ 
+           selectElement = document.getElementById('RaList2');  
+       }
+       else { 
+           selectElement = document.getElementById('RaList3'); 
+       }
+
+       if (!selectElement) {
+           console.error('Select element not found.');
+           return; 
+       }
+       $.ajax({
+           type: "POST",
+           url: "{% url 'mophy:zai-page' %}",
+           data: {csrfmiddlewaretoken: '{{ csrf_token }}'},
+           success: function (data) {
+               if (data.success){
+                   if (selectElement.options.length === 0) {
+                       data.bank_list.forEach(function(bank) {
+                           var option = document.createElement('option');
+                           option.value = bank.zai_user_id;
+                           option.text = bank.bank_name + " ("+bank.zai_email+")";
+                           selectElement.appendChild(option);                        
+                       });
+                       selectElement.options[0].selected = true;
+                   }
+                   if (type === '1'){
+                       $('#RaBalance1').html("Balance: AUD "+data.balance); 
+                   }
+                   else if (type === '2'){
+                       $('#RaBalance2').html("Balance: AUD "+data.balance); 
+                   }
+                   else{
+                       $('#RaBalance3').html("Balance: AUD "+data.balance); 
+                   }
+               }
+           }
+       });
+   }
+</script>
+   
+<!-- Withdraw Funds -->
+<script>
+   function WithdrawFunds(){      
+       var amount = String($('#Amount2').val()).trim();
+       var zai_user_id = String($('#RaList2').val()).trim();       
+       var error_flag = false        
+       var message = false
+
+       if (amount === '' || amount === null){
+           error_flag = true
+           message = 'Please enter amount'
+       }
+       else if (amount === '0' || amount === 0 || amount < 0){
+           error_flag = true
+           message = 'Amount should be greater than 0'            
+       }
+       else if (isNaN(amount) || amount.toString().includes('.')) {
+           error_flag = true; message = 'Amount should be a positive integer without decimals';
+       }
+       if (error_flag === true){
+           $('#RaError2').html(message);
+           $('#RaError2').parent().show();
+           setTimeout(function () {$('#RaError2').parent().hide();}, 3000);
+           document.getElementById('Amount2').value = '';
+       }
+       else{
+           $('#loader').show();
+           $.ajax({
+           type: "POST",
+           url: "{% url 'mophy:withdraw-zai-funds' %}",
+           data: {zai_user_id:zai_user_id, amount:amount, csrfmiddlewaretoken: '{{ csrf_token }}'},
+           success: function (data) {
+               if (data.success){
+                   $('#RaSuccess2').html(data.message);
+                   $('#RaSuccess2').parent().show();
+                   setTimeout(function () {$('#RaSuccess2').parent().hide();}, 3000);
+                   $('#RaBalance2').html("AUD "+data.balance); 
+                   window.location.href = "{% url 'mophy:zai-page'  %}";
+               }
+               else{
+                   $('#RaError2').html(data.message);
+                   $('#RaError2').parent().show();
+                   setTimeout(function () {$('#RaError2').parent().hide();}, 3000);
+               }
+               document.getElementById('Amount2').value = '';
+               $('#loader').hide();
+           }
+           })
+       }
+   }
+</script>
+
+<!-- Search user id and email for users and get user wallets -->
+<script>
+   function SearchUserWallet(type){
+       var error_flag = false
+       var zai_user_id = String($('#SearchUserId3').val()).trim();
+       var zai_email = String($('#SearchEmail3').val()).trim();
+       
+       if (zai_user_id === '' && zai_email === ''){
+           error_flag = true
+           $('#SearchErrorMessage3').html('Please enter User Id or Email.');
+           $('#SearchErrorMessage3').parent().show();
+           setTimeout(function () {$('#SearchErrorMessage3').parent().hide();}, 3000);
+           document.getElementById('SearchUserId3').value = '';
+           document.getElementById('SearchEmail3').value = '';
+       }
+                
+       if (error_flag === false){
+           $('#loader').show();
+           $.ajax({
+               type: "POST",
+               url: "{% url 'mophy:search-user-wallet' %}",
+               data: {zai_user_id: zai_user_id, zai_email:zai_email, csrfmiddlewaretoken: '{{ csrf_token }}'},
+               success: function (data) {
+                   if (data.success){
+                       $('#SearchBalance3').html("Balance: AUD "+data.balance);                         
+                       document.getElementById('SearchUserId3').value = data.zai_user_id;
+                       document.getElementById('SearchEmail3').value = data.email;
+                   }
+                   else{
+                       $('#SearchErrorMessage3').html(data.message);
+                       $('#SearchErrorMessage3').parent().show();
+                       document.getElementById('SearchUserId3').value = '';
+                       document.getElementById('SearchEmail3').value = '';
+                       $('#SearchBalance3').html("");                         
+                       setTimeout(function () {$('#SearchErrorMessage3').parent().hide();}, 3000);  
+                   }
+                   $('#loader').hide();
+                   }
+               })
+       }
+   }
+</script>
+
+<!-- Transfer WidophRemit Funds -->
+<script>
+   function TransferRaFunds(){  
+       var error_flag = false;
+       var source_id = String($('#SearchUserId1').val()).trim();
+       var source_email = String($('#SearchEmail1').val()).trim();   
+       var amount = String($('#Amount1').val()).trim();
+       var destinationElement = document.getElementById('RaList1');
+       var destination_id = destinationElement.value;
+
+       if (amount === '' || amount === null){
+           error_flag = true; message = 'Please enter amount'
+       }
+       else if (isNaN(amount) || amount.toString().includes('.')) {
+           error_flag = true; message = 'Amount should be a positive integer without decimals';
+       }
+       else if (amount === '0' || amount === 0 || amount < 0){
+           error_flag = true; message = 'Amount should be greater than 0'            
+       }
+       else if (source_id === destination_id){
+           error_flag = true; message = "Source account and destination account can't be same"            
+       }
+       if (source_id === '' && source_email === ''){
+           error_flag = true
+           $('#SearchErrorMessage1').html('Please enter User ID or User Email.');
+           $('#SearchErrorMessage1').parent().show();
+           setTimeout(function () {$('#SearchErrorMessage1').parent().hide();}, 3000);
+       }
+       if (error_flag === true){
+           $('#RaError1').html(message); $('#RaError1').parent().show();
+           setTimeout(function () {$('#RaError1').parent().hide();}, 3000);
+           document.getElementById('Amount1').value = '';
+       } 
+
+       if (error_flag === false){
+           $('#loader').show();
+           $.ajax({
+           type: "POST",
+           url: "{% url 'mophy:transfer-funds' %}",
+           data: {type:"RA Wallet Transfer", source_id:source_id, source_email:source_email, destination_id:destination_id, amount:amount, csrfmiddlewaretoken: '{{ csrf_token }}'},
+           success: function (data) {
+               if (data.success){
+                   document.getElementById('Amount1').value = '';
+                   $('#RaBalance1').html("Balance: AUD "+data.destination_balance); 
+                   $('#SearchBalance1').html("AUD "+data.source_balance); 
+                   $('#RaSuccess1').html(data.message);
+                   $('#RaSuccess1').parent().show();
+                   setTimeout(function () {$('#RaSuccess1').parent().hide();}, 3000);     
+                   window.location.href = "{% url 'mophy:zai-page'  %}";              
+               }
+               else{
+                   $('#RaError1').html(data.message);
+                   $('#RaError1').parent().show();
+                   setTimeout(function () {$('#RaError1').parent().hide();}, 3000);
+               }
+               $('#loader').hide();
+           }
+           })
+       }
+   }
+</script>
+
+<!-- Transfer User Funds -->
+<script>
+   function TransferUserFunds(){  
+       var error_flag = false;
+       var source_id = String($('#SearchUserId3').val()).trim();
+       var source_email = String($('#SearchEmail3').val()).trim();   
+       var amount = String($('#Amount3').val()).trim();
+       var destinationElement = document.getElementById('RaList3');
+       var destination_id = destinationElement.value;
+  
+       if (amount === '' || amount === null){
+           error_flag = true; message = 'Please enter amount'
+       }
+       else if (isNaN(amount) || amount.toString().includes('.')) {
+           error_flag = true; message = 'Amount should be a positive integer without decimals';
+       }
+       else if (amount === '0' || amount === 0 || amount < 0){
+           error_flag = true; message = 'Amount should be greater than 0'            
+       }
+       else if (source_id === destination_id){
+           error_flag = true; message = "Source account and destination account can't be same"            
+       }
+       if (error_flag === true){
+           $('#RaError3').html(message); $('#RaError3').parent().show();
+           setTimeout(function () {$('#RaError3').parent().hide();}, 3000);
+           document.getElementById('Amount3').value = '';
+       } 
+
+       if (source_id === '' && source_email === ''){
+           error_flag = true
+           $('#SearchErrorMessage3').html('Please enter User ID or User Email.');
+           $('#SearchErrorMessage3').parent().show();
+           setTimeout(function () {$('#SearchErrorMessage3').parent().hide();}, 3000);
+       }
+       if (error_flag === false){
+           $('#loader').show();
+           $.ajax({
+           type: "POST",
+           url: "{% url 'mophy:transfer-funds' %}",
+           data: {type: "User Wallet Transfer", source_id:source_id, source_email:source_email, destination_id:destination_id, amount:amount, csrfmiddlewaretoken: '{{ csrf_token }}'},
+           success: function (data) {
+               if (data.success){
+                   document.getElementById('Amount3').value = '';
+                   $('#RaBalance3').html("Balance: AUD "+data.destination_balance); 
+                   $('#SearchBalance3').html("AUD "+data.source_balance); 
+                   $('#RaSuccess3').html(data.message);
+                   $('#RaSuccess3').parent().show();
+                   setTimeout(function () {$('#RaSuccess3').parent().hide();}, 3000);        
+                   window.location.href = "{% url 'mophy:zai-page'  %}";           
+               }
+               else{
+                   $('#RaError3').html(data.message);
+                   $('#RaError3').parent().show();
+                   setTimeout(function () {$('#RaError3').parent().hide();}, 3000);
+               }
+               document.getElementById('Amount3').value = '';
+               $('#loader').hide();
+           }
+           })
+       }
+   }
+</script>
+
+<script>
+   const amountInputs = document.querySelectorAll('input[type="number"]');
+
+   amountInputs.forEach(input => {
+       input.addEventListener('input', function () {
+           if (this.value.length > 15) { // Limit the input length to 15 characters
+               this.value = this.value.slice(0, 15);
+           }
+       });
+   });
+
+</script>
+{% endblock %}

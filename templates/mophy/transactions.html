@@ -1,0 +1,268 @@
+{% extends 'mophy/elements/layouts/admin.html' %}
+
+{% load static %}
+
+{% block additional_css %}
+{% endblock %}
+
+{% block content %}
+<link rel="icon" type="image/png" sizes="16x16" href="/static/mophy/images/footer-logo.svg" />   
+<link rel="stylesheet" href="/static/mophy/vendor/jqvmap/css/jqvmap.min.css" >
+<link rel="stylesheet" href="/static/mophy/vendor/chartist/css/chartist.min.css" >
+<link rel="stylesheet" href="/static/mophy/vendor/datatables/css/jquery.dataTables.min.css" >
+<link rel="stylesheet" href="/static/mophy/vendor/bootstrap-select/dist/css/bootstrap-select.min.css">
+<link rel="stylesheet" href="/static/mophy/css/style.css">
+
+
+<!-- heading -->
+<!-- <div class="row mx-0">
+    <div class="col-sm-6 p-md-0">
+        <div class="welcome-text mb-4">
+            <h2 class="text-black fw-bold">{{title}}</h2>
+        </div>
+    </div>
+    <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex fw-bold">
+        <ol class="breadcrumb">
+        <li class="breadcrumb-item "><a class="text-black fw-bold" href="{% url 'mophy:index' %}" ><u >Back</u></a></li>
+        </ol>
+    </div>
+</div> -->
+
+<div class="card corridore_card">
+    <div class="card-header">
+        <h4 class="card-title">{{title}}</h4>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item "><a class="text-black fw-bold" href="{% url 'mophy:index' %}" ><u >Back</u></a></li>
+       </ol>
+    </div>
+ <div class="card-body">
+  <div class="row newlayout-table">
+    <div class="col-lg-12">
+        {% if title == "Transaction History" or title == "transaction history" %}
+        <div class="row select-row">
+            <div class="col-3">
+                <select onchange="get_csv_filter_values()" class="form-control" id="csv_key" name="csv_key">
+                    <option disabled selected>Choose Filter...</option>
+                    {% for dict in csv_filter_list %}
+                        {% for key, value in dict.items %}
+                            <option value="{{value}}">{{ key }}</option>
+                        {% endfor %}
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-3">
+                <select class="form-control" onchange="set_value()" id="csv_value" name="csv_value">
+                    <option disabled selected>Choose Value...</option>                     
+                </select>
+            </div>
+            <div class="col-3">
+                <button type="button" onclick="download_csv()" class="btn btn-primary style-button" style="float: left;">Download CSV</button>
+            </div>
+        </div>
+        {% endif %}
+     <div class="table-hover fs-14 card-table customer-table-row" id="custom-search" style="position: relative;">    
+        <table class="table dataTablesCard style-1 custom-tbl card-table previous-transactions display" id="example22" style="width: 100% !important;">
+            <thead>
+                <tr>       
+                    <th>S/N</th>
+                    <th>Transaction Id</th>
+                    <th>TM Status</th>
+                    <th>Payment Status</th>
+                    <th>Date</th>
+                    <th>PEP/AML</th>
+                    <th>Payin Amount</th>
+                    <th>FX Rate</th>
+                    <th>Recipient</th>
+                    <th>Payout Amount</th>
+                    <th>TM Rule Name</th>
+                </tr>
+            </thead>
+            <tbody>               
+                {% for t in transaction %}
+                <tr class="data-row">
+                    <td><a href="{% url 'mophy:user-details' id=user.customer_id %}"><span class="text-black font-w400 mb-0"> {{forloop.counter}}</span></a></td>
+                    <td><a href="{% url 'mophy:transactions-details' id=t.id %}"><span class="text-black font-w400 mb-0 text-decoration-underline">{{t.transaction_id}}</span></a></td>
+                    
+                    {% if t.payment_status == "Incomplete" %} 
+                        <td><a href="{% url 'mophy:transactions-details' id=t.id %}"><span class="text-black font-w400 mb-0"> Pending</span></a></td>
+                    {% elif t.tm_status == "NA" or t.tm_status == None %} 
+                        <td><a href="{% url 'mophy:transactions-details' id=t.id  %}"><span class="comma-values text-black font-w400 mb-0">No action triggered</span></a></td>
+                    {% else %}
+                        <td><a href="{% url 'mophy:transactions-details' id=t.id  %}"><span class="comma-values text-black font-w400 mb-0">{{t.tm_status}}</span></a></td>
+                    {% endif %}    
+
+                    <td><a href="{% url 'mophy:transactions-details' id=t.id %}"><span class="text-black font-w400 mb-0"> {{t.payment_status}}</span></a></td>
+                    <td><a href="{% url 'mophy:transactions-details' id=t.id %}"><span class="text-black font-w400 mb-0"> {{t.date}}</span></a></td>
+                    {% if t.aml_pep_status == False or t.aml_pep_status == "False" %} 
+                        <td><a href="{% url 'mophy:transactions-details' id=t.id %}"><span class="text-black font-w400 mb-0">Passed</span></a></td>
+                        <!-- <td><a href="{% url 'mophy:transactions-details' id=t.id  %}"><i class="fa fa-check text-success " style="font-size:20px;" aria-hidden="true"></i></a></td>  -->
+                    {% elif t.aml_pep_status == True or t.aml_pep_status == "True" %} 
+                        <td><a href="{% url 'mophy:transactions-details' id=t.id %}"><span class="text-black font-w400 mb-0">Failed</span></a></td>
+                        <!-- <td><a href="{% url 'mophy:transactions-details' id=t.id  %}"><i class="fa fa-times text-danger" style="font-size:20px;" aria-hidden="true"></i></a></td> -->
+                    {% elif t.payment_status == "incomplete" or t.payment_status == "Incomplete" %} 
+                        <td><a href="{% url 'mophy:transactions-details' id=t.id %}"><span class="text-black font-w400 mb-0"> Pending</span></a></td>
+                    {% else %}
+                        <td><a href="{% url 'mophy:transactions-details' id=t.id  %}"><span class="comma-values text-black font-w400 mb-0">No action triggered</span></a></td>
+                    {% endif %}
+                    <td><a href="{% url 'mophy:transactions-details' id=t.id  %}"><span class="comma-values text-black font-w400 mb-0"> {{t.send_currency}} {{t.total_amount}}</span></a></td>
+                    <td><a href="{% url 'mophy:transactions-details' id=t.id  %}"><span class="comma-values text-black font-w400 mb-0"> {{t.exchange_rate}} </span></a></td>
+                    <td><a href="{% url 'mophy:transactions-details' id=t.id  %}"><span class="text-black font-w400 mb-0">{{t.recipient_name}}</span></a></td>
+                    <td><a href="{% url 'mophy:transactions-details' id=t.id  %}"><span class="comma-values text-black font-w400 mb-0"> {{t.receive_currency}} {{t.receive_amount}}</span></a></td>
+                    <td><a href="{% url 'mophy:transactions-details' id=t.id  %}"><span class="text-black font-w400 mb-0"> {{t.rule}}</span></a></td>    
+                </tr>
+                {% endfor %}         
+            </tbody>
+        </table>
+     </div>
+    </div>
+  </div>
+ </div>
+</div>
+
+<p id="old_csv_value" value="" style="display: none;"></p>
+
+{% endblock %}
+
+{% block additional_js %}
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        new DataTable('#example22', {
+            scrollX: true,
+            scrollCollapse: true,
+            scrollY: '530px',
+            pageLength: 20,
+            fixedHeader: true,
+            lengthChange: false,
+            responsive: true,
+            order: [], // Disable initial sorting
+            // columnDefs: [{
+            //     targets: '_all', 
+            //     orderable: true,
+            //     orderData: [3], // Set the order data (adjust index as needed)
+            //     orderSequence: ['desc', 'asc'] // Set the order sequence for sorting
+            // }]
+        });
+    });
+</script>
+
+
+<style>
+    .dataTables_scrollHeadInner{
+        width: 100% !important;
+    }
+    table.table.dataTablesCard.style-1.custom-tbl.card-table.previous-transactions.display.dataTable.no-footer {
+        width: 100% !important;
+    }
+    table.table.dataTablesCard.style-1.custom-tbl.card-table.previous-transactions.display.dataTable.no-footer {
+        width: 100% !important;
+    }
+</style>
+
+<script>
+    function get_csv_filter_values(){
+        var key = $('#csv_key').val();
+        var old_csv_value = $('#old_csv_value').val();
+
+        $.ajax({
+            type: "POST",
+            url: "{% url 'mophy:get-csv-values' %}",
+            data: {csv_key:key, type:"transaction", csrfmiddlewaretoken: '{{ csrf_token }}'},
+            success: function (data) {
+                if(data.success){
+                    data = data.csv_values
+                    $('#csv_value').html('');
+                    $('#csv_value').append($('<option>').text('Choose Value ..').prop('disabled', true).prop('selected', true));
+                    for (var i = 0; i < data.length; i++) {
+                        $('#csv_value').append($('<option>').text(data[i]).attr('value', data[i]));
+                }
+                var get_value = '{{ value }}';
+                if (get_value !== 'None' && get_value !== old_csv_value) {
+                    $('#csv_value').val(get_value);
+                }
+                $('#old_csv_value').val(get_value);
+            }
+
+            }            
+        })
+    }
+    function set_value(){
+    
+        var key = $('#csv_value').val();
+        $.ajax({
+            type: "POST",
+            url: "{% url 'mophy:set-value' %}",
+            data: {key, type:"transaction", csrfmiddlewaretoken: '{{ csrf_token }}'},
+            success: function (data) {
+              window.location.reload();
+            }            
+        })
+    }
+
+    function getFilterList(){
+        var filter_value = '{{ filter_value }}';
+        var get_value = '{{ value }}';
+        console.log(filter_value,get_value);
+        if(filter_value=='None' || get_value=='None' || filter_value=='' || get_value==''){
+
+        }
+        else{
+          
+            $('#csv_key').val(filter_value);
+            $('#csv_value').val(get_value);
+
+             get_csv_filter_values();
+           
+             
+           
+        }
+    
+
+    }
+    getFilterList();
+</script>
+
+<script>
+    function download_csv(){
+        var key = $('#csv_key').val();
+        var value = $('#csv_value').val();
+        var error_flag = false
+
+        
+        if (key === null && value === null){
+            error_flag = false
+            key = "null"
+            value = "null"
+        }
+        else{        
+            if (key === null){
+                $("#csv_key").addClass("is-invalid");
+                event.preventDefault(); 
+                error_flag = true
+            }
+            if (value === 'None'){
+                $("#csv_value").addClass("is-invalid");
+                event.preventDefault(); 
+                error_flag = true
+            }
+        }
+        if (error_flag === false){
+            $("#csv_key").removeClass("is-invalid");
+            $("#csv_value").removeClass("is-invalid");
+            $.ajax({
+                type: "POST",
+                url: "{% url 'mophy:download-csv' %}",
+                data: {csv_key:key, csv_value:value, type:"transaction", csrfmiddlewaretoken: '{{ csrf_token }}'},
+                success: function (data) {
+                    if(data.success){
+                        window.open("{% url 'mophy:download-csv' %}")
+                    }
+                }                      
+            })
+        }
+    }
+</script>
+{% endblock %}
+
+

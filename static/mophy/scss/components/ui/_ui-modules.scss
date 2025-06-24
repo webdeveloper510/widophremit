@@ -1,0 +1,169 @@
+.table.custom-tbl tbody tr td .media.style-1 img{
+	width: 45px;
+}
+.table{
+    &.custom-tbl{
+        tbody{
+            tr{
+                td{
+                    padding: 18px 35px;
+                    &:last-child{
+                        padding-right: 0;
+                    }
+                    &:nth-child(2){
+                        padding-left: 0;
+                    }
+                    .media.style-1 img{
+                        width: 45px;
+                        
+                    }
+                }
+            }
+        }
+        thead{
+            tr{
+                th{
+                    padding: 18px 35px;
+                    &:nth-child(2){
+                        padding-left: 0;
+                    }
+                }
+            }
+        }
+    }
+}
+.avatar-upload {
+	position: relative;
+	max-width: 205px;
+	margin: 0px auto;
+  }
+  .avatar-upload .avatar-edit {
+	position: absolute;
+	right: 12px;
+	z-index: 1;
+	top: 10px;
+  }
+  .avatar-upload .avatar-edit input {
+	display: none;
+  }
+  .avatar-upload .avatar-edit input + label {
+	display: inline-block;
+	width: 34px;
+	height: 34px;
+	margin-bottom: 0;
+	border-radius: 100%;
+	background: #ffffff;
+	color: var(--primary);
+	border: 1px solid transparent;
+	box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.12);
+	cursor: pointer;
+	font-weight: normal;
+	transition: all 0.2s ease-in-out;
+	line-height: 34px;
+  text-align: center;
+  }
+  .avatar-upload .avatar-edit input + label:hover {
+	background: #f1f1f1;
+	border-color: #d6d6d6;
+  }
+  
+  .avatar-upload .avatar-preview {
+	width: 192px;
+	height: 192px;
+	position: relative;
+	border-radius: 100%;
+	border: 6px solid #f8f8f8;
+	box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.1);
+	
+  }
+  .avatar-upload .avatar-preview > div {
+	width: 100%;
+	height: 100%;
+	border-radius: 100%;
+	background-size: cover;
+	background-repeat: no-repeat;
+	background-position: center;
+ }
+ .custom-date-picker{
+    input[type="date"]::-webkit-calendar-picker-indicator{
+        cursor: pointer;
+        background: var(--primary);
+        border:1px solid var(--primary);
+        color: white;
+        font-size: 20px;
+        height: 49px;
+        width: 49px;
+    }
+       
+    .form-control{
+        padding-right: 0;
+        position: relative;
+        &:after{
+            position: absolute;
+            content:"\f073";
+            font-family: "Font Awesome 5 Free";
+            right: 15px;
+            color: white;
+            font-size: 26px;
+            cursor: pointer;
+            pointer-events: none;
+			top: 2px;
+        }
+    }
+    
+}
+.bootstrap-duallistbox-container{
+	.btn-default{
+		&:focus,
+		&:hover{
+			box-shadow: none;
+			i{
+				color: var(--primary)!important;
+			}
+		}
+	}
+}
+.box1,
+.box2{
+	.filter{
+		height: 45px;
+		@include respond ('laptop'){
+			height: 2.5rem;
+		}
+	}
+	.form-control{
+		padding:10px 20px;
+	}
+}
+.clear1, .clear2{
+	font-size: 0.875rem !important;
+}
+.pull-right{
+	float: right;
+}
+.info-container .info{
+	font-size: 0.875rem;
+}
+.show-pass,.show-con-pass,.show-old-pass {
+    cursor: pointer;
+    border-radius: 0 0.5rem 0.5rem 0px !important;
+ }
+    .show-pass .fa-eye,.show-con-pass .fa-eye,.show-old-pass .fa-eye  {
+      display: none; }
+    .show-pass.active .fa-eye-slash, .show-con-pass.active .fa-eye-slash,.show-old-pass.active .fa-eye-slash  {
+      display: none; }
+    .show-pass.active .fa-eye,.show-con-pass.active .fa-eye,.show-old-pass.active .fa-eye {
+      display: inline-block; }
+
+.custom-user .select2-container .select2-selection--multiple{
+	padding: 0.21rem 0.938rem;
+}
+.action-button{
+	#Capa_1{
+		g{
+			path{
+				fill:$white;
+			}
+		}
+	}
+}

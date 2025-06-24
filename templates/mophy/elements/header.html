@@ -1,0 +1,329 @@
+{% load static %}
+<div class="header">
+    <div class="header-content">
+        <div class="d-flex header-heading">
+            <h1>Welcome To
+            <span>WidophRemit</span>
+            </h1>
+           </div>
+<nav class="navbar navbar-expand">
+    <div class="collapse navbar-collapse justify-content-between">
+        <div class="header-left">
+            <div class="dashboard_bar">
+                <!-- <div class="input-group search-area d-lg-inline-flex d-none">
+                    <div class="input-group-append">
+                        <button class="input-group-text search_icon search_icon"><i class="flaticon-381-search-2"></i></button>
+                    </div>
+                    <input type="text" class="form-control" placeholder="Search here...">
+                </div> -->
+            </div>
+        </div>
+        <ul class="navbar-nav header-right">
+            <!-- <li class="nav-item">
+                <div class="d-flex weather-detail">
+                    <span><i class="las la-cloud"></i>21</span>
+                    Medan, IDN
+                </div>
+            </li> -->
+            <li class="nav-item dropdown notification_dropdown">
+                {% if all_count != None %}
+                    <a class="nav-link  ai-icon" href="javascript:void(0)" role="button" data-bs-toggle="dropdown">
+                {% endif %}
+                <img src="/static/mophy/images/bell.png">
+                        <!-- <<svg width="20" height="20" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M12.6001 4.3008V1.4C12.6001 0.627199 13.2273 0 14.0001 0C14.7715 0 15.4001 0.627199 15.4001 1.4V4.3008C17.4805 4.6004 19.4251 5.56639 20.9287 7.06999C22.7669 8.90819 23.8001 11.4016 23.8001 14V19.2696L24.9327 21.5348C25.4745 22.6198 25.4171 23.9078 24.7787 24.9396C24.1417 25.9714 23.0147 26.6 21.8023 26.6H15.4001C15.4001 27.3728 14.7715 28 14.0001 28C13.2273 28 12.6001 27.3728 12.6001 26.6H6.19791C4.98411 26.6 3.85714 25.9714 3.22014 24.9396C2.58174 23.9078 2.52433 22.6198 3.06753 21.5348L4.20011 19.2696V14C4.20011 11.4016 5.23194 8.90819 7.07013 7.06999C8.57513 5.56639 10.5183 4.6004 12.6001 4.3008ZM14.0001 6.99998C12.1423 6.99998 10.3629 7.73779 9.04973 9.05099C7.73653 10.3628 7.00011 12.1436 7.00011 14V19.6C7.00011 19.817 6.94833 20.0312 6.85173 20.2258C6.85173 20.2258 6.22871 21.4718 5.57072 22.7864C5.46292 23.0034 5.47412 23.2624 5.60152 23.4682C5.72892 23.674 5.95431 23.8 6.19791 23.8H21.8023C22.0445 23.8 22.2699 23.674 22.3973 23.4682C22.5247 23.2624 22.5359 23.0034 22.4281 22.7864C21.7701 21.4718 21.1471 20.2258 21.1471 20.2258C21.0505 20.0312 21.0001 19.817 21.0001 19.6V14C21.0001 12.1436 20.2623 10.3628 18.9491 9.05099C17.6359 7.73779 15.8565 6.99998 14.0001 6.99998Z" fill="#3E4954"/>> -->
+                    </svg>
+                    <span class="badge light text-white bg-primary rounded-circle" >{{all_count}}</span></a>
+                
+                <div class="dropdown-menu dropdown-menu-end">
+                    {% if all_count == 1 %}
+                        <div id="DZ_W_Notification1" class="widget-media dz-scroll p-2 ">
+                    {% elif all_count > 1 and all_count < 4 %}
+                        <div id="DZ_W_Notification1" class="widget-media dz-scroll p-2 height5 ">
+                    {% elif all_count == 4 %}
+                        <div id="DZ_W_Notification1" class="widget-media dz-scroll p-2 height6 ">
+                    {% elif all_count > 4 %}
+                        <div id="DZ_W_Notification1" class="widget-media dz-scroll p-3 height380">
+                    {% endif %}
+                         <ul class="timeline">
+                            {% for x in notification_data %}
+                             <li>
+                                <div class="timeline-panel">
+                                    <div class="media me-2 media-info">
+                                        {% if x.source_type == "user" %}
+                                        <i class="fa fa-user" aria-hidden="true"></i>
+                                        {% elif x.source_type == "transaction" %}
+                                        <i class="fa fa-exchange" aria-hidden="true"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div class="media-body">
+                                            {% if x.source_type == "user" %}
+                                                <h6 class="mb-1">New user has signed up with {{x.source_detail}}     
+                                                <a id="customer_view_page" href="{% url 'mophy:user-details' id=x.source_id %}"><u class="text-primary">view</u></a>
+                                            {% elif x.source_type == "transaction" or x.source_type == "mobile_transaction" %}
+                                                <h6 class="mb-1">New transaction has been created for {{x.source_detail}}          
+                                                <a id="transaction_view_page" href="{% url 'mophy:transactions-details' id=x.source_id %}"><u class="text-primary">view</u></a>
+                                            {% endif %}
+                                            </h6>
+                                            <h6 class="mb-1 fst-italic">{{x.created_at}} </h6>
+                                    </div>
+                                </div>
+                            </li> 
+                            {% endfor %}
+
+                            {% for x in new_transactions %}
+
+                             <li>
+                                <div class="timeline-panel">
+                                    <div class="media me-2 media-success">
+                                        <i class="fa fa-exchange" aria-hidden="true"></i>
+                                    </div>
+                                    <div class="media-body">
+                                        <h6 class="mb-1">New transaction created {{x.transaction_id}}</h6>
+                                        <a href="{% url 'mophy:transactions-details' id=x.id %}"><u>view</u></a>
+                                    </div>
+                                </div>
+                            </li> 
+                            {% endfor %}
+
+                             {% comment %} <li>
+                                <div class="timeline-panel">
+                                    <div class="media me-2 media-success">
+                                        <i class="fa fa-home"></i>
+                                    </div>
+                                    <div class="media-body">
+                                        <h6 class="mb-1">Reminder : Treatment Time!</h6>
+                                        <small class="d-block">29 July 2020 - 02:26 PM</small>
+                                    </div>
+                                </div>
+                            </li> 
+                                 <li>
+                                <div class="timeline-panel">
+                                    <div class="media me-2">
+                                        <img alt="image" width="50" src="{% static 'mophy/images/avatar/1.jpg' %}">
+                                    </div>
+                                    <div class="media-body">
+                                        <h6 class="mb-1">Dr sultads Send you Photo</h6>
+                                        <small class="d-block">29 July 2020 - 02:26 PM</small>
+                                    </div>
+                                </div>
+                            </li> 
+                             <li>
+                                <div class="timeline-panel">
+                                    <div class="media me-2 media-danger">
+                                        KG
+                                    </div>
+                                    <div class="media-body">
+                                        <h6 class="mb-1">Resport created successfully</h6>
+                                        <small class="d-block">29 July 2020 - 02:26 PM</small>
+                                    </div>
+                                </div>
+                            </li> 
+                             <li>
+                                <div class="timeline-panel">
+                                    <div class="media me-2 media-primary">
+                                        <i class="fa fa-home"></i>
+                                    </div>
+                                    <div class="media-body">
+                                        <h6 class="mb-1">Reminder : Treatment Time!</h6>
+                                        <small class="d-block">29 July 2020 - 02:26 PM</small>
+                                    </div>
+                                </div>
+                            </li>  {% endcomment %}
+                         </ul> 
+                     </div> 
+                          
+
+            <li class="nav-item dropdown header-profile">
+                <a class="nav-link" href="javascript:void(0)" role="button" data-bs-toggle="dropdown">
+                    <img src="{% static 'mophy/images/avatar1.png' %}" width="20" alt=""/>
+                    <div class="header-info">
+                        <span class="text-black">
+                            <strong>{{ request.user.First_name }} {{ request.user.Last_name }}</strong>
+                        </span>
+                            <label>View Profile</label>
+                    </div>
+                    
+                </a>
+                <div class="dropdown-menu dropdown-menu-end">
+                    
+                    {% if request.user.is_admin == True %}
+                        <a href="{% url 'mophy:change-password' %}" class="dropdown-item ai-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="text-primary" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M17.6 17.6l-4.6 4.6H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h7.6l4.6 4.6a2 2 0 0 1 0 2.8z"/></svg>
+                            <span class="ms-2" >Change Password</span>
+                        </a>
+                    {% endif %}
+
+                    <a href="{% url 'mophy:logout' %}" class="dropdown-item ai-icon">
+                        <svg id="icon-logout" xmlns="http://www.w3.org/2000/svg" class="text-primary" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                        <span class="ms-2">Logout </span>
+                    </a>
+
+                    
+                </div>
+            </li>
+        </ul>
+    </div>
+</nav>
+</div>
+</div>
+
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    function password_otp(){
+        $(".sweet-html").click(function (el) {
+        var bank_name = "dggfg";
+        var account_name = "fdgf";
+        var account_number = "fdgfdg";
+        Swal.fire({
+        title: "Please Enter OTP",
+        html: "<span><b>OTP:</b> ",
+        })
+        });
+    }
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function permisions(){
+        $.ajax({
+            type: "GET",
+            url: "{% url 'mophy:permissions' %}",
+            success: function(data){
+                var array = data.permissions_list;
+                var info = getListItemsInfo()
+                var subId = null
+
+                if(data.is_admin === false){
+                    for (let x = 0; x < info.length; x++) {
+                    const sublistInfo = info[x]['sublists'];
+                    if(sublistInfo.length !== 0){
+                        const allSublistIdsExist = sublistInfo.every(sublist => {
+                            subId = sublist.id.replace("_view_page", "");
+                            return array.some(permission => permission['name'] === 'view' && permission['codename'] === subId);
+                        });
+                    if (allSublistIdsExist) { if(document.querySelector("#"+info[x]['id'])){ document.querySelector("#"+info[x]['id']).remove();  }}
+                    } }
+                    for (let i = 0; i < array.length; i++) {  
+                        var action_th = "."+array[i]['codename']+"_th";
+                        var action_td = "#"+array[i]['codename']+"_td";
+                        if (array[i]['name'] == "create"){     
+                            var add_btn = "#"+array[i]['codename']+"_"+array[i]['name']+"_btn";
+                            if(document.querySelector(add_btn)){ 
+                                var elementsToDelete = document.querySelectorAll(add_btn)
+                                elementsToDelete.forEach(function(element) { element.remove(); });
+                            }
+                        }
+                        else if (array[i]['name'] == "edit"){    
+                            var edit_btn = "#"+array[i]['codename']+"_"+array[i]['name']+"_btn";
+                            if(document.querySelector(edit_btn)){
+                                var elementsToDelete = document.querySelectorAll(edit_btn)
+                                elementsToDelete.forEach(function(element) { element.remove(); });
+                            }
+                        }
+                        else if (array[i]['name'] == "delete"){  
+                            var delete_btn = "#"+array[i]['codename']+"_"+array[i]['name']+"_btn";
+                            if(document.querySelector(delete_btn)){
+                                var elementsToDelete = document.querySelectorAll(delete_btn)
+                                elementsToDelete.forEach(function(element) { element.remove(); });
+                            }
+                        }
+                        else if(array[i]['name'] == "view"){  
+                            var view_btn = "#"+array[i]['codename']+"_"+array[i]['name']+"_btn";
+                            var view_page = "#"+array[i]['codename']+"_"+array[i]['name']+"_page";
+                            if(document.querySelector(view_page)){
+                                var pagesToDelete = document.querySelectorAll(view_page)
+                                pagesToDelete.forEach(function(element) { element.remove(); });
+                            }
+                            if(document.querySelector(view_btn)){
+                                var elementsToDelete = document.querySelectorAll(view_btn)
+                                elementsToDelete.forEach(function(element) { element.removeAttribute('href'); });
+                            }
+                        }
+                        var editPermissionExists = array.some(permission => permission['name'] === "edit" &&  permission['codename'] === array[i]['codename']);
+                        var deletePermissionExists = array.some(permission => permission['name'] === "delete"  &&  permission['codename'] === array[i]['codename']);
+                        if (editPermissionExists === true && deletePermissionExists === true) {
+                            var elementsToDeleteTh = document.querySelectorAll(action_th);
+                            elementsToDeleteTh.forEach(function(element) { element.remove(); });
+
+                            var elementsToDeleteTd = document.querySelectorAll(action_td);
+                            elementsToDeleteTd.forEach(function(element) { element.remove(); });
+                        }
+                        
+                    }   
+                    if (data.message !== null) {
+                        const permissionMessage = document.querySelector('#permission_message');
+                        permissionMessage.innerHTML = data.message ;
+                        permissionMessage.style.display = 'block';  
+                    }     
+                }          
+            }
+            });
+    },  false);
+
+    function getListItemsInfo() {
+  const menuList = document.getElementsByClassName("metismenu");
+  
+  // Check if any elements with the class "metismenu" were found
+  if (!menuList || menuList.length === 0) {
+    console.error("Menu list not found.");
+    return [];
+  }
+
+  const itemsInfo = [];
+
+  function traverseListItems(listElement) {
+    const listItems = listElement.getElementsByTagName("li");
+    const sublistInfo = [];
+
+    for (let i = 0; i < listItems.length; i++) {
+      const listItem = listItems[i];
+      const itemId = listItem.id;
+      const sublist = listItem.querySelector("ul");
+      const sublistItemsInfo = sublist ? traverseListItems(sublist) : [];
+
+      sublistInfo.push({
+        id: itemId,
+        sublists: sublistItemsInfo,
+      });
+    }
+
+    return sublistInfo;
+  }
+
+  // Select the first element from the collection
+  return traverseListItems(menuList[0]);
+}
+
+// Ensure the DOM is fully loaded before running the script
+document.addEventListener("DOMContentLoaded", function () {
+  const itemsInfo = getListItemsInfo();
+  console.log(itemsInfo);
+});
+
+    
+// function getListItemsInfo() {
+//   const menuList = document.getElementsByClassName("metismenu");
+//   if (!menuList) {  console.error("Menu list not found."); return [];  }
+//   const itemsInfo = [];
+//   function traverseListItems(listElement) {
+//     const listItems = listElement.getElementsByTagName("li");
+//     const sublistInfo = [];
+//     for (let i = 0; i < listItems.length; i++) {
+//       const listItem = listItems[i];
+//       const itemId = listItem.id;
+//       const sublist = listItem.querySelector("ul");
+//       const sublistItemsInfo = sublist ? traverseListItems(sublist) : [];
+//       sublistInfo.push({
+//         id: itemId,
+//         sublists: sublistItemsInfo,
+//       });
+//     }
+//     return sublistInfo;
+//   }
+//   return traverseListItems(menuList);
+// }
+// const itemsInfo = getListItemsInfo();
+
+</script> 

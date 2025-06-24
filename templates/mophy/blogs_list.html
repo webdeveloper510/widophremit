@@ -1,0 +1,179 @@
+{% extends 'mophy/elements/layouts/admin.html' %}
+
+{% load static %}
+
+{% block additional_css %}
+{% endblock %}
+
+{% block content %}
+
+
+<link rel="stylesheet" href="/static/mophy/vendor/datatables/css/jquery.dataTables.min.css" >
+<link rel="stylesheet" href="/static/mophy/css/style.css">
+
+
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="card corridore_card">
+
+      <div class="card-header">
+        <h4 class="card-title">Blogs List</h4>
+        <a id="role_create_btn" href="{% url 'mophy:add-blog' %}" class="btn btn-primary btn-xs content-justify-right style-button">ADD BLOG  <span class="btn-icon-end">
+            <i class="fa fa-plus"></i></span>
+        </a>
+    </div>
+
+    <hr>
+    
+      <div class="card-body"> 
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="table-hover fs-14 card-table" style="position:relative;">  
+                <table class="table dataTablesCard style-1 custom-tbl card-table previous-transactions display" id="example22" style="width: 100% !important;">
+                    <thead>
+                        <tr>    
+                            <th>S/N</th>   
+                            <th>Blog name</th>
+                            <th>Image</th>
+                            <th>Short Description</th>
+                            <!-- <th class="blogs-description">Description</th> -->
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for i in data %}
+                        <tr class="data-row">                 
+                            <td><span class="text-black text-center font-w400 mb-0">{{forloop.counter}}</span></td>
+                            <td style="max-width: 150px; overflow: hidden;">
+                                <span class="text-black font-w400 mb-0 truncated-text">{{i.name}}</span>
+                            </td>
+                            <td class="image-cell"><img src="{{i.path}}" alt="Blog Image" style="height:90px; width: 100px;;"></td>
+                            <td style="max-width: 150px; overflow: hidden;">
+                                <span class="text-black font-w400 mb-0 truncated-text">{{i.short_description}}</span>
+                            </td>
+                            <!-- <td><span class="text-black font-w400 mb-0 truncated-text">{{i.description|safe}}</span></td> -->
+                            <td>
+                                <a class="shadow sharp me-1 single-blog-detail"  href="{% url 'mophy:blog-detail' id=i.id %}">
+                                    <button class="btn btn-primary btn-xs">View</button>
+                                </a>
+                                <button class="btn btn-danger btn-xs delete-btn" data-id="{{i.id}}"><i class="fa-solid fa-trash fs-5"></i></button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                </table>
+                </div>
+              
+               
+            </div>
+        </div>	
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+{% endblock %}
+
+{% block additional_js %}
+
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    $(document).ready(function() {
+        new DataTable('#example22', {
+            scrollX: true,
+            scrollCollapse: true,
+            scrollY: '530px',
+            pageLength: 20,
+            fixedHeader: true,
+            lengthChange: false,
+            responsive: true,
+            order: [], 
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const maxLength = 150; 
+    
+        document.querySelectorAll('.truncated-text').forEach(function(el) {
+            let text = el.textContent;
+            if (text.length > maxLength) {
+                text = text.slice(0, maxLength) + '....';
+                el.textContent = text;
+            }
+        });
+    });
+</script>
+
+<style>
+    .dataTables_scrollHeadInner{
+        width: 100% !important;
+    }
+    table.table.dataTablesCard.style-1.custom-tbl.card-table.previous-transactions.display.dataTable.no-footer {
+        width: 100% !important;
+    }
+    table.table.dataTablesCard.style-1.custom-tbl.card-table.previous-transactions.display.dataTable.no-footer {
+        width: 100% !important;
+    }
+    </style>
+
+<script>
+   $(document).ready(function () {
+    $(document).on('click', '.delete-btn', function (el) {
+        var id = $(this).attr('data-id');
+        var url = "{% url 'mophy:delete-blog' id=0 %}".replace('0', id);
+        Swal.fire({
+            title: "Are you sure to delete?",
+            text: '',
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#4BB543",
+            confirmButtonText: "Confirm",
+        }).then((result) => {
+            if (result.isConfirmed) {                   
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: {csrfmiddlewaretoken: '{{ csrf_token }}'},
+                    success: function (response) {
+                        if (response.success){
+                            Swal.fire({
+                                title: 'Deleted Successfully!',
+                                text: response.message,
+                                icon: 'success',
+                                confirmButtonText: 'OK'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    window.location.reload();
+                                }
+                            });
+                        }
+                        else{
+                            Swal.fire(
+                            'Failed!', response.message, 'error'
+                            );
+                        }                            
+                    },
+                    error: function (error) {
+                        Swal.fire(
+                            'Failed!','Something went wrong. Please try again later', 'error'
+                        );
+                    }
+                });
+            }
+        });
+    });
+});
+
+</script>
+    
+   
+{% endblock %}
+

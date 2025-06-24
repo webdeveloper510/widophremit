@@ -1,0 +1,138 @@
+<html>
+<head>
+    <title>Welcome</title>
+</head>
+
+<body>
+  <table width="100%" cellspacing="0" cellpadding="0" border="0" style="outline:none;border-collapse:collapse;border-spacing:0;table-layout:auto!important;margin:0;padding:0" bgcolor="#eef0f4">
+    <tbody>
+        <tr>
+            <td>
+              <center>
+                <table align="center" cellspacing="0" cellpadding="0" border="0" style="outline:none;border-collapse:collapse;border-spacing:0;table-layout:fixed;width:800px;min-width:800px;margin:0 auto;padding:0">
+                  <tbody>
+                    <tr>
+                        <table cellspacing="0" cellpadding="0" border="0" style="outline:none;border-collapse:collapse;border-spacing:0;table-layout:fixed;width:100%;margin:0;padding:0" bgcolor="#f1f1f1">
+                          <tbody style="float: left;     border-top-left-radius: 10px; border-top-right-radius: 10px; background: #6414e9; border-radius: 5px; box-shadow: 1px 1px 5px 0px rgb(0 0 0 / 25%);">
+                            <tr>
+                              <td style="outline:none;width:100%;margin:0;padding:0" align="left" valign="top">
+                                <table cellspacing="0" cellpadding="0" border="0" style="outline:none;border-collapse:collapse;border-spacing:0;table-layout:fixed;width:100%;margin:0;padding:0">
+                                 <tbody>
+                                  <tr>
+                                    <td style="outline:none;width:100%;margin:0;padding:0" align="left" valign="top">
+                                      <table cellspacing="0" cellpadding="0" border="0" style="outline:none;border-collapse:collapse;border-spacing:0;table-layout:fixed;width:100%;margin:0;padding:0">
+                                        <tbody style="float: left;     border-top-left-radius: 10px; border-top-right-radius: 10px; background: #6414e9; border-radius: 5px; box-shadow: 1px 1px 5px 0px rgb(0 0 0 / 25%);">
+                                          <tr>
+                                              {% if type == "customer" %}
+                                              <td style="outline:none;width:100%;color:#6414E9; font-family: Arial,helvetica,sans-serif; font-size:25px;font-style:normal;font-weight:normal;line-height:30px;word-spacing:0;margin:0;padding:81px 0 69px" align="center" valign="top"> {{message}} </td>
+                                              {% else %}
+                                              <td style="outline:none;width:100%;color:#6414E9; font-family: Arial,helvetica,sans-serif; font-size:25px;font-style:normal;font-weight:normal;line-height:30px;word-spacing:0;margin:0;padding:60px 0 0px" align="center" valign="top"> {{message}} </td>
+                                              {% endif %}
+                                            </tr>
+                                       
+                                          <tr>
+                                            {% if type == "transaction" %}
+                                            <td style="outline:none;width:100%;color:#000;font-family: Arial,helvetica,sans-serif;font-size:16px;font-style:normal;font-weight:normal;line-height:24px;word-spacing:0;margin:0;padding:29px 123px 50px 117px;" align="left" valign="top">
+                                             
+                                              <div>
+                                                <!-- <img src="{{data.Notification_Logo}}" style="padding: 12px;"> -->
+                                                <!-- <h2 style="outline:none;margin:0;padding:0; color:#000; font-size: 18px;text-align: center; font-weight: 800;">Transactions Details for ID: {{transaction.transaction_id}}</h2> -->
+                                                </div>
+                                                <table class="center" background: #fff;
+                                                float: left;
+                                                width: 100%; border:1px solid #f1f1f1;   font-family: Arial,helvetica,sans-serif; margin:0; padding:10px 8 5px 30px;border-collapse: collapse; border-radius: 5px; box-shadow: 1px 1px 5px 0px rgb(0 0 0 / 25%); align="center" >
+                                             													 
+                                                    <tbody style="float: left;     border-top-left-radius: 10px; border-top-right-radius: 10px; background: #6414e9; border-radius: 5px; box-shadow: 1px 1px 5px 0px rgb(0 0 0 / 25%);">
+                                                    
+                                                     
+                                                      <tr style="border:1px solid #1613130f;">
+                                                        <td width="200px" valign="top" style="padding:15px; font-weight:bold; color: #191970;  background: #fff;"><b>Customer Id</b></td>
+                                                        <td width="200px" valign="top"  style="padding:15px;color: #000; color: #191970;  background: #fff;">{{transaction.customer_id}}</td>
+                                                      </tr>
+                                                      <tr style="border:1px solid #1613130f;">
+                                                        <td width="200px" valign="top" style="padding:15px; font-weight: bold; color: #191970;  background: #fff;"><b>Transaction Id</b></td>
+                                                        <td width="200px" valign="top"  style="padding:15px;color: #000;color: #191970;  background: #fff;">{{transaction.transaction_id}}</td>
+                                                      </tr>
+                                                      <tr style="border:1px solid #1613130f;">
+                                                        <td style="padding:15px; font-weight: bold;color: #191970;  background: #fff;"><b>Amount</b></td>
+                                                        <td style="padding:15px;color: #000;  color: #191970;  background: #fff;">{{transaction.send_currency}} {{transaction.amount}} </td>
+                                                      </tr>
+                                                      <tr style="border:1px solid #1613130f;">
+                                                        <td style="padding:15px; font-weight: bold;color: #191970;  background: #fff;"><b>Payout Amount</b></td>
+                                                        <td style="padding:15px;color: #000;  color: #191970;  background: #fff;">{{transaction.receive_currency}} {{transaction.receive_amount}} </td>
+                                                      </tr>
+                                                      <tr style="border:1px solid #1613130f;">
+                                                        <td style="padding:15px; font-weight: bold;color: #191970;  background: #fff;"><b>Exchange Rate</b></td>
+                                                        <td style="padding:15px;color: #000;  color: #191970;  background: #fff;">{{transaction.exchange_rate}}</td>
+                                                      </tr>
+                                                      <tr style="border:1px solid #1613130f;">
+                                                        <td style="padding:15px; font-weight: bold;color: #191970;  background: #fff;"><b>Payment Method</b></td>
+                                                        <td style="padding:15px;color: #000;  color: #191970;  background: #fff;">{{transaction.send_method}}</td>
+                                                      </tr>
+                                                      <tr style="border:1px solid #1613130f;">
+                                                      <td style="padding:15px; font-weight: bold;color: #191970;  background: #fff;"><b>Payment Status</b></td>
+                                                      <td style="padding:15px;color: #000; color: #191970;  background: #fff;">{{transaction.payment_status}}</td>
+                                                      </tr>
+                                                    </tbody>
+                                                    <!-- {% elif type == "webhook_transaction" %}
+                                                    <td style="outline:none;width:100%;color:#797c7f;font-family: Arial,helvetica,sans-serif;font-size:16px;font-style:normal;font-weight:normal;line-height:24px;word-spacing:0;margin:0;padding:29px 123px 1px 117px;" align="left" valign="top">
+                                                     
+                                                      <table class="center" style="border:1px solid #f1f1f1;  width:100%; font-family: Arial,helvetica,sans-serif; margin:0; padding:10px 8 5px 30px; border-collapse: collapse;" align="center" >
+                                                       <div style=" border-top-left-radius: 10px; border-top-right-radius: 10px;background: #6414e9; float: left; width: 100%; display: flex; align-items: center;">
+													   <img src="C:\Users\Rahul\Desktop\icons\footer-logo.png" style="padding: 12px;">
+														<h2 style="outline:none;margin:0;padding:0; color:#fff; font-size: 18px;text-align: center; font-weight: 800;">Transactions details for IDd</h2>                                                         
+                                                       </div>														
+													
+                                                    <tbody style="float: left;     border-top-left-radius: 10px; border-top-right-radius: 10px; background: #6414e9; border-radius: 5px; box-shadow: 1px 1px 5px 0px rgb(0 0 0 / 25%);">
+													
+                                                        <tr style="border:1px solid #1613130f;">
+                                                            <td style="padding:15px; font-weight:bold; color: #191970;  background: #fff;"><b>Customer Id</b></td>
+															<td style="padding:15px;color: #000; color: #191970;  background: #fff; display: flex;align-items: center;"><img src="C:\Users\Rahul\Desktop\icons\right-arrow.png" style="margin-right: 30px;">{{transaction.customer_id}}</td>
+                                                        </tr>
+                                                        <tr style="border:1px solid #1613130f;">
+                                                            <td style="padding:15px; font-weight: bold; color: #191970;  background: #fff;"><b>Transaction Id</b></td>
+                                                            <td style="padding:15px;color: #000; color: #191970;  background: #fff; display: flex;align-items: center;"><img src="C:\Users\Rahul\Desktop\icons\right-arrow.png" style="margin-right: 30px;">{{transaction.transaction_id}}</td>
+                                                        </tr>
+                                                        <tr style="border:1px solid #1613130f;">
+                                                            <td style="padding:15px; font-weight: bold;color: #191970;  background: #fff;"><b>Amount</b></td>
+                                                            <td style="padding:15px;color: #000;    color: #191970;  background: #fff;">{{transaction.amount}}  {{transaction.send_currency}}</td>
+                                                        </tr>
+                                                        <tr style="border:1px solid #1613130f;">
+                                                            <td style="padding:15px; font-weight: bold;color: #191970;  background: #fff;"><b>Exchange Rate</b></td>
+                                                            <td style="padding:15px;color: #000; color: #191970;  background: #fff;">{{transaction.exchange_rate}}</td>
+                                                        </tr>
+                                                        <tr style="border:1px solid #1613130f;">
+                                                            <td style="padding:15px; font-weight: bold;color: #191970;  background: #fff;"><b>Payment Gateway</b></td>
+                                                            <td style="padding:15px;color: #000;   color: #191970;  background: #fff;">{{transaction.send_method}}</td>
+                                                        </tr>
+                                                        <tr style="border:1px solid #1613130f;">
+                                                          <td style="padding:15px; font-weight: bold;color: #191970;  background: #fff;"><b>Payment Status</b></td>
+                                                          <td style="padding:15px;color: #000;  color: #191970;  background: #fff;">{{transaction.payment_status}}</td>
+                                                      </tr>
+                                                    </tbody> -->
+                                                  {% endif %}
+                                                  </table>
+                                                </p>
+                                            </td>
+                                          </tr>
+                                       
+                                      </table>
+                                    </td>
+                                  </tr>
+                                 </tbody>
+                                </table>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>                       
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </center>
+            </td>
+        </tr>
+    </tbody>
+  </table>
+</body>
+</html>

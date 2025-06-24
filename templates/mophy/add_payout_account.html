@@ -1,0 +1,274 @@
+{% extends 'mophy/elements/layouts/admin.html' %}
+{% load static widget_tweaks %}
+
+
+{% block additional_css %}
+
+{% endblock %}
+
+{% block message %}
+{% include 'mophy/elements/alert.html' %}
+{% endblock %}
+
+{% block content %}
+
+<div class="card">
+<div class="top-header">
+    <div class="zai-select">
+      <div class="heaidng-zai">Add User Account</div>
+
+    </div>
+        <div class="total_money">
+            <a href="{% url 'mophy:payout-list' %}" class="btn btn-primary style-button" id="btn33">View All Accounts</a>
+            
+    </div>
+  </div>
+
+  <div class="card-body">
+    <div class="basic-form form-custom-label">
+        <div style="display: none;" class="alert alert-danger alert-dismissible fade show" id="alert" role="alert">
+            <strong id="error_message"></strong> 
+        </div>
+          <div class="row">
+              <div class="row col-md-12">
+                  <div class="mb-4 col-md-6">
+                      <label class="form-label">First Name</label> <span class="text-danger"> *</span> 
+                      <input class="form-control input-custom" type="text" id="first_name" name="first_name" placeholder="First Name" maxlength="50" required>
+                  </div>
+
+                  <div class="mb-4 col-md-6">
+                      <label class="form-label">Last Name</label><span class="text-danger"> *</span> 
+                      <input class="form-control input-custom" type="text" id="last_name" name="last_name" placeholder="Last Name" maxlength="50" required>
+                  </div>
+              </div>  
+              
+              <div class="row col-md-12">
+                <div class="mb-4 col-md-6">
+                    <label class="form-label">Nick Name</label><span class="text-danger"> *</span> 
+                    <input class="form-control input-custom" type="text" id="nick_name" name="nick_name" placeholder="Nick Name" maxlength="50" required>
+                </div>
+                <div class="mb-4 col-md-6">
+                    <label class="form-label">Email</label><span class="text-danger"> *</span> 
+                    <input class="form-control input-custom" type="email" id="email" name="email" placeholder="abc@example.com" maxlength="50" required>
+                </div>
+            </div>  
+
+            <div class="row col-md-12">
+                <div class="row col-md-12">
+                    <div class="mb-4 col-md-6">
+                        <label class="form-label">Bank Name</label> <span class="text-danger"> *</span> 
+                        <input class="form-control input-custom" type="text" id="bank_name" name="bank_name" placeholder="Enter Bank Name" maxlength="50" required>
+                    </div>
+                    <div class="mb-4 col-md-6">
+                      <label class="form-label">Account Name</label> <span class="text-danger"> *</span> 
+                      <input class="form-control input-custom" type="text" id="account_name" name="account_name" placeholder="Enter Account Holder Name" maxlength="50" required>
+                  </div>
+  
+                </div>  
+  
+                <div class="row col-md-12">
+                  <div class="mb-4 col-md-6">
+                      <label class="form-label">Routing / BSB Number</label> <span class="text-danger"> *</span> 
+                      <input class="form-control input-custom" type="number" id="routing_number" name="routing_number" placeholder="Enter BSB Number" pattern="/^-?\d+\.?\d*$/" onKeyPress="if(this.value.length==6) return false;" required>
+                  </div>
+                  <div class="mb-4 col-md-6">
+                      <label class="form-label">Account Number</label> <span class="text-danger"> *</span> 
+                      <input class="form-control input-custom" type="number" id="account_number" name="account_number" placeholder="Enter Account Number" pattern="/^-?\d+\.?\d*$/" onKeyPress="if(this.value.length==15) return false;" required>
+                  </div>
+                 
+              </div>  
+  
+              <div class="row col-md-12">
+                  <div class="mb-4 col-md-6">
+                      <label class="form-label">Account Type</label> <span class="text-danger"> *</span> 
+                      <select class="border border-dark form-control" name="account_type" id="account_type" >
+                          <option value="" selected>Choose type ...</option>
+                          <option value="savings">savings</option>   
+                          <option value="checking">checking</option>                       
+                      </select>
+                  </div>
+                  <div class="mb-4 col-md-6">
+                      <label class="form-label">Holder Type</label> <span class="text-danger"> *</span> 
+                      <select class="border border-dark form-control" name="holder_type" id="holder_type" >
+                          <option value="" selected>Choose type ...</option>
+                          <option value="personal">personal</option>   
+                          <option value="business">business</option>   
+                      </select>
+                  </div>
+              </div>  
+            </div>
+  
+              <div class="row col-md-12">
+                      <button type="submit" onclick="create_payout_user()" class="btn btn-primary mt-4 mb-5 style-button" style="width:80%;">Save</button>
+                      <a href="{% url 'mophy:confirm-details' %}" class="btn btn-primary mt-4 mb-5 style-button">Cancel</a>
+                <div class="col-10"></div>
+              </div>
+          </div>
+    </div>
+  </div>
+</div>
+
+<div id="loader" style="display:none" class="loader-overly"><div class="loader" ></div>
+
+{% endblock %}
+
+
+{% block additional_js %}
+<script>
+    function create_payout_user() {
+        // Get jQuery objects for input fields
+        var $firstName = $('#first_name');
+        var $lastName = $('#last_name');
+        var $nickName = $('#nick_name');
+        var $email = $('#email');
+        var $bankName = $('#bank_name');
+        var $accountName = $('#account_name');
+        var $routingNumber = $('#routing_number');
+        var $accountNumber = $('#account_number');
+        var $accountType = $('#account_type');
+        var $holderType = $('#holder_type');
+        var errorFlag = false;
+        var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; 
+
+        // Clear previous error messages and classes
+        $firstName.removeClass('is-invalid');
+        $('#fn-error').remove();
+
+        $lastName.removeClass('is-invalid');
+        $('#ln-error').remove();
+
+        $nickName.removeClass('is-invalid');
+        $('#nn-error').remove();
+
+        $email.removeClass('is-invalid');
+        $('#email-error').remove();
+
+        $bankName.removeClass('is-invalid');
+        $('#bank_name-error').remove();
+
+        $accountName.removeClass('is-invalid');
+        $('#account_name-error').remove();
+
+        $routingNumber.removeClass('is-invalid');
+        $('#routing_number-error').remove();
+
+        $accountNumber.removeClass('is-invalid');
+        $('#account_number-error').remove();
+
+        $accountType.removeClass('is-invalid');
+        $('#account_type-error').remove();
+
+        $holderType.removeClass('is-invalid');
+        $('#holder_type-error').remove();
+
+        // Validate fields
+        if (!$bankName.val().trim()) {
+            errorFlag = true;
+            $bankName.addClass('is-invalid');
+            $bankName.after('<div id="bank_name-error" class="invalid-feedback">Bank Name is required.</div>');
+        }
+        if (!$accountName.val().trim()) {
+            errorFlag = true;
+            $accountName.addClass('is-invalid');
+            $accountName.after('<div id="account_name-error" class="invalid-feedback">Account Name is required.</div>');
+        }
+        if (!$routingNumber.val().trim()) {
+            errorFlag = true;
+            $routingNumber.addClass('is-invalid');
+            $routingNumber.after('<div id="routing_number-error" class="invalid-feedback">Routing/BSB Number is required.</div>');
+        }
+        if ($routingNumber.val().trim().length < 6) {
+            errorFlag = true;
+            $routingNumber.addClass('is-invalid');
+            $('#routing_number-error').remove(); 
+            $routingNumber.after('<div id="routing_number-error" class="invalid-feedback">Routing/BSB Number must be 6 digits long.</div>');
+        }
+        if (!$accountNumber.val().trim()) {
+            errorFlag = true;
+            $accountNumber.addClass('is-invalid');
+            $accountNumber.after('<div id="account_number-error" class="invalid-feedback">Account Number is required.</div>');
+        }
+        if (!$accountType.val().trim()) {
+            errorFlag = true;
+            $accountType.addClass('is-invalid');
+            $accountType.after('<div id="account_type-error" class="invalid-feedback">Account Type is required.</div>');
+        }
+        if (!$holderType.val().trim()) {
+            errorFlag = true;
+            $holderType.addClass('is-invalid');
+            $holderType.after('<div id="holder_type-error" class="invalid-feedback">Holder Type is required.</div>');
+        }
+        if (!$firstName.val().trim()) {
+            errorFlag = true;
+            $firstName.addClass('is-invalid');
+            $firstName.after('<div id="fn-error" class="invalid-feedback">First Name is required.</div>');
+        }
+        if (!$lastName.val().trim()) {
+            errorFlag = true;
+            $lastName.addClass('is-invalid');
+            $lastName.after('<div id="ln-error" class="invalid-feedback">Last Name is required.</div>');
+        }
+        if (!$nickName.val().trim()) {
+            errorFlag = true;
+            $nickName.addClass('is-invalid');
+            $nickName.after('<div id="nn-error" class="invalid-feedback">Nick Name is required.</div>');
+        }
+        if (!$email.val().trim()) {
+            errorFlag = true;
+            $email.addClass('is-invalid');
+            $email.after('<div id="email-error" class="invalid-feedback">Email is required.</div>');
+        }
+        if (!emailPattern.test($email.val().trim())) {
+            errorFlag = true;
+            $email.addClass('is-invalid');
+            $email.after('<div id="email-error" class="invalid-feedback">Please enter a valid email address.</div>');
+        }
+        // If no errors, proceed with AJAX request
+        if (!errorFlag) {
+            $('#loader').show();
+            $.ajax({
+                type: "POST",
+                url: "{% url 'mophy:add-payout-account' %}",
+                data: {
+                    first_name: $firstName.val(),
+                    last_name: $lastName.val(),
+                    nick_name: $nickName.val(),
+                    email: $email.val(),
+                    bank_name: $bankName.val(),
+                    account_name: $accountName.val(),
+                    routing_number: $routingNumber.val(),
+                    account_number: $accountNumber.val(),
+                    account_type: $accountType.val(),
+                    holder_type: $holderType.val(),
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                success: function (data) {
+                    $('#loader').hide();
+                    if (data.success === true) {
+                        $('#success_message').html(data.message);
+                        $('#success_message').parent().show();
+                        setTimeout(function() {
+                            window.location.href = "{% url 'mophy:payout-list' %}"; 
+                        }, 2000);
+                    } else {
+                        $('#loader').hide();
+                        alert(data.message); 
+                        // $('#error_message').html(data.message);
+                        // $('#error_message').parent().show();
+                        // setTimeout(function () { $('#error_message').parent().hide(); }, 3000);
+                    }
+                }
+            });
+        }
+    }
+
+    // Remove invalid class and error message on input
+    $('.form-control').on('input', function() {
+        $(this).removeClass('is-invalid');
+        $(this).next('.invalid-feedback').remove();
+    });
+</script>
+
+
+{% endblock %}
+

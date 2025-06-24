@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en" class="h-100">
+
+<head>
+    {% load static widget_tweaks %}
+    <meta charset="utf-8">
+    <meta name="keywords" content="" />
+	<meta name="author" content="" />
+	<meta name="robots" content="" />
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="description" content="{{ dz_array.public.title }}" />
+	<meta property="og:title" content="{{ dz_array.public.title }}" />
+	<meta property="og:description" content="{{ dz_array.public.title }}" />
+	<!--  -->
+	<meta name="format-detection" content="telephone=no">
+    <title>{{ dz_array.public.title }}</title>
+    <!-- Favicon icon -->
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static dz_array.public.favicon %}">
+
+    
+	{% load custom_tags %}
+
+
+    {% for cssurl in dz_array.pagelevel.mophy.mophy_views.css|getdata:request.path %}
+    <link rel="stylesheet" href="{% static cssurl %}" >
+	{% endfor %}
+  
+
+    {% for cssurl in dz_array.global.css %}
+    <link rel="stylesheet" href="{% static cssurl %}" >
+    {% endfor %}
+
+
+
+
+
+</head>
+
+
+
+
+<body class="h-100">
+
+    <div class="login-main-page" style="background-image: url({% static 'mophy/images/bg-login.jpg' %});">
+        <div class="login-wrapper">
+            <div class="login-aside-left" style="background-image: url({% static 'mophy/images/bg-login2.png' %});">
+                <a href="#" class="login-logo">
+                    <img src="{% static 'mophy/images/logo.png' %}" alt="" class="mr-2"/>
+                    <img src="{% static 'mophy/images/logo-text.png' %}" alt="" class="ml-1"/>
+                </a>
+                <div class="login-description">
+                    <h2 class="text-black  mb-2">Check the Status</h2>
+                    <p class="fs-12">It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters,</p>
+                    <ul class="social-icons mt-4">
+                        <li><a href="#"><i class="fa-brands fa-facebook-f"></i></a></li>
+						<li><a href="#"><i class="fa-brands fa-twitter"></i></a></li>
+						<li><a href="#"><i class="fa-brands fa-linkedin-in"></i></a></li>
+                    </ul>
+                    <div class="mt-5">
+                        <a href="#" class="text-black mr-4">Privacy Policy</a>
+                        <a href="#" class="text-black mr-4">Contact</a>
+                        <a href="#" class="text-black">© 2022 DexignZone</a>
+                    </div>
+                </div>
+            </div>
+            <div class="login-aside-right">
+                <div class="row mx-2 justify-content-center h-100 align-items-center">
+                  <div class="col-xl-7 col-xxl-7">
+                    <div class="authincation-content">
+                      <div class="row no-gutters">
+                        <div class="col-xl-12">
+                          <div class="auth-form-1">
+                            <div class="mb-4">
+                                <h2 class="text-white mb-1">Welcome to WidophRemit</h2>
+                                <p class="text-white">Sign Up by entering information below</p>
+                            </div>
+
+                           
+                            
+                            <form method='post'>{% csrf_token %}
+                                <div class="row">
+                                
+                                        <div class="form-group col-md-12">
+                                            <label class="mb-2 ">
+                                            <strong class="text-white">Email</strong>
+                                            </label>
+                                            {{ form.email|attr:"type:email"|attr:"class:form-control"|attr:"placeholder:Email" }}
+
+                                            <div class="text-danger w-100 d-block mt-1">
+                                                {{ form.email.errors }}
+                                                </div>
+                                        
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label class="mb-2 "><strong class="text-white">First Name</strong></label>
+                                            {{ form.first_name|attr:"class:form-control"|attr:"placeholder:First Name"|attr:"type:text" }}   
+                                            <div class="text-danger w-100 d-block mt-1">
+                                                {{ form.first_name.errors }}
+                                                </div>
+            
+                                        </div>
+
+                                        <div class="form-group col-md-6">
+                                            <label class="mb-2 "><strong class="text-white">Last Name</strong></label>
+                                            {{ form.last_name|attr:"class:form-control"|attr:"placeholder:Last Name"|attr:"type:text" }}   
+                                            <div class="text-danger w-100 d-block mt-1">
+                                                {{ form.last_name.errors }}
+                                                </div>
+                                        </div>
+
+
+                                        <div class="form-group col-md-12">
+                                            <label class="mb-2 "><strong class="text-white">Password</strong></label>
+                                            {{ form.password1|attr:"class:form-control"|attr:"placeholder:Password"|attr:"type:password" }}
+                                            <div class="text-danger w-100 d-block mt-1">
+                                                {{ form.password1.errors }}
+                                                </div>
+            
+                                        </div>
+
+                                        <div class="form-group col-md-12">
+                                            <label class="mb-2 "><strong class="text-white">Confirm Password</strong></label>
+                                            {{ form.password2|attr:"class:form-control"|attr:"placeholder:Confirm Password"|attr:"type:password" }}
+                                            <div class="text-danger w-100 d-block mt-1">
+                                                {{ form.password2.errors }}
+                                                </div>
+                                        </div>
+
+
+                                    <div class="text-center">
+                                        <button type="submit" class="btn bg-white text-primary btn-block">
+                                        Sign up
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                            <div class="new-account mt-2">
+                              <p class="text-white">
+                               Already have an account?
+                                <a class="text-black" href="{% url 'mophy:login' %}">
+                                  Sign in
+                                </a>
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!--**********************************
+	Scripts
+***********************************-->
+<!-- Required vendors -->
+{% for jsurl in dz_array.global.js.top %}
+<script src="{% static jsurl %}"></script>
+{% endfor %}
+
+    {% for jsurl in dz_array.pagelevel.mophy.mophy_views.js|getdata:request.path %}
+    <script src="{% static jsurl %}"></script>
+    {% endfor %}
+
+{% for jsurl in dz_array.global.js.bottom %}
+<script src="{% static jsurl %}"></script>
+{% endfor %}
+
+{% block additional_js %}
+{% endblock %}
+
+</body>
+</html>

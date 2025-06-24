@@ -1,0 +1,219 @@
+<head>
+   <link rel="stylesheet" href="style.css">
+   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+<script>
+$(document).ready(function () {
+$(".wallet-select").hide();
+   $(".drop-btn").click(function () {
+        $(".wallet-select").toggle("slow");
+   });
+});
+</script>
+
+</head>
+{% extends 'mophy/elements/layouts/admin.html' %}
+{% load static %}
+{% block additional_css %}
+{% endblock %}
+{% block content %}
+
+<div class="row mx-0">
+   <div class="col-sm-6 p-md-0">
+   <div class="welcome-text">
+   <h2 class="fw-bolder fs-2">Wallet Transfer</h2>
+   </div>
+   </div>
+   <div class="col-sm-6 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex fw-bold">
+       <ol class="breadcrumb">        
+           <li class="breadcrumb-item"><a href="{% url 'mophy:my-wallets' %}" class="fs-3" ><u>Back</u></a></li>
+       </ol>
+   </div>
+</div>
+
+<!-- Start error and succes messages -->
+<div style="display: none;" class="alert alert-danger alert-dismissible fade show" id="alert" role="alert">
+  <strong id="error_message"></strong> 
+</div>
+  
+<div style="display: none;" class="alert alert-success alert-dismissible fade show" id="alert" role="alert">
+  <strong id="success_message"></strong> 
+</div>
+<!-- End error and succes messages -->
+
+<div class="row">
+<div class="col-xl-12 col-xxl-12">
+<div class="row">
+   <div class="col-xl-12">
+      <div class="card stacked-2" id="zai-card-header">
+         <div class="card-header flex-wrap border-0 pb-0 align-items-end">
+            <div class="row">
+               <div class="col-4" style="padding-left: 0;">
+                  <div class="my-wallet-div">
+                     <h5 class="border  font-w600">{{source_bank}}</h5>
+                  </div>
+                  <div class="mb-3 me-3 my-wallet-inner">
+                     <img class="wallet-icon" src="{% static 'mophy/images/wallet-bg.png' %}"> 
+                     <div class="me-auto wallet-bal">          
+                       <span class="comma-values text-num" id="new_source_balance" style="display:none;">{{source_wallet_balance}}</span>
+                        <span class="comma-values text-num" id="source_wallet_balance"  style="display:none; ">{{source_wallet_balance}} AUD</span>
+                        <p class="bank-name"  value={{source_id}} id="source_email">{{source_zai_email}}</p>
+                     </div>
+                  </div>
+
+               </div>
+
+               <div class="col-1 transfer2">
+                 <i class="fa-solid fa-right-left" style="color: #000;"></i>
+               </div>
+
+               <div class="col-4">
+                 <div class="dropdown-menu-list">
+                    <select onchange="ra_wallet_transfer()" id="zai_user_id" name="bankname" class="form-control" required>
+                       <option selected disabled>Select Bank</option>
+                       {% for i in data %}
+                       <option value={{i.zai_user_id}}>{{i.bank_name}}</option>
+                       {% endfor %}
+                    </select>
+                </div>
+                <br>
+                <br>   
+                <div class="mb-3 me-3 my-wallet-inner">
+                 <img class="wallet-icon" src="{% static 'mophy/images/wallet-bg.png' %}"> 
+                 <div class="me-auto wallet-bal">                                       
+                    <span class="comma-values text-num" id ="destination_wallet_balance"></span>
+                    <p class="bank-name" id="destination_email"></p>
+                 </div>
+              </div>        
+               </div>
+               <div class="col-3" id="transfer-btn" style=" display:none; padding-left: 0; padding-top:50px;">
+                 {% csrf_token %}
+                 <div class="with-balnc"><input type="number" onchange="check_amount()" name="amount" min="1" step=1 onkeypress="return !(event.charCode == 46)" valur="1" pattern="[0-9]" class="form-control transfer-amount" id="inputAddress" placeholder="Enter Amount" required> 
+                    <input type="text"  id="subdomaintwo" value="AUD" disabled/> </div>               
+                    <div class="withdraw-btn pt-3">
+                    <button onclick="ra_wallet_transfer(true)" name="submit" id="withdraw_amount" class="btn btn-primary btn-lg fw-bold">Transfer Money</button>
+                 </div>  
+              </div>
+
+             </div>               
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+<div id="loader" style="display:none" class="loader-overly" >
+   <div class="loader" ></div>
+</div>
+
+
+<script>
+  let errorText = false;
+  $('#source_wallet_balance').show();
+  function check_amount(){
+     var amount = $('#inputAddress').val();
+     amount = parseInt(amount)
+     if(isNaN(amount)){
+        errorText = true
+        $('#error_message').html("Please enter amount.");
+        $('#error_message').parent().show();
+        setTimeout(function () {
+           $('#error_message').parent().hide();
+        }, 3000);
+        document.getElementById('inputAddress').value = '';
+     }
+     else if(amount < 1){
+        errorText = true
+        $('#error_message').html("Amount should be greater than 0.");
+        $('#error_message').parent().show();
+        setTimeout(function () {
+           $('#error_message').parent().hide();
+        }, 3000);
+        document.getElementById('inputAddress').value = '';
+     }
+     else errorText = false;
+  }
+  function ra_wallet_transfer(buttonClicked){
+     var amount = $('#inputAddress').val();
+     amount = parseInt(amount)
+     if(buttonClicked && isNaN(amount)){
+        errorText = true
+        $('#error_message').html("Please enter amount.");
+        $('#error_message').parent().show();
+        setTimeout(function () {
+           $('#error_message').parent().hide();
+        }, 3000);
+        document.getElementById('inputAddress').value = '';
+     }
+     else if(buttonClicked && amount < 1){
+        errorText = true
+        $('#error_message').html("Amount should be greater than 0.");
+        $('#error_message').parent().show();
+        setTimeout(function () {
+           $('#error_message').parent().hide();
+        }, 3000);
+        document.getElementById('inputAddress').value = '';
+     }
+     if(errorText) return;
+     var zai_user_id = $('#zai_user_id').val();
+     var amount = $('#inputAddress').val();
+     var sourceIdElement = document.getElementById("source_email");
+     var source_id = sourceIdElement.getAttribute("value");
+     var url = "{% url 'mophy:zai-transfer' id=0 %}".replace('0', source_id);
+
+     if (zai_user_id == source_id){
+        $('#loader').hide();
+        $('#transfer-btn').hide();
+        $('#error_message').html("Both wallets can not be same. Please change Destination wallet.");
+        $('#error_message').parent().show();
+        setTimeout(function () {
+           $('#error_message').parent().hide();
+        }, 3000);
+     }
+     else{         
+        $('#loader').show();
+        $.ajax({
+           type: "POST",
+           url : url,
+           data: {amount:amount, zai_user_id:zai_user_id, csrfmiddlewaretoken: '{{ csrf_token }}'},         
+           success: function(data){
+              if(data.success){
+                 $('#loader').hide();
+                 $('#transfer-btn').show();
+                 $('#new_source_balance').html(data.source_wallet_balance)+ " AUD";
+                 $('#source_email').html(data.source_zai_email);
+                 $('#destination_wallet_balance').html(data.destination_wallet_balance)+ " AUD";
+                 $('#destination_email').html(data.destination_zai_email);
+                 if (data.type == "completed"){
+                    $('#transfer-btn').hide();
+                    $('#new_source_balance').show();
+                    $('#source_wallet_balance').hide();
+                    $('#success_message').html(data.message);
+                    $('#success_message').parent().show();
+                    window.location.href = "{% url 'mophy:my-wallets'  %}";
+                                   
+                    }
+                 }            
+              if(data.success === false ){
+                 $('#loader').hide();
+                 $('#error_message').html(data.message);
+                 $('#error_message').parent().show();
+                 setTimeout(function () {
+                    $('#error_message').parent().hide();
+                 }, 1500);
+                 document.getElementById('inputAddress').value = '';
+           }
+        }
+        });  
+     }
+     }  
+  
+</script>
+
+<script>
+  const elements = document.querySelectorAll('.comma-values');
+  elements.forEach(element => {
+      const originalValue = parseFloat(element.textContent.match(/\d+/)[0]);
+      const formattedValue = originalValue.toLocaleString();
+      element.textContent = element.textContent.replace(/\d+/, formattedValue);
+  });
+</script>
+{% endblock %}

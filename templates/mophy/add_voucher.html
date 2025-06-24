@@ -1,0 +1,199 @@
+{% extends 'mophy/elements/layouts/admin.html' %}
+{% load static widget_tweaks %}
+
+
+{% block additional_css %}
+
+{% endblock %}
+
+{% block message %}
+{% include 'mophy/elements/alert.html' %}
+{% endblock %}
+
+{% block content %}
+<!-- <div class="form-head mb-4">
+   <h2 class="text-black font-w600 mb-0">Add New Loyality Program</h2>
+</div> -->
+
+<div class="alert alert-danger" role="alert" id="error" style="display: none;"></div>
+
+<!-- NEW COMMENT STARTED -->
+<div class="row justify-content-center h-100 align-items-center">
+<div class="col-xl-12 col-lg-12">
+<div class="card corridore_card">
+   <div class="card-header">
+      <h4 class="card-title">Add New Loyality Program</h4>
+
+  </div>
+<div class="card-body">
+<!-- <form  method="post" action="{% url 'mophy:add-loyality-program' %}" enctype="multipart/form-data" autocomplete="off">
+{% csrf_token %} -->
+
+<div class="row col-md-12 select-row">
+   <div class="row">
+      <div class="form-group mb-3 col-md-4" >
+         <label class="form-label" name="referral_type">Referral Type</label>
+            <select onchange="get_amount()" class="border border-dark form-control" name="referral_type" id="referral_type" >
+               <option value="" selected>Choose type ...</option>
+               {% for i in data %}
+                  <option value="{{i.type}}">{{i.type}}</option>              
+               {% endfor %}
+            </select>
+      </div>      
+      <div class="form-group mb-3 col-md-4">
+         <label class="form-label">Name</label>
+         <input type="text" class="border border-dark form-control input-custom" id="name" placeholder="Name" >
+      </div>
+      <div class="form-group mb-3 col-md-4">
+         <label class="form-label" name="description">Description</label>
+         <input type="text" class="border border-dark form-control input-custom" id="description" placeholder="Description" >
+      </div>           
+   </div>
+
+   <!-- STATUS & CURRENCY ROW START-->
+   <div class="row" >
+      <div class="form-group mb-3 col-md-6">
+            <label class="form-label" name="status">Status</label>
+            <select class="border border-dark form-control status" name="status" id="status" >
+               <option value="" selected>Choose status ...</option>
+               <option value="active">Active</option>
+               <option value="expired">Expired</option>
+            </select>      
+      </div>
+      <div class="form-group mb-3 col-md-6">
+         <label class="form-label" name="currency">Currency</label>
+         <select class="border border-dark form-control" name="currency" id="currency" >
+            <option value="" selected>Choose currency ...</option>
+            <option value="AUD">AUD</option>
+            <option value="NZD">NZD</option>
+         </select>          
+      </div>
+   </div>
+   <!-- STATUS $ CURRENCY ROW END -->
+
+   <!-- INVITE ROW START-->
+   <div class="row" id="invite_row" style="display: none;">
+      <div class="form-group mb-3 col-md-6">
+         <label class="form-label" name="referred_by">Referred By Amount</label>
+         <input type="text" name="referred_by" id="referred_by" class="referred_by border border-dark form-control input-custom" min="1" step="1" onkeypress="return event.charCode >= 48 && event.charCode <= 57" >
+      </div>
+      <div class="form-group mb-3 col-md-6">
+         <label class="form-label" name="referred_to">Referred To Amount</label>
+         <input type="number" name="referred_to" id="referred_to"  class="referred_to border border-dark form-control input-custom" min="1" step="1" onkeypress="return event.charCode >= 48 && event.charCode <= 57" >
+      </div>  
+   </div>
+   <!-- INVITE ROW END -->
+
+   <!-- DATE ROW START-->
+   <div class="row" id="date_row" style="display: none;">
+      <div class="form-group mb-3 col-md-6">
+         <label class="form-label" name="start_date">Start Date</label>
+         <input type="date" class="border border-dark form-control input-custom" name="start_date" id="start_date" >             
+      </div>
+      <div class="form-group mb-3 col-md-6">
+         <label class="form-label" name="end_date">End Date</label>
+         <input type="date" name="end_date" id="end_date input-custom" class="border border-dark form-control" >
+      </div>        
+   </div>
+   <!-- DATE ROW END -->
+
+   <!-- OTHER ROW START -->
+   <div class="row" id="other_row" style="display: none;">
+      <div class="form-group mb-3 col-md-4">
+         <label class="form-label">Discount Amount</label>
+         <input type="text" name="discount" id="discount" class="border border-dark form-control input-custom" min="1" step="1" onkeypress="return event.charCode >= 48 && event.charCode <= 57" >
+      </div> 
+   </div>
+   <!-- OTHER ROW END -->
+
+<div class="row-col-md-6">
+   <button type="submit" onclick="add_program()" class="btn btn-primary mt-4 mb-5 style-button" >Save</button>
+   <a href="{% url 'mophy:loyality-program' %}" class="btn btn-primary mt-4 mb-5 style-button">Cancel</a>
+   <!-- <button type="submit" onclick="add_program()" class="btn btn-primary mt-4 mb-5" style="width: 10%;">Save</button>
+   <a href="{% url 'mophy:loyality-program' %}" style="width: 10%;" class="btn btn-primary mt-4 mb-5">Cancel</a> -->
+</div>
+<!-- </form> -->
+</div>
+</div>
+</div>
+</div>
+
+<div id="loader" style="display:none" class="loader-overly" ><div class="loader" ></div>
+
+
+{% endblock %}
+
+
+{% block additional_js %}
+
+<script>
+ function get_amount(){
+   var referral_type = $('#referral_type').val();
+   if (referral_type.toLowerCase() === "invite"){
+      $('#invite_row').show();  $('#other_row').hide();  $('#date_row').hide();
+   }
+   else if (referral_type.toLowerCase() === "birthday"){
+      $('#date_row').hide(); $('#other_row').show(); $('#invite_row').hide();
+   }
+   else{  $('#other_row').show(); $('#date_row').hide(); $('#invite_row').hide();  }
+ }
+</script>
+
+<script>
+   function add_program(){
+      var referral_type = $('#referral_type').val();
+      var name = $('#name').val();
+      var description = $('#description').val();
+      var status = $('#status').val();
+      var currency = $('#currency').val();
+      var discount = $('#discount').val();
+      var start_date = $('#start_date').val();
+      var end_date = $('#end_date').val();
+      var referred_by = $('#referred_by').val();
+      var referred_to = $('#referred_to').val();
+      var error_flag = false
+
+      if (referral_type === null || referral_type === ''){ error_flag = true; $("#referral_type").addClass("is-invalid");  event.preventDefault();   }
+      if (name === null || name === ''){error_flag = true; $("#name").addClass("is-invalid");  event.preventDefault();   }
+      if (description === null || description === ''){error_flag = true; $("#description").addClass("is-invalid");  event.preventDefault();   }
+      if (status === null || status === ''){ error_flag = true; $(".status").addClass("is-invalid");  event.preventDefault();   }
+      if (currency === null || currency === ''){error_flag = true; $("#currency").addClass("is-invalid");  event.preventDefault();   }
+
+      if (referral_type.toLowerCase() === "invite"){
+         if (referred_by === null || referred_by === ''){error_flag = true; $("#referred_by").addClass("is-invalid");  event.preventDefault();   }
+         if (referred_to === null || referred_to === ''){error_flag = true; $("#referred_to").addClass("is-invalid");  event.preventDefault();   }
+      }
+      else{
+         if (discount === null || discount === ''){error_flag = true; $("#discount").addClass("is-invalid");  event.preventDefault();   }
+      }
+
+      if (error_flag === false){
+         var fields = ["referral_type", "name", "description", "status", "currency", "discount","referred_by","referred_to","start_date","end_date"];
+         for (var i = 0; i < fields.length; i++) {
+            var field = fields[i];
+               $("#" + field).removeClass("is-invalid");
+               $("." + field).removeClass("is-invalid");            
+         }
+         $('#loader').show();
+            $.ajax({
+               type: "POST",
+               url: "{% url 'mophy:add-loyality-program' %}",
+               data: {
+                  referral_type: referral_type, name:name, description:description, status:status, currency:currency, discount:discount, referred_by:referred_by, referred_to:referred_to, start_date:start_date, end_date:end_date,           
+                  csrfmiddlewaretoken: '{{ csrf_token }}'
+               },
+               success: function (data) {
+                  if (data.success === true){  $('#loader').hide(); window.location.href = "{% url 'mophy:loyality-program'  %}"; }
+                  else {
+                     $('#error').show(); $('#loader').hide(); $('#error').html(data.message);  
+                     setTimeout(function () { $('#error').hide(); }, 3000);
+                  }
+               }
+               });
+      }
+ };
+</script>
+
+
+{% endblock %}
+

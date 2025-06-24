@@ -1,0 +1,309 @@
+{% extends 'mophy/elements/layouts/admin.html' %}
+
+{% load static %}
+
+{% block additional_css %}
+{% endblock %}
+
+{% block content %}
+<link rel="icon" type="image/png" sizes="16x16" href="/static/mophy/images/footer-logo.svg" />   
+<link rel="stylesheet" href="/static/mophy/vendor/jqvmap/css/jqvmap.min.css" >
+<link rel="stylesheet" href="/static/mophy/vendor/chartist/css/chartist.min.css" >
+<link rel="stylesheet" href="/static/mophy/vendor/datatables/css/jquery.dataTables.min.css" >
+<link rel="stylesheet" href="/static/mophy/vendor/bootstrap-select/dist/css/bootstrap-select.min.css">
+<link rel="stylesheet" href="/static/mophy/css/style.css">
+
+
+<div class="card corridore_card">
+    <div class="card-header">
+        <h4 class="card-title">{{title}}</h4>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item "><a class="text-black fw-bold" href="{% url 'mophy:index' %}" ><u >Back</u></a></li>
+       </ol>
+    </div>
+ <div class="card-body">
+  <div class="row newlayout-table">
+    <div class="col-lg-12">
+     <div class="table-hover fs-14 card-table customer-table-row" id="custom-search" style="position: relative;">    
+        <table class="table dataTablesCard style-1 custom-tbl card-table previous-transactions display" id="example22" style="width: 100% !important;">
+            <thead>
+                <tr>       
+                    <th>S/N</th>
+                    <th>Transaction Id</th>
+                    <th>Date</th>
+                    <th>Payment Status</th>
+                    <th>TM Status</th>
+                    <th>PEP/AML</th>
+                    <th>AUSTRAC</th>
+                </tr>
+            </thead>
+            <tbody>               
+                {% for t in transaction %}
+                <tr class="data-row">
+                    <td><a href="{% url 'mophy:user-details' id=user.customer_id %}"><span class="text-black font-w400 mb-0"> {{forloop.counter}}</span></a></td>
+                    <td><a href="{% url 'mophy:transactions-details' id=t.id %}"><span class="text-black font-w400 mb-0 text-decoration-underline">{{t.transaction_id}}</span></a></td>
+                    <td><a href="{% url 'mophy:transactions-details' id=t.id %}"><span class="text-black font-w400 mb-0"> {{t.date}}</span></a></td>
+                    <td><a href="{% url 'mophy:transactions-details' id=t.id %}"><span class="text-black font-w400 mb-0"> {{t.payment_status}}</span></a></td>
+
+                    {% if t.payment_status == "Incomplete" %} 
+                        <td><a href="{% url 'mophy:transactions-details' id=t.id %}"><span class="text-black font-w400 mb-0"> Pending</span></a></td>
+                    {% elif t.tm_status == "NA" or t.tm_status == None %} 
+                        <td><a href="{% url 'mophy:transactions-details' id=t.id  %}"><span class="comma-values text-black font-w400 mb-0">No action triggered</span></a></td>
+                    {% else %}
+                        <td><a href="{% url 'mophy:transactions-details' id=t.id  %}"><span class="comma-values text-black font-w400 mb-0">{{t.tm_status}}</span></a></td>
+                    {% endif %}    
+
+                    {% if t.aml_pep_status == False or t.aml_pep_status == "False" %} 
+                        <td><a href="{% url 'mophy:transactions-details' id=t.id %}"><span class="text-black font-w400 mb-0">Passed</span></a></td>
+                        <!-- <td><a href="{% url 'mophy:transactions-details' id=t.id  %}"><i class="fa fa-check text-success " style="font-size:20px;" aria-hidden="true"></i></a></td>  -->
+                    {% elif t.aml_pep_status == True or t.aml_pep_status == "True" %} 
+                        <td><a href="{% url 'mophy:transactions-details' id=t.id %}"><span class="text-black font-w400 mb-0">Failed</span></a></td>
+                        <!-- <td><a href="{% url 'mophy:transactions-details' id=t.id  %}"><i class="fa fa-times text-danger" style="font-size:20px;" aria-hidden="true"></i></a></td> -->
+                    {% elif t.payment_status == "incomplete" or t.payment_status == "Incomplete" %} 
+                        <td><a href="{% url 'mophy:transactions-details' id=t.id %}"><span class="text-black font-w400 mb-0"> Pending</span></a></td>
+                    {% else %}
+                        <td><a href="{% url 'mophy:transactions-details' id=t.id  %}"><span class="comma-values text-black font-w400 mb-0">No action triggered</span></a></td>
+                    {% endif %} 
+                   
+                    <td>
+                        {% if t.inflow_status != 'submitted' or t.outflow_status != 'submitted' %}
+                            <button type="button" data-bs-toggle="modal" data-bs-target="#submitReport" class="btn btn-primary style-button mb-1" data-id="{{t.id}}" data-inflow-status="{{t.inflow_status}}" data-outflow-status="{{t.outflow_status}}" style="float: left;">submit report</button>
+                        {% endif %}
+                        {% if t.inflow_status != 'pending' or t.outflow_status != 'pending' %}
+                            <button type="button" data-bs-toggle="modal" data-bs-target="#downloadReport" class="btn btn-primary style-button" data-id="{{t.id}}" data-inflow-path="{{t.inflow_path}}" data-outflow-path="{{t.outflow_path}}" data-inflow-status="{{t.inflow_status}}" data-outflow-status="{{t.outflow_status}}" style="float: left;">download report</button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}         
+            </tbody>
+        </table>
+     </div>
+    </div>
+  </div>
+ </div>
+</div>
+
+<!-- Submit Report Modal Start -->
+<div class="modal fade" id="submitReport">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Submit AUSTRAC Inflow / Outflow Report</h5>
+                <button type="button" class="close" data-bs-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <div class="row" style="justify-content: center; display: flex;">
+                    <div id="inflowMessage" class="alert alert-warning" style="display: none;">Inflow report already submitted!</div>
+                    <button type="button" class="btn btn-primary style-button submit-inflow-report" style="float: left;">Submit Inflow Report</button>
+                    <div id="outflowMessage" class="alert alert-warning" style="display: none;">Outflow report already submitted!</div>
+                    <button type="button" class="btn btn-primary style-button submit-outflow-report" style="float: left;">Submit Outflow Report</button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Submit Report Modal End -->
+
+<!-- Download Report Modal Start -->
+<div class="modal fade" id="downloadReport">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Download AUSTRAC Inflow / Outflow Report</h5>
+                <button type="button" class="close" data-bs-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <div class="row" style="display: flex; justify-content: center;">
+                    <div id="downloadInflowMessage" class="alert alert-warning" style="display: none;">Inflow report is not available for download!</div>
+                    <button type="button" class="btn btn-primary style-button download-inflow-report" style="margin-right: 10px;">Download Inflow Report</button>
+                    <div id="downloadOutflowMessage" class="alert alert-warning" style="display: none;">Outflow report is not available for download!</div>
+                    <button type="button" class="btn btn-primary style-button download-outflow-report">Download Outflow Report</button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger light" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Download Report Modal End -->
+
+<div id="loader" style="display:none" class="loader-overly" ><div class="loader" ></div>
+
+{% endblock %}
+
+{% block additional_js %}
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        new DataTable('#example22', {
+            scrollX: true,
+            scrollCollapse: true,
+            scrollY: '530px',
+            pageLength: 20,
+            fixedHeader: true,
+            lengthChange: false,
+            responsive: true,
+            order: [], 
+        });
+    });
+</script>
+
+
+<style>
+    .dataTables_scrollHeadInner{
+        width: 100% !important;
+    }
+    table.table.dataTablesCard.style-1.custom-tbl.card-table.previous-transactions.display.dataTable.no-footer {
+        width: 100% !important;
+    }
+    table.table.dataTablesCard.style-1.custom-tbl.card-table.previous-transactions.display.dataTable.no-footer {
+        width: 100% !important;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+    var submitReportModal = document.getElementById('submitReport');    
+    
+    submitReportModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;        
+        var transactionId = button.getAttribute('data-id');        
+        var inflowStatus = button.getAttribute('data-inflow-status');        
+        var outflowStatus = button.getAttribute('data-outflow-status');        
+        
+        var inflowButton = submitReportModal.querySelector('.submit-inflow-report');
+        var inflowMessage = submitReportModal.querySelector('#inflowMessage');
+        var outflowButton = submitReportModal.querySelector('.submit-outflow-report');
+        var outflowMessage = submitReportModal.querySelector('#outflowMessage');
+        
+        // Set onclick attributes
+        inflowButton.setAttribute('onclick', `submit_austrac_report('${transactionId}', 'inflow')`);
+        outflowButton.setAttribute('onclick', `submit_austrac_report('${transactionId}', 'outflow')`);
+        
+        // Handle inflow status
+        if (inflowStatus === 'submitted') {
+            inflowButton.disabled = true;
+            inflowMessage.style.display = 'block'; // Show message
+            inflowButton.setAttribute('onclick', `alert('Inflow report already submitted!')`);
+        } else {
+            inflowButton.disabled = false;
+            inflowMessage.style.display = 'none'; // Hide message
+        }
+
+        // Handle outflow status (similar logic can be applied)
+        if (outflowStatus === 'submitted') {
+            outflowButton.disabled = true;
+            outflowMessage.style.display = 'block'; // Show message
+            outflowButton.setAttribute('onclick', `alert('Outflow report already submitted!')`);
+        } else {
+            outflowButton.disabled = false;
+            outflowMessage.style.display = 'none'; // Hide message
+        }
+    });
+});
+
+</script>
+
+<script>
+   document.addEventListener('DOMContentLoaded', function () {
+    var downloadReportModal = document.getElementById('downloadReport');    
+    
+    downloadReportModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;        
+        var inflowStatus = button.getAttribute('data-inflow-status');        
+        var outflowStatus = button.getAttribute('data-outflow-status');        
+        var inflowPath = button.getAttribute('data-inflow-path');        
+        var outflowPath = button.getAttribute('data-outflow-path');        
+
+        var downloadInflowButton = downloadReportModal.querySelector('.download-inflow-report');
+        var downloadInflowMessage = downloadReportModal.querySelector('#downloadInflowMessage');
+        var downloadOutflowButton = downloadReportModal.querySelector('.download-outflow-report');
+        var downloadOutflowMessage = downloadReportModal.querySelector('#downloadOutflowMessage');
+        
+        // Set onclick attributes
+        downloadInflowButton.setAttribute('onclick', `download_austrac_report('${inflowPath}', 'inflow')`);
+        downloadOutflowButton.setAttribute('onclick', `download_austrac_report('${outflowPath}', 'outflow')`);
+
+        // Handle inflow report status
+        if (inflowStatus !== 'submitted') {
+            downloadInflowButton.disabled = true;
+            downloadInflowMessage.style.display = 'block'; // Show message
+        } else {
+            downloadInflowButton.disabled = false;
+            downloadInflowMessage.style.display = 'none'; // Hide message
+        }
+
+        // Handle outflow report status
+        if (outflowStatus !== 'submitted') {
+            downloadOutflowButton.disabled = true;
+            downloadOutflowMessage.style.display = 'block'; // Show message
+        } else {
+            downloadOutflowButton.disabled = false;
+            downloadOutflowMessage.style.display = 'none'; // Hide message
+        }
+    });
+});
+
+</script>
+
+<script>
+    function submit_austrac_report(transactionId, reportType) {
+        console.log(transactionId, reportType, "transactionId, reportType")
+        var errorFlag = false;
+
+        // If no errors, proceed with AJAX request
+        if (!errorFlag) {
+            $('#loader').show();
+            $.ajax({
+                type: "POST",
+                url: "{% url 'mophy:austrac' %}",
+                data: {id:transactionId, type:reportType, csrfmiddlewaretoken: '{{ csrf_token }}' },
+                success: function (data) {
+                    $('#loader').hide();
+                    if (data.success === true) {
+                        $('#success_message').html(data.message);
+                        $('#success_message').parent().show();
+                        setTimeout(function() {
+                            $('#submitReport').hide();
+                            window.location.href = "{% url 'mophy:austrac' %}"; 
+                        }, 2000);
+                    } else {
+                        $('#loader').hide();
+                        alert(data.message);                         
+                    }
+                }
+            });
+        }
+    }
+
+    // Remove invalid class and error message on input
+    $('.form-control').on('input', function() {
+        $(this).removeClass('is-invalid');
+        $(this).next('.invalid-feedback').remove();
+    });
+</script>
+
+<script>
+    function download_austrac_report(path) {
+    const fileUrl = path;
+    const link = document.createElement('a');
+    link.href = fileUrl;
+    link.download = fileUrl.split('/').pop(); // Use the file name from the URL
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+</script>
+
+
+
+{% endblock %}
+
+

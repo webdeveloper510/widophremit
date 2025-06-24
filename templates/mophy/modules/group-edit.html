@@ -1,0 +1,139 @@
+{% extends 'mophy/elements/layouts/admin.html' %}
+{% load static widget_tweaks %}
+
+
+{% block additional_css %}
+
+{% endblock %}
+
+
+
+{% block message %}
+{% include 'mophy/elements/alert.html' %}
+{% endblock %}
+
+{% block content %}
+
+       <div class="col-lg-12">
+          <div class="card">
+             <div class="card-header">
+                <h4 class="card-title">Edit Group Permissions </h4>
+             </div>
+             <div class="card-body">
+                <div id="message">
+                </div>
+                <form id="user_perm"  method="post">
+                   {% csrf_token %}
+                   <div class="row">
+                      <div class="mb-3 col-md-12">
+                         <label class="form-label">Name</label>
+                         {{ form.name|attr:"type:text"|attr:"class:form-control"|attr:"placeholder:Name" }}
+                         <div class="text-danger w-100 d-block mt-1">
+                         {{ form.name.errors }}
+                         </div>
+                      </div>
+                      <div class="mb-3 col-md-12">
+                         {{ form.permissions|attr:"style:height:300px" }}
+                         <div class="text-danger w-100 d-block mt-1">
+                         {{ form.permissions.errors }}
+                         </div>
+                      </div>
+                   </div>
+                   <button type="submit" class="btn btn-primary mt-5">Save</button>
+                   <a href="{% url 'mophy:groups' %}" class="btn btn-primary mt-5">Back</a>
+                </form>
+             </div>
+          </div>
+       </div>
+
+       
+
+
+{% endblock %}
+
+
+{% block additional_js %}
+<script type="text/javascript">
+    var demo1 = $('select[name=permissions]').bootstrapDualListbox(
+
+        {
+            preserveSelectionOnMove: 'moved',
+            moveOnSelect: true,
+            moveAllLabel: 'Move all',
+            moveSelectedLabel: 'Move selected'
+        }
+    );
+    
+    $(document).on('submit', '#user_perm', function(event) {
+    
+        var formData = $(this).serialize();
+        console.log(formData);
+        event.preventDefault();
+    
+        $.ajax({
+            type: 'POST',
+            url: '{{ request.path }}',
+            dataType:'json',
+            data: {
+                name:$('input[name=name]').val(),
+                permissions: $('select[name=permissions]').val(),
+                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+            },
+
+
+            success: function(response) {
+               //alert(response.success);
+               if(typeof response.info != "undefined"){
+               //alert( response.info);
+               document.getElementById("message").innerHTML += 
+               '<div class="alert alert-warning solid alert-dismissible fade show">\
+                 <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="me-2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>\
+                 <strong>'+response.info+'</strong>\
+                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="btn-close">\
+                 </button>\
+                 </div>';
+               }
+
+              if(typeof response.success != "undefined"){
+               //alert(response.success);
+               document.getElementById("message").innerHTML += 
+               '<div class="alert alert-success solid alert-dismissible fade show">\
+                 <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="me-2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>\
+                 <strong>'+response.success+'</strong>\
+                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="btn-close">\
+                 </button>\
+                 </div>';
+              }
+               
+
+               
+
+
+
+
+            },
+            error: function(response){
+               
+               document.getElementById("message").innerHTML += 
+               '<div class="alert alert-danger alert-dismissible fade show">\
+                 <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="me-2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>\
+                 <strong'+ response.error +'</strong>\
+                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="btn-close">\
+                 </button>\
+                 </div>';
+                 //alert(response.status); // the status code
+                
+
+
+
+
+
+            },
+           
+        });
+    });
+
+</script>
+{% endblock %}
+
+

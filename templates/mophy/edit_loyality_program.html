@@ -1,0 +1,141 @@
+{% extends 'mophy/elements/layouts/admin.html' %}
+{% load static widget_tweaks %}
+
+
+{% block additional_css %}
+
+{% endblock %}
+
+{% block message %}
+{% include 'mophy/elements/alert.html' %}
+{% endblock %}
+
+{% block content %}
+<!-- <div class="form-head mb-4">
+   <h2 class="text-black font-w600 mb-0">Add New Loyality Program</h2>
+</div> -->
+
+<div class="alert alert-danger" role="alert" id="error" style="display: none;"></div>
+
+<!-- NEW COMMENT STARTED -->
+<div class="row justify-content-center h-100 align-items-center">
+<div class="col-xl-12 col-lg-12">
+<div class="card corridore_card">
+   <div class="card-header">
+      <h4 class="card-title">Add New Loyality Program</h4>
+
+  </div>
+<div class="card-body">
+<form  method="post" action="{% url 'mophy:edit-loyality-program' id=data.id %}" enctype="multipart/form-data" autocomplete="off">
+   {% csrf_token %}
+<div class="row col-md-12">
+   <div class="row select-row">
+      <div class="form-group mb-3 col-md-4" >
+         <label class="form-label"  name="referral_type">Referral Type</label>
+         <input class="form-control input-custom" value="{{data.referral_type_id__type}}" id="referral_type" disabled>
+      </div>      
+      <div class="form-group mb-3 col-md-4">
+         <label class="form-label">Name</label>
+         <input type="text" name="name" class="form-control input-custom" value="{{data.name}}">
+      </div>
+      <div class="form-group mb-3 col-md-4">
+         <label class="form-label" name="description">Description</label>
+         <input class="form-control input-custom" name="description" value="{{data.description}}" type="text" maxlength="50">
+      </div>           
+   </div>
+
+   <!-- STATUS & CURRENCY ROW START-->
+   <div class="row select-row">
+      <div class="form-group mb-3 col-md-4">
+         <label class="form-label" name="status">Current Status</label>
+         <input class="form-control input-custom" value="{{data.status}}" disabled>
+     </div>
+      <div class="form-group mb-3 col-md-4">
+            <label class="form-label" name="status"> Update Status</label>
+            <select class="border border-dark form-control status" name="status" id="status" >
+               <option value="" selected>Choose status ...</option>
+               <option value="active">Active</option>
+               <option value="expired">Expired</option>
+            </select>      
+      </div>
+      <div class="form-group mb-3 col-md-4">
+         <label class="form-label" name="status">Currency</label>
+         <input class="form-control input-custom" value="{{data.currency}}" disabled>
+     </div>
+   </div>
+   <!-- STATUS $ CURRENCY ROW END -->
+
+   <!-- INVITE ROW START-->
+   <div class="row" id="invite_row" style="display: none;">
+      <div class="form-group mb-3 col-md-4">
+         <label class="form-label" name="referred_by">Referred By Amount</label>
+         <input type="text" name="referred_by" class="input-custom referred_by border border-dark form-control" min="1" step="1" onkeypress="return event.charCode >= 48 && event.charCode <= 57" value="{{data.referred_by_amount}}">
+      </div>
+      <div class="form-group mb-3 col-md-4">
+         <label class="form-label" name="referred_to">Referred To Amount</label>
+         <input type="number" name="referred_to"  class="input-custom referred_to border border-dark form-control" min="1" step="1" onkeypress="return event.charCode >= 48 && event.charCode <= 57" value="{{data.referred_to_amount}}">
+      </div>  
+   </div>
+   <!-- INVITE ROW END -->
+
+   <!-- DATE ROW START-->
+   <div class="row" id="date_row" style="display: none;">
+      <div class="form-group mb-3 col-md-6">
+         <label class="form-label" name="start_date">Start Date</label>
+         <input type="date" class="border border-dark form-control input-custom" name="start_date" id="date" value="{{data.start_date}}">             
+      </div>
+      <div class="form-group mb-3 col-md-6">
+         <label class="form-label" name="end_date">End Date</label>
+         <input type="date" name="end_date" class="border border-dark form-control input-custom" value="{{data.end_date}}">
+      </div>        
+   </div>
+   <!-- DATE ROW END -->
+
+   <!-- OTHER ROW START -->
+   <div class="row" id="other_row" style="display: none;">
+      <div class="form-group mb-3 col-md-4">
+         <label class="form-label">Discount Amount</label>
+         <input type="text" name="discount" class="border border-dark form-control input-custom" min="1" step="1" onkeypress="return event.charCode >= 48 && event.charCode <= 57" value="{{data.referred_by_amount}}">
+      </div> 
+   </div>
+   <!-- OTHER ROW END -->
+
+<div class="row-col-md-6">
+   <button type="submit" class="btn btn-primary mt-4 mb-5 style-button" >Save</button>
+   <a href="{% url 'mophy:loyality-program' %}"  class="btn btn-primary mt-4 mb-5 style-button">Cancel</a>
+   <!-- <button type="submit" class="btn btn-primary mt-4 mb-5" style="width: 10%;">Save</button>
+   <a href="{% url 'mophy:loyality-program' %}" style="width: 10%;" class="btn btn-primary mt-4 mb-5">Cancel</a> -->
+</div>
+</form>
+</div>
+</div>
+</div>
+</div>
+
+<div id="loader" style="display:none" class="loader-overly" ><div class="loader" ></div>
+
+
+{% endblock %}
+
+
+{% block additional_js %}
+
+   
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+      var referral_type = $('#referral_type').val();
+      console.log(referral_type, "referral_type==")
+      if (referral_type.toLowerCase() === "invite"){
+         console.log("invite = = =")
+         $('#invite_row').show();  $('#other_row').hide();  $('#date_row').hide();
+      }
+      else if (referral_type.toLowerCase() === "birthday"){
+         $('#date_row').hide(); $('#other_row').show(); $('#invite_row').hide();
+      }
+      else{  $('#other_row').show(); $('#date_row').hide(); $('#invite_row').hide();  }
+});
+</script>
+
+
+{% endblock %}
+

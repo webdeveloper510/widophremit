@@ -1,0 +1,273 @@
+{% extends 'mophy/elements/layouts/admin.html' %}
+{% load static %}
+
+{% block additional_css %}
+{% endblock %}
+
+{% block message %}
+{% include 'mophy/elements/alert.html' %}
+{% endblock %}
+
+{% block content %}
+
+
+<link rel="stylesheet" href="/static/mophy/vendor/datatables/css/jquery.dataTables.min.css" >
+<link rel="stylesheet" href="/static/mophy/css/style.css">
+
+<div class="row mx-0">
+ <div class="col-sm-8 p-md-0">
+  <div class="welcome-text mb-3">
+    <h4 class="fw-bold"><span class="text-black fw-bold fs-4" >Cust ID- {{user.customer_id}}</span></h4>
+  </div>
+ </div>
+ <div class="col-sm-4 p-md-0 justify-content-sm-end mt-2 mt-sm-0 d-flex fw-bold">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'mophy:customer-referrals' %}"><u class="fw-bold">Back</u></a></li>
+  </ol>
+ </div>
+</div>
+
+<!-- Summary -->
+<div class="row">
+  <div class="col-md-12">
+    <div class="card">
+      <div class="card-header">
+        {% comment %} <h4 class="card-title"> {% endcomment %}
+        <h4 class="fw-bold mb-0">Summary
+      </div>
+      <div class="card-body"> 
+        <div class="row">
+            <div class="col-xl-12">
+               <!-- <div class="row">
+                    {% for arr in array %}
+                    <div class="d-flex col-xl-3 col-xxl-3  col-md-3 col-sm-6 mb-4 ">
+                        <svg class="me-3" width="14" height="54" viewBox="0 0 14 54" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="-6.10352e-05" width="14" height="54" rx="7" fill="#AC39D4"/>
+                        </svg>
+                        <div>
+                            <p class="fs-14 mb-2">{{arr.type}}</p>
+                            <span class="fs-16 font-w500"><span class="text-black me-2">
+                                <h>{{arr.count}}</h>
+                        </div>
+                    </div>
+                    {% endfor %}                    
+               </div> -->
+               <div class="row">
+                 <div class="col-6">
+                    <div class="table-responsive table-hover fs-14 card-table">
+                        <table class="table display mb-4 dataTablesCard user_details">
+                            <tbody>
+                                <tr>
+                                <td  class="text-black font-w600 mb-0">Customer Name</td>
+                                {% if user.First_name != "" and user.Last_name != None %}
+                                    <td><span class="text-black text-nowrap">{{user.First_name}} {{user.Last_name}}</span></td>
+                                {% else %}
+                                    <td><span class="text-black text-nowrap">None</span></td>
+                                {% endif %}
+                                </tr>            
+                                <tr>
+                                    <td  class="text-black font-w600 mb-0">Email</td>
+                                    {% if user.email %}
+                                        <td><span class="text-black text-nowrap">{{user.email}}</span></td>
+                                    {% else %}
+                                        <td><span class="text-black text-nowrap">None</span></td>
+                                    {% endif %}
+                                </tr>     
+                              </tbody>
+                        </table>
+                      </div>
+                 </div>
+                 <div class="col-6">
+                    <div class="table-responsive table-hover fs-14 card-table">
+                        <table class="table display mb-4 dataTablesCard user_details">
+                          <tbody>
+                            {% if referred_by %}
+                            <tr>
+                                <td  class="text-black font-w600 mb-0">Referred By Cust Name</td>
+                                {% if referred_by.First_name != None or referred_by.First_name != '' %}
+                                    <td><span class="text-black text-nowrap">{{referred_by.First_name}} {{referred_by.Last_name}}</span></td>
+                                {% else %}
+                                    <td><span class="text-black text-nowrap">None</span></td>
+                                {% endif %}
+                            </tr> 
+                            <tr>
+                                <td  class="text-black font-w600 mb-0">Referred By</td>
+                                {% if referred_by.email %}
+                                    <td><span class="text-black text-nowrap">{{referred_by.email}}</span></td>
+                                {% else %}
+                                    <td><span class="text-black text-nowrap">None</span></td>
+                                {% endif %}
+                            </tr> 
+                            {% endif %}      
+                          </tbody>
+                        </table>
+                      </div>
+                 </div>
+               </div>
+            </div>
+        </div>	
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CLAIMED REWARDS TABLE START -->
+<div class="row">
+    <div class="col-xl-12">
+    <div class="card">
+        <div class="card-header">
+            <h4 class="fw-bold text-uppercase">Claimed Rewards</h4>
+        </div>
+        <div class="card-body">
+        <div class="table-hover fs-14 card-table" style="position: relative;">
+            <table class="table dataTablesCard style-1 custom-tbl card-table previous-transactions display" id="example22"  style="width: 100% !important;">
+                <thead>
+                    <tr class="header-row">
+                        <th>Reward Type</th>
+                        <th>Transaction Id</th>
+                        <th>Reward Amount</th>
+                        <th>Claimed Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for c in claimed_data %}
+                <tr> 
+                    <td> <h6 class="text-black font-w400 mb-0">{{c.referral_id__referral_type_id__type}}</h6></td>
+                    <td> <h6 class="text-black font-w400 mb-0">{{c.transaction_id}}</h6></td>
+                    <td> <h6 class="text-black font-w400 mb-0">{{c.referral_id__currency}} {{c.discount}}</h6></td>
+                    <td> <h6 class="text-black font-w400 mb-0">{{c.claimed_date}}</h6></td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        </div>
+    </div>
+    </div>
+</div>
+<!-- CLAIMED REWARDS TABLE END -->
+
+<!-- UNCLAIMED REWARDS TABLE START -->
+<div class="row">
+    <div class="col-xl-12">
+    <div class="card">
+        <div class="card-header">
+            <h4 class="fw-bold text-uppercase">Unclaimed Rewards</h4>
+        </div>
+        <div class="card-body">
+        <div class="table-hover fs-14 card-table" style="position: relative;">
+            <table class="table dataTablesCard style-1 custom-tbl card-table previous-transactions display" id="example22"  style="width: 100% !important;">
+                <thead>
+                    <thead>
+                        <tr class="header-row">
+                            <th>Reward Type</th>
+                            <th>Reward Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for u in unclaimed_data %}
+                    <tr> 
+                        <td> <h6 class="text-black font-w400 mb-0">{{u.type}}</h6></td>
+                        <td> <h6 class="text-black font-w400 mb-0">{{u.amount}}</h6></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        </div>
+    </div>
+    </div>
+</div>
+
+<!-- UNCLAIMED REWARDS TABLE END -->
+
+<!-- OLD CODE START -->
+
+<!-- {% for a in array %}
+<div class="row">
+<div class="col-xl-12">
+<div class="card">
+    <div class="card-header">
+        <h4 class="fw-bold text-uppercase">{{a.type}}</h4>
+    </div>
+    <div class="card-body">
+    <div class="table-hover fs-14 card-table" style="position: relative;">
+        <table class="table dataTablesCard style-1 custom-tbl card-table previous-transactions display" id="example22"  style="width: 100% !important;">
+            <thead>
+                <tr class="header-row">
+                    <th>Transaction Id</th>
+                    <th>Reward Amount</th>
+                    {% if a.type == "invite" or a.type == "Invite" %}
+                        <th>Invited Customer</th>
+                    {% endif %}
+                    <th>Reward Claimed</th>
+                    <th>Reward Status</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for t in a.data %}
+            <tr> 
+                <td> <h6 class="text-black font-w400 mb-0">{{t.transaction_id}}</h6></td>
+                <td> <h6 class="text-black font-w400 mb-0">{{t.referral_id__currency}} {{t.discount}}</h6></td>
+                {% if a.type == "invite" or a.type == "Invite" %}
+                    <td> <h6 class="text-black font-w400 mb-0">{{t.referred_to_user}}</h6></td>
+                {% endif %}
+                <td> <h6 class="text-black font-w400 mb-0">{{t.is_used}}</h6></td>
+                <td> <h6 class="text-black font-w400 mb-0">{{t.referral_id__status}}</h6></td>                    
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    </div>
+</div>
+</div>
+</div>
+{% endfor %} -->
+
+<!-- OLD CODE END  -->
+{% endblock %}
+
+{% block additional_js %}
+<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        new DataTable('#example22', {
+            scrollX: true,
+            scrollCollapse: true,
+            scrollY: '530px',
+            pageLength: 20,
+            fixedHeader: true,
+            lengthChange: false,
+            responsive: true,
+            order: [], // Disable initial sorting
+            // columnDefs: [{
+            //     targets: '_all', 
+            //     orderable: true,
+            //     orderData: [0], // Set the order data (adjust index as needed)
+            //     orderSequence: ['desc', 'asc'] // Set the order sequence for sorting
+            // }]
+        });
+    });
+</script>
+
+
+<style>
+.dataTables_scrollHeadInner{
+    width: 100% !important;
+}
+table.table.dataTablesCard.style-1.custom-tbl.card-table.previous-transactions.display.dataTable.no-footer {
+    width: 100% !important;
+}
+table.table.dataTablesCard.style-1.custom-tbl.card-table.previous-transactions.display.dataTable.no-footer {
+    width: 100% !important;
+}
+</style>
+
+
+
+{% endblock %}
+

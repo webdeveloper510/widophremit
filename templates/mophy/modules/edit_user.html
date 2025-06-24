@@ -1,0 +1,177 @@
+{% extends 'mophy/elements/layouts/admin.html' %}
+{% load static widget_tweaks %}
+
+
+{% block additional_css %}
+
+{% endblock %}
+
+{% block message %}
+{% include 'mophy/elements/alert.html' %}
+{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center h-100 align-items-center">
+  <div class="col-xl-12 col-lg-12">
+    <div class="card">
+        <div class="card-header">
+            <h4 class="card-title">Edit User Form</h4>
+        </div>
+        <div class="card-body">
+          <div class="basic-form">
+            <form  method="post" enctype="multipart/form-data" novalidate autocomplete="off">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="row col-md-12">
+                        <div class="mb-4 col-md-4">
+                            <label class="form-label">First Name {% if form.First_name.field.required %}<span class="text-danger">*</span> {% endif %}</label>
+                            {{ form.First_name|attr:"type:text"|attr:"class:form-control"|attr:"placeholder:First Name" }}
+                            <div class="text-danger w-100 d-block mt-1">
+                            {{ form.First_name.errors }}
+                            </div>
+                        </div>
+                        <div class="mb-4 col-md-4">
+                            <label class="form-label">Middle Name {% if form.Middle_name.field.required %}<span class="text-danger">*</span> {% endif %}</label>
+                            {{ form.Middle_name|attr:"type:text"|attr:"class:form-control"|attr:"placeholder:Middle Name" }}
+                            <div class="text-danger w-100 d-block mt-1">
+                            {{ form.Last_name.errors }}
+                            </div>
+                        </div>
+                        <div class="mb-4 col-md-4">
+                            <label class="form-label">Last Name {% if form.Last_name.field.required %}<span class="text-danger">*</span> {% endif %}</label>
+                            {{ form.Last_name|attr:"type:text"|attr:"class:form-control"|attr:"placeholder:Last Name" }}
+                            <div class="text-danger w-100 d-block mt-1">
+                            {{ form.Last_name.errors }}
+                            </div>
+                        </div>                        
+                    </div>
+
+                    <div class="row col-md-12 ">
+                        <div class="mb-5 col-md-5">
+                            <label class="form-label">Email {% if form.email.field.required %}<span class="text-danger">*</span> {% endif %}</label>
+                            {{ form.email|attr:"type:email"|attr:"class:form-control"|attr:"placeholder:Email" }}
+                            <div class="text-danger w-100 d-block mt-1">
+                            {{ form.email.errors }}
+                            </div>
+                        </div> 
+                        <div class="mb-4 col-md-4" id="show-mobile">
+                            <label class="form-label">Mobile {% if form.mobile.field.required %}<span class="text-danger">*</span> {% endif %}</label>
+                            <div class="row" style="display: flex;">
+                                <!-- <div class="col-3">
+                                    <input class="form-control" value={{country_code}}  style="padding-left: 4px; padding-right:0px;" disabled/>
+                                </div> -->
+                                <div class="col-9" style="margin-left:-28px;">
+                                    {{ form.mobile|attr:"type:text"|attr:"onkeypress:test()"|attr:"class:form-control" }}
+                                    <div class="text-danger w-100 d-block mt-1">
+                                    {{ form.mobile.errors }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>  
+                        <div class="mb-4 col-md-4" id="edit-mobile" style="display: none;">
+                            <label class="form-label">Mobile {% if form.mobile.field.required %}<span class="text-danger">*</span> {% endif %}</label>
+                            {{ form.mobile|attr:"type:number"|attr:"value:form.mobile" | attr:"step:1"|attr:"onkeypress:if(this.value.length==10) return false; else return event.charCode >= 48 && event.charCode<= 57"|attr:"name:mobile"|attr:"id:mobile"|attr:"class:form-control" }}
+                            <div class="text-danger w-100 d-block mt-1">
+                            {{ form.mobile.errors }}
+                            </div>
+                        </div>  
+                        <div class="mb-3 col-md-3">
+                            <label class="form-label">Date of Birth {% if form.Date_of_birth.field.required %}<span class="text-danger">*</span> {% endif %}</label>
+                            {{ form.Date_of_birth|attr:"type:date"|attr:"class:form-control"|attr:"placeholder:Date_of_birth" }}
+                            <div class="text-danger w-100 d-block mt-1">
+                            {{ form.Date_of_birth.errors }}
+                            </div>
+                        </div>                                              
+                    </div>
+
+                    <div class="row col-md-12">                         
+                        <div class="mb-4 col-md-4">
+                            <label class="form-label">Location {% if form.location.field.required %}<span class="text-danger">*</span> {% endif %}</label>
+                            {{ form.location|attr:"type:text"|attr:"class:form-control"|attr:"placeholder:location" }}
+                            <div class="text-danger w-100 d-block mt-1">
+                            {{ form.location.errors }}
+                            </div>
+                        </div>   
+                        <div class="mb-4 col-md-4">
+                            <label class="form-label">Cust Id {% if form.customer_id.field.required %}<span class="text-danger">*</span> {% endif %} </label>
+                            {{ form.customer_id|attr:"type:text"|attr:"class:form-control"|attr:"placeholder:customer_id" }}
+                            <div class="text-danger w-100 d-block mt-1">
+                            {{ form.location.errors }}
+                            </div>
+                        </div>   
+                    </div>
+
+                    <div class="row col-md-12">
+                        <div class="col-2">
+                            <button type="submit" class="btn btn-primary mt-4 mb-5 " style="width:80%;">Save</button>
+                        </div>
+                        <div class="col-2 ">
+                            <a href="{% url 'mophy:users' %}" style="width:80%;" class="btn btn-primary mt-4 mb-5">Cancel</a>
+                        </div>
+                        <div class="col-10"></div>
+                    </div>
+                </div>
+            </form>
+          </div>
+        </div>
+    </div>
+  </div>
+</div>
+
+
+
+{% endblock %}
+
+
+{% block additional_js %}
+
+
+
+
+<script>
+   function readURL(input) {
+
+      if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+               $('#imagePreview').css('background-image', 'url('+e.target.result +')');
+               $('#imagePreview').hide();
+               $('#imagePreview').fadeIn(650);
+            }
+            reader.readAsDataURL(input.files[0]);
+      }
+   }
+   $("#id_avatar").change(function() {
+      readURL(this);
+   });
+</script> 
+
+
+<script>
+   $(".multi-select").select2({
+      placeholder: "Select the Role"
+  });
+</script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
+
+<script>
+    const contextData = JSON.parse('{{ context_json|safe }}');
+    const phoneInputField = document.querySelector("#mobile");
+    const phoneInput = window.intlTelInput(phoneInputField, {
+      utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+      onlyCountries: contextData.country_list, // Add country codes for Australia and New Zealand
+    });
+</script>
+
+<script>
+    function test(){
+        $('#show-mobile').hide();
+        $('#edit-mobile').show();
+
+    };
+</script>
+
+{% endblock %}

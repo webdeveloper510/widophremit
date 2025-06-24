@@ -1,0 +1,179 @@
+{% extends 'mophy/elements/layouts/admin.html' %}
+{% load static widget_tweaks %}
+
+
+{% block additional_css %}
+
+{% endblock %}
+
+{% block message %}
+{% include 'mophy/elements/alert.html' %}
+{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center h-100 align-items-center">
+  <div class="col-xl-12 col-lg-12">
+    <div class="card">
+        <div class="card-header">
+            <h4 class="card-title">New User Form</h4>
+        </div>
+        <div class="card-body">
+          <div class="basic-form">
+            <form  method="post" enctype="multipart/form-data" novalidate autocomplete="off">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="row col-md-12">
+                        <div class="mb-4 col-md-4">
+                            <label class="form-label">First Name {% if form.First_name.field.required %}<span class="text-danger">*</span> {% endif %}</label>
+                            {{ form.First_name|attr:"type:text"|attr:"class:form-control"|attr:"placeholder:First Name" }}
+                            <div class="text-danger w-100 d-block mt-1">
+                            {{ form.First_name.errors }}
+                            </div>
+                        </div>
+                        <div class="mb-4 col-md-4">
+                            <label class="form-label">Middle Name</label>
+                            {{ form.Middle_name|attr:"type:text"|attr:"class:form-control"|attr:"placeholder:Middle Name" }}
+                        </div>
+                        <div class="mb-4 col-md-4">
+                            <label class="form-label">Last Name {% if form.Last_name.field.required %}<span class="text-danger">*</span> {% endif %}</label>
+                            {{ form.Last_name|attr:"type:text"|attr:"class:form-control"|attr:"placeholder:Last Name" }}
+                            <div class="text-danger w-100 d-block mt-1">
+                            {{ form.Last_name.errors }}
+                            </div>
+                        </div>                        
+                    </div>
+
+                    <div class="row col-md-12 ">
+                        <div class="mb-5 col-md-5">
+                            <label class="form-label">Email {% if form.email.field.required %}<span class="text-danger">*</span> {% endif %}</label>
+                            {{ form.email|attr:"type:email"|attr:"class:form-control"|attr:"placeholder:Email" }}
+                            <div class="text-danger w-100 d-block mt-1">
+                            {{ form.email.errors }}
+                            </div>
+                        </div> 
+                        <div class="mb-4 col-md-4">
+                            <label class="form-label">Mobile {% if form.mobile.field.required %}<span class="text-danger">*</span> {% endif %}</label>
+                            <!-- {{ form.mobile|attr:"type:tel"|attr:"class:form-control"|attr:"placeholder:Mobile" }} -->
+                            <input class="form-control" type="number" id="mobile" step="1" onkeypress="if(this.value.length==10) return false; else return event.charCode >= 48 && event.charCode <= 57 " name="mobile" />                         
+                            <div class="text-danger w-100 d-block mt-1">
+                            {{ form.mobile.errors }}
+                            </div>
+                        </div>  
+                        <div class="mb-3 col-md-3">
+                            <label class="form-label">Date of Birth {% if form.Date_of_birth.field.required %}<span class="text-danger">*</span> {% endif %}</label>
+                            {{ form.Date_of_birth|attr:"type:date"|attr:"class:form-control"|attr:"placeholder:Date_of_birth" }}
+                            <div class="text-danger w-100 d-block mt-1">
+                            {{ form.Date_of_birth.errors }}
+                            </div>
+                        </div>                                              
+                    </div>
+
+                    <div class="row col-md-12">                           
+                        <div class="mb-4 col-md-4">
+                            <label class="form-label">Location {% if form.location.field.required %}<span class="text-danger">*</span> {% endif %}</label>
+                            {{ form.location|attr:"type:text"|attr:"class:form-control"|attr:"placeholder:location" }}
+                            <div class="text-danger w-100 d-block mt-1">
+                            {{ form.location.errors }}
+                            </div>
+                        </div>   
+                        {% if form.password %}
+                        <div class="mb-4 col-md-4">
+                          <label class="form-label">Password {% if form.password.field.required %}<span class="text-danger">*</span>{% endif %}</label>
+                           <div class="input-group transparent-append">
+                              {% comment %} <span class="input-group-text"> <i class="fa fa-lock"></i> </span> {% endcomment %}
+                              
+                              {{ form.password|attr:"class:form-control"|attr:"placeholder:Password"|attr:"id:dz-password"|attr:"type:password" }}
+                              <span class="input-group-text show-pass"> 
+                              <i class="fa fa-eye-slash"></i>
+                              <i class="fa fa-eye"></i>
+                              </span>
+                              <div class="text-danger w-100 d-block mt-1">
+                              {{ form.password.errors }}
+                              </div>
+
+                           </div>
+                        </div>
+                        <div class="mb-4 col-md-4">
+                          <label class="form-label">Confirm Password {% if form.password2.field.required %}<span class="text-danger">*</span>{% endif %}</label>
+                           <div class="input-group transparent-append">
+                              {% comment %} <span class="input-group-text"> <i class="fa fa-lock"></i> </span> {% endcomment %}
+                              
+                              {{ form.password2|attr:"class:form-control"|attr:"placeholder:Confirm Password"|attr:"id:dz-con-password"|attr:"type:password" }}
+                              <span class="input-group-text show-con-pass"> 
+                              <i class="fa fa-eye-slash"></i>
+                              <i class="fa fa-eye"></i>
+                              </span>
+                              <div class="text-danger w-100 d-block mt-1">
+                              {{ form.password2.errors }}
+                              </div>
+                           </div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row col-md-12">
+                        <div class="col-2">
+                            <button type="submit" class="btn btn-primary mt-4 mb-5 " style="width:80%;">Save</button>
+                        </div>
+                        <div class="col-2 ">
+                            <a href="{% url 'mophy:users' %}" style="width:80%;" class="btn btn-primary mt-4 mb-5">Cancel</a>
+                        </div>
+                        <div class="col-10"></div>
+                    </div>
+                </div>
+            </form>
+          </div>
+        </div>
+    </div>
+  </div>
+</div>
+
+
+
+{% endblock %}
+
+
+{% block additional_js %}
+
+
+
+
+<script>
+   function readURL(input) {
+
+      if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+               $('#imagePreview').css('background-image', 'url('+e.target.result +')');
+               $('#imagePreview').hide();
+               $('#imagePreview').fadeIn(650);
+            }
+            reader.readAsDataURL(input.files[0]);
+      }
+   }
+   $("#id_avatar").change(function() {
+      readURL(this);
+   });
+</script> 
+
+
+<script>
+   $(".multi-select").select2({
+      placeholder: "Select the Role"
+  });
+</script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
+
+<script>
+    const phoneInputField = document.querySelector("#mobile");
+    const phoneInput = window.intlTelInput(phoneInputField, {
+      utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+      onlyCountries: ["au", "nz"], // Add country codes for Australia and New Zealand
+    });
+</script>
+
+{% endblock %}
+
