@@ -26,7 +26,7 @@ class DirectDebitView(APIView):
                     "totalAmount": data.get("amount"),
                     "paymentSource": "directDebit",
                     # "lodgementReference": data.get("lodgementReference", "monoova-123"),
-                    "description": data.get("description"),
+                    "description": data.get("description") or "",
                     "directDebit": {
                         "bsbNumber": data.get("bsbNumber"),
                         "accountNumber": data.get("accountNumber"),
@@ -53,7 +53,7 @@ class DirectDebitView(APIView):
                         "amount": data.get("amount")
                         }
                     ],
-                    "description": data.get("description")
+                    "description": data.get("description") or ""
                     }
             url = "https://api.m-pay.com.au/financial/v2/transaction/execute"
             headers = {
