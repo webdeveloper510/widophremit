@@ -871,6 +871,8 @@ class VerifyMobileView(APIView):
             sendemail(html_content, msg)
         user = User.objects.get(email=email)
         data['token']= get_tokens_for_user(user)['access']
+
+        return Response({"code": "200", "data": data})
         
         if data["transactions"] == "None":
             pa = "0"
@@ -883,15 +885,15 @@ class VerifyMobileView(APIView):
             is_digital_Id_verified = sa['is_digital_Id_verified']
         # if upp == None:
         #     return Response({"code": "400", "message": "You are using an old version of the app. Please update!"})
-        if version == None:
-            return Response({"code": "400", "message": "You are using an old version of the app. Please update!"})
-        if data["occupation"] == "old_user" and upp is None:
-            return Response({"code": "400", "message": "You are using an old version of the app. Please update!"})
+        # if version == None:
+        #     return Response({"code": "400", "message": "You are using an old version of the app. Please update!"})
+        # if data["occupation"] == "old_user" and upp is None:
+        #     return Response({"code": "400", "message": "You are using an old version of the app. Please update!"})
         
-        elif data["occupation"] == "old_user":
-            User.objects.filter(email=email).update(occupation= "NA")
-            data["transactions"] = pa
-            return success_response(message= "Login successful", data=data)
+        # elif data["occupation"] == "old_user":
+        #     User.objects.filter(email=email).update(occupation= "NA")
+        #     data["transactions"] = pa
+        #     return success_response(message= "Login successful", data=data)
             # return Response({"code": "400", "message": "You are using an old version of the app. Please update!"})
         elif is_digital_Id_verified != "approved":
             if user_check == 'spam':

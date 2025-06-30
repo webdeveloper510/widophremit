@@ -12,12 +12,18 @@ class DirectDebitView(APIView):
     permission_classes=[IsAuthenticated] 
     def post(self, request):
         try:
-            # user_data = User.objects.filter(id=2).values()
-            # user_data_list = list(user_data)
             user_id = request.user.id
-            user_data_list = get_object_or_404(User,id=user_id)
-            payment_mode = data.get("payment_mode")
+            user_data = User.objects.filter(id=user_id).values()
+            user_data_list = list(user_data)
+
+            # user_data_list = get_object_or_404(User,id=user_id)
+            # print('user_data',user_data)
             data = json.loads(request.body)
+            # data = json.loads(request.body)
+            # print('data', data)
+            # return JsonResponse({'data':data}, status=200)
+
+            payment_mode = data.get("payment_mode")
             # Recipient | # Recipient_bank_details
             # recipient_id = 2
             # recipient_bank_details = get_object_or_404(Recipient_bank_details,recipient_id=recipient_id)
@@ -62,10 +68,9 @@ class DirectDebitView(APIView):
             }
             response = requests.post(url, json=payload, headers=headers)
             response_data = response.json()
-            # print('response_data',response_data)
             dataRes = {
-                "customer_id": user_data_list.customer_id,
-                "recipient_name": f"{user_data_list.First_name} {user_data_list.Last_name}",
+                "customer_id": user_data_list[0].get("customer_id"),
+                "recipient_name": f"{user_data_list[0].get("First_name")} {user_data_list[0].get("Last_name")}",
                 "send_currency": 'AUD',
                 "receive_currency": 'NGN',
                 "amount": data.get("amount"),
@@ -75,7 +80,7 @@ class DirectDebitView(APIView):
                 "receive_method": "Bank transfer",
                 "payout_partner": "",
                 "exchange_rate": 1000.00,
-                "payment_status": TRANSACTION.pending_review if response_data.get("transactionId") else TRANSACTION.incomplete,
+                "payment_status": TRANSACTION.get('pending_review') if response_data.get("transactionId") else TRANSACTION.get('incomplete'),
                 "payment_status_reason": response_data.get("statusDescription") or "",
                 "transaction_id": response_data.get("transactionId"),
                 "reason": response_data.get("reason") or "",
@@ -83,7 +88,7 @@ class DirectDebitView(APIView):
             }
             # print('dataRes',dataRes)
 
-            # Transaction_details.objects.create(**dataRes)
+            Transaction_details.objects.create(**dataRes)
             # print('transactionId',response_data.get('transactionId'))
             return JsonResponse(response_data, status=response.status_code)
 
