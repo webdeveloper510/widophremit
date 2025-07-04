@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from auth_app.serializers import *
 import stripe
 from django.conf import settings
-from Remit_Assure.settings import *
+from Widoph_Remit.settings import *
 from rest_framework import status
 from requests_toolbelt import MultipartEncoder
 from auth_app.models import *
@@ -22,7 +22,7 @@ from rest_framework.views import APIView
 import json
 from datetime import date
 from itertools import chain
-from Remit_Assure.response import *
+from Widoph_Remit.response import *
 from django.shortcuts import get_object_or_404, redirect, render
 from django.core.exceptions import ObjectDoesNotExist
 from decimal import Decimal
@@ -105,7 +105,7 @@ from payment_app.serializers import *
 import stripe
 import ssl
 import datetime
-from Remit_Assure.response import *
+from Widoph_Remit.response import *
 from django.http import HttpResponse
 from django.template.loader import get_template
 from weasyprint import HTML, CSS

@@ -1,5 +1,5 @@
-from Remit_Assure.helpers import *
-from Remit_Assure.package import *
+from Widoph_Remit.helpers import *
+from Widoph_Remit.package import *
 
 transaction =  settings.TRANSACTION
 

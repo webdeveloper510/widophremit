@@ -1,4 +1,4 @@
-from Remit_Assure.package import *
+from Widoph_Remit.package import *
 import json
 from django.conf import settings
 import requests

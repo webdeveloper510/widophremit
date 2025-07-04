@@ -6,13 +6,13 @@ import datetime
 from datetime import date
 from dotenv import load_dotenv
 import os
-from Remit_Assure.settings import *
+from Widoph_Remit.settings import *
 
 load_dotenv() 
 
 # HOST = "TEST"
 # HOST = "DEV"
-HOST= "LOCAL"
+HOST= "DEV"
 
 if HOST == "TEST":
   SEND_OTP = False
@@ -37,9 +37,9 @@ SECRET_KEY = 'django-insecure-3i7eb85@4c(4r9rc7+5y69qsza11b22!ochy#!pl9t#017v74n
 DEBUG = True
 
 if HOST == "LIVE":
-  ALLOWED_HOSTS = ['api.remitassure.com','remitassure.com']
+  ALLOWED_HOSTS = ['api.widophremit.com','widophremit.com']
 elif HOST == "TEST":
-  ALLOWED_HOSTS = ['admin.qa.remitassure.com','qa.remitassure.com']
+  ALLOWED_HOSTS = ['admin.qa.widophremit.com','qa.widophremit.com']
 elif HOST == "DEV":
   ALLOWED_HOSTS = ['54.151.50.98','54.151.50.98:8000',]
 else:
@@ -112,7 +112,7 @@ MIDDLEWARE = [
   # 'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
-ROOT_URLCONF = 'Remit_Assure.urls'
+ROOT_URLCONF = 'Widoph_Remit.urls'
 
 TEMPLATES = [
   {
@@ -131,7 +131,7 @@ TEMPLATES = [
   },
 ]
 
-WSGI_APPLICATION = 'Remit_Assure.wsgi.application'
+WSGI_APPLICATION = 'Widoph_Remit.wsgi.application'
 
 
 
@@ -142,7 +142,7 @@ if HOST == "LOCAL":
   DATABASES = {
     'default': {
     'ENGINE': 'django.db.backends.mysql',
-    'NAME': 'Remit_Assure',
+    'NAME': 'WidophRemitLocal',
     'USER': 'root',
     # 'PASSWORD': '1234',
     'PASSWORD': '',
@@ -171,7 +171,7 @@ elif HOST == 'DEV':
   DATABASES = {
   'default': {
   'ENGINE': 'django.db.backends.mysql',
-  'NAME': 'Remit_Assure',
+  'NAME': 'WidophRemitDev',
   'USER': os.environ.get('DB_USER_DEV'),
   'PASSWORD': os.environ.get('DB_PASSWORD_DEV'),
   'HOST': 'localhost', # Or an IP Address that your DB is hosted on
@@ -185,7 +185,7 @@ else:
   DATABASES = {
   'default': {
   'ENGINE': 'django.db.backends.mysql',
-  'NAME': 'Remit_Assure',
+  'NAME': 'WidophRemitTest',
   'USER': os.environ.get('DB_USER_QA'),
   'PASSWORD': os.environ.get('DB_PASSWORD_QA'),
   'HOST': 'localhost', # Or an IP Address that your DB is hosted on
@@ -306,12 +306,12 @@ elif HOST == "DEV":
 
 elif HOST == "LIVE":
   CORS_ALLOWED_ORIGINS = [
-  "https://api.remitassure.com",
+  "https://api.widophremit.com",
   "https://widophremit.com",
   "http://localhost:3000",
   ]
-  CSRF_TRUSTED_ORIGINS = ['https://api.remitassure.com']
-  BASE_URL= "https://api.remitassure.com"
+  CSRF_TRUSTED_ORIGINS = ['https://api.widophremit.com']
+  BASE_URL= "https://api.widophremit.com"
   FRAUDNET_ORDER = "LIVE"
   EMAIL_ACTIVATION_LINK = "https://widophremit.com/remi-user-email-verification/"
   PAYMENT_ID = str(date.today())
@@ -319,15 +319,14 @@ elif HOST == "LIVE":
 else:
   CORS_ALLOWED_ORIGINS = [
   "http://localhost:3000",
-  "https://gormefoods.com",
-  "https://qa.remitassure.com",
-  "https://admin.qa.remitassure.com",
+  "https://qa.widophremit.com",
+  "https://admin.qa.widophremit.com",
   ]
 
-  CSRF_TRUSTED_ORIGINS = ['https://admin.qa.remitassure.com']
-  BASE_URL= "https://admin.qa.remitassure.com"
+  CSRF_TRUSTED_ORIGINS = ['https://admin.qa.widophremit.com']
+  BASE_URL= "https://admin.qa.widophremit.com"
   FRAUDNET_ORDER = "TEST"
-  EMAIL_ACTIVATION_LINK = "https://qa.remitassure.com/remi-user-email-verification/"
+  EMAIL_ACTIVATION_LINK = "https://qa.widophremit.com/remi-user-email-verification/"
   PAYMENT_ID = str(date.today())
 
 
@@ -463,7 +462,7 @@ else:
   ZAI_REMIT_USER_ID = os.environ.get('ZAI_REMIT_USER_ID')
   ZAI_URL_ACCOUNT = "https://sandbox.au-0000.api.assemblypay.com"
   ZAI_NPP_URL = "https://int-npp-master.platforms.prelive.assemblypayments.com/npp/receive-request"
-  ZAI_PAYID_DOMAIN = "@mydomain.com"
+  ZAI_PAYID_DOMAIN = "@mywidophremit.com"
   ABN_NO = os.environ.get('ZAI_ABN_NO')
 
 
@@ -482,7 +481,7 @@ if HOST == "LIVE":
 else:
   REMIT_ASSURE_MOBILE = os.environ.get('REMIT_ASSURE_NOTIFICATION_MOBILE')
   REMIT_ASSURE_EMAIL = os.environ.get('REMIT_ASSURE_NOTIFICATION_EMAIL')
-  INVITE_LINK = "https://qa.remitassure.com/sign-up"
+  INVITE_LINK = "https://qa.widophremit.com/sign-up"
 
 SESSION_COOKIE_AGE = 1800  # 30 minutes in seconds
 SESSION_SAVE_EVERY_REQUEST = True
@@ -505,14 +504,14 @@ if HOST == "LIVE":
   SUPPORT_CENTER_LINK = "https://widophremit.com/help"
   HOME_LINK = "https://widophremit.com/"
   UNSUBSCRIBE_LINK = "https://widophremit.com/"
-  REMITASSURE_LINK = "https://widophremit.com/"
+  WIDOPH_REMIT_LINK = "https://widophremit.com/"
   LOGIN_LINK = "https://widophremit.com/login"
 else:
-  SUPPORT_CENTER_LINK = "https://qa.remitassure.com/help"
-  HOME_LINK = "https://qa.remitassure.com/"
-  UNSUBSCRIBE_LINK = "https://qa.remitassure.com/"
-  REMITASSURE_LINK = "https://qa.remitassure.com/"
-  LOGIN_LINK = "https://qa.remitassure.com/login"
+  SUPPORT_CENTER_LINK = "https://qa.widophremit.com/help"
+  HOME_LINK = "https://qa.widophremit.com/"
+  UNSUBSCRIBE_LINK = "https://qa.widophremit.com/"
+  WIDOPH_REMIT_LINK = "https://qa.widophremit.com/"
+  LOGIN_LINK = "https://qa.widophremit.com/login"
 
 #Brevo for newsletters
 BREVO_URL = os.environ.get('BREVO_URL')
@@ -569,13 +568,13 @@ PERMISSION_MODULES = ['Admin User','Role', 'Customer','Recipient','Transaction',
 #WidophRemit zai users to receive funds
 if HOST == 'LIVE':
   ZAI_ADMIN_USERS = [
-    {'bank_name':"ANZ Bank",'zai_user_id':"192688",'zai_email':"treasury@remitassure.com"},
-    {'bank_name':"Commbank",'zai_user_id':"192684",'zai_email':"obiukabiala@gmail.com"}
+    {'bank_name':"ANZ Bank",'zai_user_id':"",'zai_email':""},
+    {'bank_name':"Commbank",'zai_user_id':"",'zai_email':""}
   ]
 else:
   ZAI_ADMIN_USERS = [
-    {'bank_name':"Bank of Australia (Platform user)",'zai_user_id':"6569edd28e93c53f503c1b0bcd5c507c",'zai_email':"test-user@promisepay.com"},
-    {'bank_name':"Bank of Australia",'zai_user_id':"12345678",'zai_email':"remitassure@gmail.com"}
+    {'bank_name':"Bank of Australia (Platform user)",'zai_user_id':"",'zai_email':""},
+    {'bank_name':"Bank of Australia",'zai_user_id':"",'zai_email':""}
   ]
 
 #discount amount for invitee and inviter
@@ -584,8 +583,8 @@ REFERRED_TO_AMOUNT = 25 #invited to
 
 #custom otp for custom users to login with custom mobiles and emails
 CUSTOM_OTP = "902300"
-CUSTOM_MOBILES = ['+610400240429','+61400240429','+61400240430','+610400240430','+61400240431','+610400240501','+61400240501','+61400240502','+610400240502','+61400240503','+610400240503','+610400240430','+61411223344','+610411223344','+61412022024','+610412022024','+61413022024','+610413022024','+61414022024','+610414022024','+61415022024','+610415022024','+61416022024','+610416022024','+61417022024','+610417022024']
-CUSTOM_EMAILS = ['Itaudit@remitassure.com','Itaudit1@remitassure.com','Itaudit2@remitassure.com','Itaudit3@remitassure.com','Itaudit4@remitassure.com','Itaudit5@remitassure.com','obiyo.orji@gmail.com','obiukabiala@icloud.com','test240203@remitassure.com','test120424@remitassure.com','test130424@remitassure.com',' test140424@remitassure.com','test150424@remitassure.com']
+CUSTOM_MOBILES = []
+CUSTOM_EMAILS = []
 
 #optional fields for user table
 PROFILE_COMPLETED_OPTIONAL_LOWER_FIELDS = ['middle_name','flat','stripe_customer_id','country_of_birth','is_verified','destination_currency', 'referred_by', 'gender','aml_pep_status','address']
@@ -695,36 +694,14 @@ REFERRAL_TYPES = ['Invite','Birthday']
 
 
 #Transaction usage values 
-PAYMENT_PER_ANNUM_LIST = [
-  {'Tier 1 - Less than 5 times': "4"},
-  {'Tier 2 - 5 to 10 times': "10" },
-  {'Tier 3 - Greater than 10 times': "unlimited"},
-  {'Tier-1 Less than 5 times': "4"},
-  {'Tier-2 5-10 Times': "10" },
-  {'Tier-3 Greater than 10 Times': "unlimited"},
-]
+PAYMENT_PER_ANNUM_LIST = []
 
-VALUE_PER_ANNUM_LIST = [
-  {'Tier 1 - Less than $30,000': "29999.99"},
-  {'Tier 2 - $30,000 to $100,000': "100000" },
-  {'Tier 3 - Greater than $100,000': "unlimited"},  
-  {'Tier-1 Less than $30,000': "29999.99"},
-  {'Tier-2 $30,000 - $100,000': "100000" },
-  {'Tier-3 Greater than $100,000': "unlimited"},
-]
+VALUE_PER_ANNUM_LIST = []
 
 #update list for adminpanel for Tiers
-ADMIN_PAYMENT_PER_ANNUM_LIST = [
-  {'Tier-1 Less than 5 times': "4"},
-  {'Tier-2 5-10 Times': "10" },
-  {'Tier-3 Greater than 10 times': "unlimited"}
-]
+ADMIN_PAYMENT_PER_ANNUM_LIST = []
 
-ADMIN_VALUE_PER_ANNUM_LIST = [
-  {'Tier-1 Less than $30,000': "29999.99"},
-  {'Tier-2 $30,000 - $100,000': "100000" },
-  {'Tier-3 Greater than $100,000': "unlimited"}
-]
+ADMIN_VALUE_PER_ANNUM_LIST = []
 
 ADMIN_VERIFF_STATUS_LIST = [
   {'Yes': "approved"},
@@ -746,8 +723,8 @@ if HOST == 'LIVE':
   ]
 else:
   ZAI_PAYOUT_USERS = [
-    {'bank_name':"Bank of Australia",'zai_user_id':"192689",'zai_email':"currencycloud@gmail.com"},
-    {'bank_name':"Bank of Australia",'zai_user_id':"12345678",'zai_email':"remitassure@gmail.com"}
+    {'bank_name':"Bank of Australia",'zai_user_id':"",'zai_email':""},
+    {'bank_name':"Bank of Australia",'zai_user_id':"",'zai_email':""}
   ]
 
 
@@ -768,3 +745,6 @@ else:
   AUSTRAC_VERSION = os.environ.get('AUSTRAC_VERSION')
   AUSTRAC_IFTI_URL = "https://online.austrac.gov.au/ao-trn/automatedFileUpload"
   AUSTRAC_TTR_URL = "https://online.austrac.gov.au/ao-trn/automatedFileUpload"
+
+
+MONOOVA_API_ENDPOINT = os.environ.get('MONOOVA_API_ENDPOINT')

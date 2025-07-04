@@ -21,8 +21,8 @@ fn_cancelled = "cancelled"
 
 
 
-from Remit_Assure.package import *
-from Remit_Assure.response import *
+from Widoph_Remit.package import *
+from Widoph_Remit.response import *
 from auth_app.models import *
 from auth_app.serializers import *
 from auth_app.helpers import *

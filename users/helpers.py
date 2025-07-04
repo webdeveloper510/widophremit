@@ -1,4 +1,4 @@
-from Remit_Assure.package import *
+from Widoph_Remit.package import *
 from datetime import datetime
 from payment_app.views import *
 from payment_app.models import withdraw_zai_funds

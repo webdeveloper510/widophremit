@@ -1,7 +1,7 @@
-from Remit_Assure.package import *
+from Widoph_Remit.package import *
 from .sendsms import *
 from .model_queries import *
-from Remit_Assure.helpers import success_logs, error_logs
+from Widoph_Remit.helpers import success_logs, error_logs
 from django.core.files.base import ContentFile
 
 def replace_(key):

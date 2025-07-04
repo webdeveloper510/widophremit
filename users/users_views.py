@@ -2,7 +2,7 @@
 from .helpers import *
 from auth_app.model_queries import *
 from payment_app.views import generate_pdf_receipt
-from Remit_Assure.helpers import error_logs, success_logs, get_current_datetime
+from Widoph_Remit.helpers import error_logs, success_logs, get_current_datetime
 from payment_app.helper import create_zai_bank_account, zai_create_user,zai_update_user
 
 transaction =  TRANSACTION

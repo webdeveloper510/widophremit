@@ -1,6 +1,6 @@
 from django.shortcuts import render
-from Remit_Assure import settings
-from Remit_Assure.package import *
+from Widoph_Remit import settings
+from Widoph_Remit.package import *
 import uuid
 
 
@@ -15,13 +15,7 @@ class DirectDebitView(APIView):
             user_id = request.user.id
             user_data = User.objects.filter(id=user_id).values()
             user_data_list = list(user_data)
-
-            # user_data_list = get_object_or_404(User,id=user_id)
-            # print('user_data',user_data)
             data = json.loads(request.body)
-            # data = json.loads(request.body)
-            # print('data', data)
-            # return JsonResponse({'data':data}, status=200)
 
             payment_mode = data.get("payment_mode")
             # Recipient | # Recipient_bank_details
@@ -55,13 +49,13 @@ class DirectDebitView(APIView):
                             "endToEndId": "INV/001-5678",
                             "remitterName": "Widoph Remit"
                         },
-                        # "lodgementReference": "string",
+                        # "lodgementReference": data.get("lodgementReference", "monoova-123"),
                         "amount": data.get("amount")
                         }
                     ],
                     "description": data.get("description") or ""
                     }
-            url = "https://api.m-pay.com.au/financial/v2/transaction/execute"
+            url = f"{settings.MONOOVA_API_ENDPOINT}/financial/v2/transaction/execute"
             headers = {
                 "Authorization": "83224362-77E8-4CE3-BA96-6A59D1BD83DB",
                 "Content-Type": "application/json",
@@ -70,7 +64,7 @@ class DirectDebitView(APIView):
             response_data = response.json()
             dataRes = {
                 "customer_id": user_data_list[0].get("customer_id"),
-                "recipient_name": f"{user_data_list[0].get("First_name")} {user_data_list[0].get("Last_name")}",
+                "recipient_name": f'{user_data_list[0].get("First_name")} {user_data_list[0].get("Last_name")}',
                 "send_currency": 'AUD',
                 "receive_currency": 'NGN',
                 "amount": data.get("amount"),
@@ -86,10 +80,7 @@ class DirectDebitView(APIView):
                 "reason": response_data.get("reason") or "",
                 "date": datetime.strptime(datetime.today().strftime("%Y-%m-%d"), "%Y-%m-%d").date(),
             }
-            # print('dataRes',dataRes)
-
             Transaction_details.objects.create(**dataRes)
-            # print('transactionId',response_data.get('transactionId'))
             return JsonResponse(response_data, status=response.status_code)
 
         except Exception as e:

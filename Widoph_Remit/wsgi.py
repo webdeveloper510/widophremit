@@ -1,5 +1,5 @@
 """
-WSGI config for Remit_Assure project.
+WSGI config for Widoph_Remit project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Remit_Assure.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Widoph_Remit.settings')
 
 application = get_wsgi_application()

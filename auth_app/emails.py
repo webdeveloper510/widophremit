@@ -1,4 +1,4 @@
-from Remit_Assure.package import *
+from Widoph_Remit.package import *
 from auth_app.sendsms import *
 from .model_queries import *
 from .helpers import *
@@ -128,7 +128,7 @@ def send_welcome_email(email):
     try:
         if settings.SEND_EMAIL == True :
             image_dict = email_template_image()              
-            html_content = render_to_string('welcome.html', {'data':image_dict,'home':settings.HOME_LINK, 'support':settings.SUPPORT_CENTER_LINK, 'unsubscribe':settings.UNSUBSCRIBE_LINK, 'remitassure':settings.REMITASSURE_LINK})
+            html_content = render_to_string('welcome.html', {'data':image_dict,'home':settings.HOME_LINK, 'support':settings.SUPPORT_CENTER_LINK, 'unsubscribe':settings.UNSUBSCRIBE_LINK, 'remitassure':settings.WIDOPH_REMIT_LINK})
             msg = EmailMultiAlternatives(
                 subject='Welcome to Widoph Remit',
                 body='Welcome to Widoph Remit',

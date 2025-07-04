@@ -1,4 +1,4 @@
-from Remit_Assure.package import *
+from Widoph_Remit.package import *
 import json
 from django.conf import settings
 import requests
@@ -6,7 +6,7 @@ import sys
 from twilio.rest import Client
 import phonenumbers
 from urllib.parse import urlencode
-from Remit_Assure.helpers import *
+from Widoph_Remit.helpers import *
 
 def comma_separated(send_amount, receive_amount, exchange_rate):
     if send_amount ==  None or send_amount == "":

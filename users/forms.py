@@ -6,7 +6,7 @@ from django.contrib.auth.forms import PasswordResetForm
 from payment_app.models import *
 from payment_app.serializers import *
 from service_providers.models import *
-from Remit_Assure.package import *
+from Widoph_Remit.package import *
 
 import phonenumbers as pn 
 from phonenumbers import geocoder 

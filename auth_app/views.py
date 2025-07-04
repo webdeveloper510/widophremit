@@ -1,14 +1,14 @@
-from Remit_Assure.package import *
+from Widoph_Remit.package import *
 from auth_app.sendsms import *
 import datetime
 import math
-from Remit_Assure.response import *
+from Widoph_Remit.response import *
 from dateutil import parser
 from .serializers import *
 from .model_queries import *
 from .helpers import *
 from .emails import *
-from Remit_Assure.helpers import *
+from Widoph_Remit.helpers import *
 from payment_app.helper import CreateErrorFile, CreateTextFile
 
 referral_dict = settings.REFERRALS

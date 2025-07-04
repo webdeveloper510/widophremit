@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from Remit_Assure.package import *
+from Widoph_Remit.package import *
 from mobile_app.sendsms import *
 from auth_app.sendsms import *
 from auth_app.models import *

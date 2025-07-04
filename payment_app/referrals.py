@@ -1,7 +1,7 @@
-from Remit_Assure.package import *
+from Widoph_Remit.package import *
 import calendar
 from dateutil import parser
-from Remit_Assure.helpers import error_logs, success_logs
+from Widoph_Remit.helpers import error_logs, success_logs
 
 def referral_birthday(user_id, dob):
     try:

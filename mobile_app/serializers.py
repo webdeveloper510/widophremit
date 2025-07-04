@@ -6,7 +6,7 @@ from auth_app.models import *
 from django.utils.encoding import smart_str,force_bytes, DjangoUnicodeDecodeError
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from Remit_Assure.settings import BASE_URL
+from Widoph_Remit.settings import BASE_URL
 import datetime 
 from django.contrib.auth import password_validation
 from django.contrib.auth.hashers import make_password

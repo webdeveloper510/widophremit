@@ -1,6 +1,6 @@
-from Remit_Assure.package import *
+from Widoph_Remit.package import *
 from auth_app.model_queries import *
-from Remit_Assure.helpers import *
+from Widoph_Remit.helpers import *
 import socket
 from datetime import datetime
 

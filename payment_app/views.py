@@ -1,4 +1,4 @@
-from Remit_Assure.package import *
+from Widoph_Remit.package import *
 from service_providers.models import *
 from auth_app.sendsms import *
 from auth_app.views import *
@@ -1732,7 +1732,7 @@ def email_transaction_receipt(transaction_id, type):
                 customer_id = customer_name[0]['customer_id']
                 customer_name = str(str(customer_name[0]['First_name'])+" "+str(customer_name[0]['Last_name']))
                 context.update(login=settings.LOGIN_LINK, support=settings.SUPPORT_CENTER_LINK,customer_name = customer_name)
-                context2.update(remitassure=settings.REMITASSURE_LINK,login=settings.LOGIN_LINK,support=settings.SUPPORT_CENTER_LINK,email=user_email, customer_id=customer_id, type="transaction",customer_name=customer_name,transaction=context2_dict)
+                context2.update(widophremit=settings.WIDOPH_REMIT_LINK,login=settings.LOGIN_LINK,support=settings.SUPPORT_CENTER_LINK,email=user_email, customer_id=customer_id, type="transaction",customer_name=customer_name,transaction=context2_dict)
                 if User_address.objects.filter(user_id=int(user_id)).exists():
                     a = User_address.objects.filter(user_id=int(user_id)).values('building','street','city','state','country')
                     customer_address = str(str(a[0]['building'])+" "+str(a[0]['street'])+" "+str(a[0]['city'])+" "+str(a[0]['state'])+" "+str(a[0]['country']))

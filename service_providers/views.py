@@ -1,5 +1,5 @@
-from Remit_Assure.package import *
-from Remit_Assure.helpers import error_logs
+from Widoph_Remit.package import *
+from Widoph_Remit.helpers import error_logs
 
 ################################ Blogs Views ################################
 
