@@ -587,6 +587,10 @@ REFERRED_TO_AMOUNT = 25 #invited to
 CUSTOM_OTP = "902300"
 CUSTOM_MOBILES = []
 CUSTOM_EMAILS = []
+CUSTOMER_TYPES = [
+  {"text":"Individual", "value":"individual"},
+  {"text":"Business", "value":"business"}
+]
 
 #optional fields for user table
 PROFILE_COMPLETED_OPTIONAL_LOWER_FIELDS = ['middle_name','flat','stripe_customer_id','country_of_birth','is_verified','destination_currency', 'referred_by', 'gender','aml_pep_status','address']
