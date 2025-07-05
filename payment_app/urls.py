@@ -72,6 +72,10 @@ urlpatterns = [
     ################ Another Views ################  
     path('cloud-currency/login/', views.Cloud_Currency_ViewSet.as_view({'post':'login'})),   
     path('test/', views.test_View.as_view()),   
+    path('upload-document/', views.upload_document.as_view()),   
+    path('currencies/', views.get_currencies_list.as_view()),  
+
+    path('customer-types/',views.CustomerTypes.as_view())
 
 ] 
 

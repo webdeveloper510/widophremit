@@ -13,6 +13,10 @@ from .helper import *
 import datetime
 from datetime import datetime
 
+
+# customer Types
+CUSTOMER_TYPES = settings.CUSTOMER_TYPES
+
 #stripe 
 stripe.api_key = settings.API_SECRET_KEY
 stripe.api_version = "2020-08-27"
@@ -91,7 +95,7 @@ class Recipient_account_number_validation(APIView):
             # if not account_number or str(account_number).strip() == '':
             #     return bad_response("Please enter account number")
             if account_number:
-                recipient_users = Recipient.objects.filter(user_id=request.user.id).values('id')
+                recipient_users = Recipient.objects.filter(user_id=request.user.id, delete=False).values('id')
                 if is_obj_exists(Recipient_bank_details, {'recipient_id__in':recipient_users, 'account_number':account_number}):
                     return bad_response('Recipient with this account number already exists!')           
             return success_response("success")
@@ -117,11 +121,19 @@ class Recipient_create_View(APIView):
             payload = request.data
             user_id = request.user.id
 
-            RECIPIENT_FIELDS = ['first_name','last_name','mobile','building','street','city','state','country','country_code','bank_name','account_number']
+            RECIPIENT_FIELDS = ['first_name','last_name','building','street','city','state','country','country_code','bank_name','account_number', 'account_type']
             #validation
             for k in RECIPIENT_FIELDS:
                 if not k in payload or str(k).strip() == '' or k == None:
                     return bad_response("Please enter "+replace_(k))
+           
+           
+            RECIPIENT_BUSINESS_FIELDS = ['business_name', 'business_nature', 'registration_date', 'registration_number','registration_country', 'business_address']
+            if payload['account_type'] == 'business':
+                for k in RECIPIENT_BUSINESS_FIELDS:
+                    if not k in payload or str(k).strip() == '' or k == None:
+                        return bad_response("Please enter "+replace_(k))
+
 
             #creating account name
             account_name = str(payload['first_name'])+" "+str(payload['last_name'])
@@ -139,11 +151,11 @@ class Recipient_create_View(APIView):
             #         return bad_response(message="Recipient with this mobile number already exists!")
 
             #account number validation  
-            recipient_users = Recipient.objects.filter(user_id=user_id).values('id')
+            recipient_users = Recipient.objects.filter(user_id=user_id, delete=False).values('id')
             if is_obj_exists(Recipient_bank_details, {'recipient_id__in':recipient_users, 'account_number':payload['account_number']}):
                 return bad_response('Recipient with this account number already exists')            
            
-            create_recipient_dict = {'user_id':user_id,'first_name':payload['first_name'], 'middle_name':middle_name, 'last_name': payload['last_name'], 'email':email, 'mobile':payload['mobile'], 'flat':flat, 'building':payload['building'], 'street':payload['street'], 'city':payload['city'], 'state':payload['state'], 'country':payload['country'], 'country_code':payload['country_code'], 'postcode':postcode}
+            create_recipient_dict = {'user_id':user_id,'first_name':payload['first_name'], 'middle_name':middle_name, 'last_name': payload['last_name'], 'email':email, 'flat':flat, 'building':payload['building'], 'street':payload['street'], 'city':payload['city'], 'state':payload['state'], 'country':payload['country'], 'country_code':payload['country_code'], 'postcode':postcode, 'account_type': payload['account_type']}
             if 'address' in payload:
                 create_recipient_dict.update(address=payload['address'])
             recipient_data = create_model_obj(Recipient, create_recipient_dict)
@@ -156,6 +168,14 @@ class Recipient_create_View(APIView):
             bank_dict = {'recipient_id':serializer.data['id'],'bank_name':payload['bank_name'],'account_name':account_name,'account_number':payload['account_number']}
             bank_data = create_model_obj(Recipient_bank_details, bank_dict)           
             data.update(bank_dict)
+
+
+            if payload['account_type'] == 'business':
+                #creating recipient bank details
+                business_dict = {'recipient_id':serializer.data['id'],'business_name':payload['business_name'],'business_nature':payload['business_nature'],'registration_date':payload['registration_date'],'registration_number':payload['registration_number'],'registration_country':payload['registration_country'],'business_address':payload['business_address']}
+                bank_data = create_model_obj(Recipient_business_details, business_dict)           
+                data.update(business_dict)
+
             return success_response("success", data_to_str([data])[0])
         except Exception as e:
             exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -175,7 +195,7 @@ class Recipient_list_View(APIView):
             user_id = request.user.id
             if not is_obj_exists(Recipient, {'user_id':user_id}):
                 return bad_response("Recipients not found")
-            recipient_data = get_all_filter_values(Recipient, {'user_id':user_id})
+            recipient_data = get_all_filter_values(Recipient, {'user_id':user_id, 'delete':False})
             for i in recipient_data:
                 if is_obj_exists(Recipient_bank_details, {'recipient_id':i['id']}):
                     bank_data = filter_model_objs(Recipient_bank_details, {'recipient_id':i['id']}, {'bank_name','account_name','account_number'})
@@ -198,11 +218,16 @@ class Recipient_update_View(APIView):
     @csrf_exempt
     def get(self, request, pk, format=None):
         try:
-            if not is_obj_exists(Recipient, {'id':pk}):
+            if not is_obj_exists(Recipient, {'id':pk, 'delete':False}):
                 return bad_response("Recipient does not exists!")
             data = get_all_filter_values(Recipient, {'id':pk})[0]
             bank = filter_model_objs(Recipient_bank_details, {'recipient':pk}, {'recipient_id','bank_name','account_name','account_number'})
+
+            business = filter_model_objs(Recipient_business_details, {'recipient':pk}, {'recipient_id','business_name','business_nature','registration_date','registration_number','registration_country','business_address'})
+
             data.update(bank[0])
+            if business:
+                data.update(business[0])
             return success_response("success", data_to_str([data])[0])
         except Exception as e:
             exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -221,13 +246,14 @@ class Recipient_update_View(APIView):
         middle_name = request.data.get("middle_name")
         flat = request.data.get("flat")
         postcode = request.data.get("postcode")
+        account_type = request.data.get("account_type")
 
         try:
             payload = request.data
             user_id = request.user.id
-            if not is_obj_exists(Recipient, {'user':user_id, 'id':pk}):
+            if not is_obj_exists(Recipient, {'user':user_id, 'id':pk, 'delete':False}):
                 return bad_response("Recipient does not exists!")   
-            RECIPIENT_FIELDS = ['first_name','last_name','mobile','building','street','city','state','country','country_code','bank_name','account_number']
+            RECIPIENT_FIELDS = ['first_name','last_name','building','street','city','state','country','country_code','bank_name','account_number']
             
             #validation
             for k in RECIPIENT_FIELDS:
@@ -235,8 +261,8 @@ class Recipient_update_View(APIView):
                     return bad_response("Please enter "+replace_(k))
                 
             #account number validation
-            r_id = Recipient.objects.filter(user_id=user_id)
-            if 'account_number' in payload and is_obj_exists(Recipient_bank_details, {'recipient_id__in':r_id, 'account_number':payload['account_number']}):
+            r_id = Recipient.objects.filter(user_id=user_id, delete=False)
+            if 'account_number' in payload and is_obj_exists(Recipient_bank_details, {'recipient_id__in':r_id, 'account_number':payload['account_number'], 'delete':False}):
                 rbank = Recipient_bank_details.objects.filter(recipient_id=pk)
                 if str(rbank[0].account_number) != str(payload['account_number']):
                     return bad_response("Account number already exists!")
@@ -256,12 +282,27 @@ class Recipient_update_View(APIView):
             data = dict(recipient_serializer.data)
 
             request.data['account_name'] = data['first_name']+" "+data['last_name']
+            
             #updating recipient bank data
             bank_obj = Recipient_bank_details.objects.get(id=pk)
             bank_serializer = Update_Recipient_Bank_Serializer(bank_obj, data=request.data, partial=True)
             if bank_serializer.is_valid():
                 bank_serializer.save()
+
+            
+            if account_type == 'business':
+                #updating recipient business data
+                business_obj = Recipient_business_details.objects.get(recipient_id=pk)
+                business_serializer = Update_Recipient_Business_Serializer(business_obj, data=request.data, partial=True)
+                if business_serializer.is_valid():
+                    business_serializer.save()
+
+                data.update(business_serializer.data)
+
+
+            
             data.update(bank_serializer.data)
+            
             return success_response("success", data_to_str([data])[0])
         except Exception as e:
             exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -275,17 +316,15 @@ class Recipient_update_View(APIView):
         try:
             if not is_obj_exists(Recipient, {'id':pk}):
                 return bad_response("Recipient does not exists!")
-            recipient =  Recipient.objects.get(pk=pk)
-            bank = Recipient_bank_details.objects.filter(recipient_id=pk)
-            if recipient.delete() and bank.delete():
-                return success_response("Recipient deleted successfully")
-            return bad_response("Recipient is not deleted")
+            recipient =  Recipient.objects.filter(id=pk).update(delete=True)
+            Recipient_bank_details.objects.filter(recipient_id=pk).update(delete=True)
+            return success_response("Recipient deleted successfully")
         except Exception as e:
             exc_type, exc_obj, exc_tb = sys.exc_info()
             file_content = str(e)+ "in line " +str(exc_tb.tb_lineno)+" in payment_app/views"
             CreateErrorFile(file_content)
             error_logs(file_content)
-            return bad_response(message=str(e)+" in line "+str(exc_tb.tb_lineno))
+            return bad_response("Recipient is not deleted")
         
 
 ################################ Zai PayId Per User ################################  
@@ -365,7 +404,7 @@ class Zai_register_payid_peruser_View(APIView):
 
                 #registering pay id with virtual account id
                 payid = zai_create_payid(request.user.customer_id)
-                payid_response =  zai_register_payid_peruser(access_token, virtual_account_id, payid, zai_user_id)
+                payid_response =  zai_register_payid_peruser(access_token, virtual_account_id, payid, zai_user_id, request.user.First_name, request.user.Last_name)
                 if 'errors' in payid_response:
                     return bad_response(payid_response['errors'])
                 
@@ -430,7 +469,7 @@ class Zai_payid_per_user_payment_View(APIView):
             payment_status =  Transaction_details.objects.filter(transaction_id=transaction_id).values()
             User.objects.filter(id=user_id).update(source_currency=str(payment_status[0]['send_currency']), destination_currency=str(payment_status[0]['receive_currency']))      
             
-            #sending notifications to WidophRemit via email and sms 
+            #sending notifications to RemitAssure via email and sms 
             if str(payment_status[0]['payment_status']) != str(transaction['pending_review']):
                 if Transaction_details.objects.filter(customer_id=user.data['customer_id']).exists():
                     transactions = Transaction_details.objects.filter(customer_id=user.data['customer_id']).count()                    
@@ -643,17 +682,20 @@ class Zai_payto_agreement_payment_View(APIView):
             agreement_uuid = agreement_details['agreement_uuid']
             zai_user_id = agreement_details['user_external_id']
 
-            print(agreement_status, "status of agreement  ======================")
             if settings.HOST == 'LIVE':
-                payid_owner_name = agreement_details['agreement_info']['debtor_info']['debtor_account_details']['payid_details']['payid_name']
+                if agreement_details == "VALIDATION_FAILED":
+                    return Response({"code":"400","message":str(agreement_details['status_description']), "data":{"id":obj.id,"transaction_id":obj.transaction_id, 'final_amount':str(obj.amount)}})
 
-                #matching payid owner name with user name
-                user_name = str(request.user.First_name).lower()+" "+str(request.user.Last_name).lower()
-                if str(payid_owner_name).lower() != user_name:
-                    status_obj = zai_update_agreement_status(agreement_uuid, access_token, "name linked to PayID does not match the name provided during registration")
-                    if status_obj and zai_agreement_details.objects.filter(user_id=user_id, agreement_uuid=agreement_uuid).exists():
-                        zai_agreement_details.objects.filter(user_id=user_id, agreement_uuid=agreement_uuid).update(status='cancelled')
-                    return Response({"code":"400","message":"Your agreement has been canceled as the name linked to your PayID does not match the name provided during registration.", "data":{"id":obj.id,"transaction_id":obj.transaction_id, 'final_amount':str(obj.amount)}})
+                if 'payid_details' in agreement_details['agreement_info']['debtor_info']['debtor_account_details']:
+                    payid_owner_name = agreement_details['agreement_info']['debtor_info']['debtor_account_details']['payid_details']['payid_name']
+
+                    #matching payid owner name with user name
+                    user_name = str(request.user.First_name).lower()+" "+str(request.user.Last_name).lower()
+                    if str(payid_owner_name).lower() != user_name:
+                        status_obj = zai_update_agreement_status(agreement_uuid, access_token, "name linked to PayID does not match the name provided during registration")
+                        if status_obj and zai_agreement_details.objects.filter(user_id=user_id, agreement_uuid=agreement_uuid).exists():
+                            zai_agreement_details.objects.filter(user_id=user_id, agreement_uuid=agreement_uuid).update(status='cancelled')
+                        return Response({"code":"400","message":"Your agreement has been canceled as the name linked to your PayID does not match the name provided during registration.", "data":{"id":obj.id,"transaction_id":obj.transaction_id, 'final_amount':str(obj.amount)}})
 
             #updating payment status in DB
             if str(agreement_status).lower() != "active":                
@@ -679,7 +721,7 @@ class Zai_payto_agreement_payment_View(APIView):
 
             #payment initiate request
             initiate_response = zai_initiate_payment(access_token=access_token, agreement_uuid=agreement_uuid, send_amount=str(obj.amount), payment_id=transaction_id, reason=obj.reason)
-            print(initiate_response, 'initiate_response ==================>')
+            # print(initiate_response, 'initiate_response ==================>')
             if 'errors' in initiate_response:
                 return bad_response(initiate_response['errors'])
             
@@ -700,7 +742,7 @@ class Zai_payto_agreement_payment_View(APIView):
             User.objects.filter(id=request.user.id).update(source_currency=str(payment_status[0]['send_currency']), destination_currency=str(payment_status[0]['receive_currency']))      
             notification.objects.create(source_id=payment_status[0]['id'], source_type="transaction", source_detail=str(obj.amount)+" ("+str(obj.send_currency)+")", message=NOTIFICATION_TRANSACTION_MSG)
             
-            #sending notification sms and email to WidophRemit 
+            #sending notification sms and email to RemitAssure 
             send_sms_to_RA(type="transaction",data={'payment_status':payment_status[0]['payment_status'],'transaction_id':transaction_id,'customer_id':profile_serializer.data['customer_id'],'send_currency':obj.send_currency, 'amount': obj.amount, 'exchange_rate':obj.exchange_rate})
             email_to_RA(type="transaction", id=transaction_id)
 
@@ -859,9 +901,9 @@ class zai_transaction_webhook_View(APIView):
                 amount_matched = False
                 body_data = request.body
                 body_data_json = json.loads(body_data)
-                
-                file_name = 'transaction_webhooks.txt'
-                CreateTextFile(file_name, body_data_json)
+                amount = None
+
+                CreateTextFile('transaction_webhooks.txt', body_data_json)
                 success_logs(body_data_json)
                 if body_data_json['transactions']['debit_credit'] == "debit":
                     print(" =================GK Transaction webhook 2 DEBIT ====================")
@@ -872,7 +914,8 @@ class zai_transaction_webhook_View(APIView):
                     print("body_data 1 ======== ",body_data)
                     zai_transaction_id = body_data_json['transactions']['id']  
                     zai_user_id = body_data_json['transactions']['user_id']
-                    
+                    amount = str(body_data_json['transactions']['amount'])
+
                     if zai_user_id and User.objects.filter(customer_id=zai_user_id).exists():
                         transactions_object = User.objects.filter(customer_id=zai_user_id).values('transactions')
                         if transactions_object[0]['transactions'] is not None:
@@ -881,92 +924,105 @@ class zai_transaction_webhook_View(APIView):
 
                     #get data with transaction id from supplementary api
                     supplementary_response = get_zai_supplementary_data(zai_transaction_id, access_token)
-                    print(supplementary_response, "supplementary_response ==============")
-                    if "agreement_uuid" in supplementary_response['npp_details']:
-                        payment_id = supplementary_response['npp_details']['end_to_end_id']
-                        new_t_data = Transaction_details.objects.filter(transaction_id=payment_id).values()[0]
-                        item_response = zai_create_item(seller_id=None, access_token=access_token, payment_id=payment_id, amount_reason=new_t_data['reason'], send_amount=str(new_t_data['amount']), zai_user_id=zai_user_id, send_currency="AUD")
-                        print(item_response, "agreement item created =====", payment_id)     
-                    else:  
-                        #for payid per user
-                        if settings.HOST == "LIVE":
+                    # print(supplementary_response, "supplementary_response ==============")
+                    if "npp_details" in supplementary_response:
+                        if "agreement_uuid" in supplementary_response['npp_details']:
                             payment_id = supplementary_response['npp_details']['end_to_end_id']
-                            if payment_id == "NOTPROVIDED" or payment_id == "":
+                            new_t_data = Transaction_details.objects.filter(transaction_id=payment_id).values()[0]
+                            item_response = zai_create_item(seller_id=None, access_token=access_token, payment_id=payment_id, amount_reason=new_t_data['reason'], send_amount=str(new_t_data['amount']), zai_user_id=zai_user_id, send_currency="AUD")
+                            # print(item_response, "agreement item created =====", payment_id)     
+                        else:  
+                            #for payid per user
+                            if settings.HOST == "LIVE":
+                                payment_id = supplementary_response['npp_details']['end_to_end_id']
+                                if payment_id == "NOTPROVIDED" or payment_id == "":
+                                    payment_id = supplementary_response['remittance_information']
+                            else:
                                 payment_id = supplementary_response['remittance_information']
-                        else:
-                            payment_id = supplementary_response['remittance_information']
-                        
-                        print(payment_id, " =========== payment id 1 ==============")
-                        if not Transaction_details.objects.filter(transaction_id=payment_id).exists():
-                            print("Transaction exists with payment status processed or does not exists with payment id ====== ")
                             
-                            #print all payment status of customer transactions:
-                            payment_status_data = Transaction_details.objects.filter(Q(send_method="zai_payid_per_user") | Q(send_method="PayID"), customer_id= zai_user_id).values('transaction_id','payment_status','date')
-                            for p in payment_status_data:
-                                print("Transactions of user for zai payid peruser  =====>", p['transaction_id'], p['payment_status'], p['date'])
+                            #if end to end id as transaction id is alreay procesed
+                            if Transaction_details.objects.filter(transaction_id=payment_id).exists():
+                                check_obj = Transaction_details.objects.filter(transaction_id=payment_id).values()[0]
+                                
+                                if '.' in str(check_obj['amount']):
+                                    check_amount = float(str(check_obj['amount']).replace(",",""))*100
+                                else:       
+                                    check_amount = int(str(check_obj['amount']).replace(",",""))*100
+                                if float(check_amount) != float(amount) and check_obj['payment_status'] != transaction['completed']:
+                                    payment_id = None
+                                
+                            # print(payment_id, " =========== payment id 1 ==============")
+                            if not Transaction_details.objects.filter(transaction_id=payment_id).exists():
+                                # print("Transaction exists with payment status processed or does not exists with payment id ====== ")
+                                
+                                #print all payment status of customer transactions:
+                                payment_status_data = Transaction_details.objects.filter(Q(send_method="zai_payid_per_user") | Q(send_method="PayID"), customer_id= zai_user_id).values('transaction_id','payment_status','date')
+                                # for p in payment_status_data:
+                                #     pass
+                                    # print("Transactions of user for zai payid peruser  =====>", p['transaction_id'], p['payment_status'], p['date'])
 
-                            amount = str(body_data_json['transactions']['amount'])
-                            if Transaction_details.objects.filter(Q(send_method="zai_payid_per_user") | Q(send_method="PayID"), customer_id= zai_user_id, payment_status=transaction['pending_payment']).exists():
-                                print("Transaction exists with pending payment status =======> ", zai_user_id)
-                                t_data = Transaction_details.objects.filter(Q(send_method="zai_payid_per_user") | Q(send_method="PayID"), customer_id= zai_user_id, payment_status=transaction['pending_payment']).values('transaction_id','amount','payment_status','date')
-                                for i in t_data:
-                                    if '.' in str(i['amount']):
-                                        t_amount = float(i['amount'])*100
-                                    else:       
-                                        t_amount = int(i['amount'])*100
-                                        print("matching webhook amount with database amount =====", t_amount)
-                                    if float(t_amount) == float(amount):
-                                        amount_matched = True
-                                        print("amount matched =======>", float(t_amount) , float(amount))
-                                        payment_id = i['transaction_id']
-                                        break
-                                if not amount_matched:
-                                    print("amount not matched so fetching transaction with incomplete status ====")
-                                    t_data = Transaction_details.objects.filter(Q(send_method="zai_payid_per_user") | Q(send_method="PayID"), customer_id= zai_user_id, payment_status=transaction['incomplete'], updated_at__date=timezone.now().date()).values('transaction_id','amount','payment_status','date')
-                                    print("Transaction exists with incomplete payment status =======> ", zai_user_id)
+                                if Transaction_details.objects.filter(Q(send_method="zai_payid_per_user") | Q(send_method="PayID"), customer_id= zai_user_id, payment_status=transaction['pending_payment']).exists():
+                                    pass
+                                    #print("Transaction exists with pending payment status =======> ", zai_user_id)
+                                    t_data = Transaction_details.objects.filter(Q(send_method="zai_payid_per_user") | Q(send_method="PayID"), customer_id= zai_user_id, payment_status=transaction['pending_payment']).order_by('-id').values('transaction_id','amount','payment_status','date')
                                     for i in t_data:
                                         if '.' in str(i['amount']):
                                             t_amount = float(i['amount'])*100
                                         else:       
                                             t_amount = int(i['amount'])*100
-                                            print("matching webhook amount with database amount =====", t_amount)
+                                            # print("matching webhook amount with database amount =====", t_amount)
                                         if float(t_amount) == float(amount):
                                             amount_matched = True
-                                            print("amount matched =======>", float(t_amount) , float(amount))
+                                            # print("amount matched =======>", float(t_amount) , float(amount))
                                             payment_id = i['transaction_id']
                                             break
-                        if Transaction_details.objects.filter(transaction_id=payment_id).exists():                           
-                            print("transaction exists ----------- ")
-                            tobj = Transaction_details.objects.filter(transaction_id=payment_id)
-                            tobj = tobj[0]
+                                    if not amount_matched:
+                                        # print("amount not matched so fetching transaction with incomplete status ====")
+                                        t_data = Transaction_details.objects.filter(Q(send_method="zai_payid_per_user") | Q(send_method="PayID"), customer_id= zai_user_id, payment_status=transaction['incomplete'], updated_at__date=timezone.now().date()).values('transaction_id','amount','payment_status','date')
+                                        # print("Transaction exists with incomplete payment status =======> ", zai_user_id)
+                                        for i in t_data:
+                                            if '.' in str(i['amount']):
+                                                t_amount = float(i['amount'])*100
+                                            else:       
+                                                t_amount = int(i['amount'])*100
+                                                # print("matching webhook amount with database amount =====", t_amount)
+                                            if float(t_amount) == float(amount):
+                                                amount_matched = True
+                                                # print("amount matched =======>", float(t_amount) , float(amount))
+                                                payment_id = i['transaction_id']
+                                                break
+                            if Transaction_details.objects.filter(transaction_id=payment_id).exists():                           
+                                # print("transaction exists ----------- ")
+                                tobj = Transaction_details.objects.filter(transaction_id=payment_id)
+                                tobj = tobj[0]
 
-                            #get sender address details
-                            user = User.objects.filter(customer_id=tobj.customer_id)
-                            user = user[0]
-                            if User_address.objects.filter(user_id=user.id).exists():
-                                address = User_address.objects.filter(user_id=user.id)                                
-                                address = address[0]
-                            if Recipient.objects.filter(id=tobj.recipient).exists():
-                                robj = Recipient.objects.filter(id=tobj.recipient)
-                                robj = robj[0]
+                                #get sender address details
+                                user = User.objects.filter(customer_id=tobj.customer_id)
+                                user = user[0]
+                                if User_address.objects.filter(user_id=user.id).exists():
+                                    address = User_address.objects.filter(user_id=user.id)                                
+                                    address = address[0]
+                                if Recipient.objects.filter(id=tobj.recipient).exists():
+                                    robj = Recipient.objects.filter(id=tobj.recipient)
+                                    robj = robj[0]
 
-                            if Recipient_bank_details.objects.filter(recipient_id=tobj.recipient).exists():
-                                bank = Recipient_bank_details.objects.filter(recipient_id=tobj.recipient)
-                                bank = bank[0] 
-                            fraudnet_response = zai_fraudnet_tranaction_check(fraudnet_payment_status="approved", recipient_account_number = str(bank.account_number), transaction_id= str(payment_id), send_currency=str(tobj.send_currency), send_amount=str(tobj.amount),  payment_id=str(payment_id), recipient_id=str(robj.id),recipient_country_code = str(robj.country_code), recipient_address= str(robj.building+" "+robj.street+" "+robj.city+" "+robj.state), recipient_name = str(robj.first_name+" "+robj.last_name), customer_postcode = address.postcode, customer_country_code = address.country_code, customer_dob = str(user.Date_of_birth) ,customer_mobile = str(user.mobile), customer_email = str(user.email), customer_id = str(user.customer_id), customer_fn = user.First_name, customer_ln = user.Last_name, customer_address=str(address.building+" "+address.street+" "+address.city+" "+address.state), customer_city = address.city,customer_state= address.state)
-                            print(fraudnet_response, "fraudnet_response ===================>")
-                            if 'data' in fraudnet_response:
-                                payment_status = update_fn_data_in_db(response=fraudnet_response, customer_id=user.customer_id, transaction_id=tobj.id)
-                                   
-                            print("creating item") #have to check item exists or not ===================
-                            item_response = zai_create_item(seller_id=None, access_token=access_token, payment_id=payment_id, amount_reason=tobj.reason, send_amount=str(tobj.amount), zai_user_id=zai_user_id, send_currency="AUD")
-                            if 'errors' in item_response:
-                                item_status = zai_get_item(payment_id, access_token)
-                                if str(item_status).lower() == "pending":
-                                    amount = Transaction_details.objects.filter(transaction_id=payment_id).values('amount')
-                                    zai_update_item(send_amount=str(amount[0]['amount']), payment_id=payment_id, access_token=access_token)
-                            print(item_response, "item created")
-                    
+                                if Recipient_bank_details.objects.filter(recipient_id=tobj.recipient).exists():
+                                    bank = Recipient_bank_details.objects.filter(recipient_id=tobj.recipient)
+                                    bank = bank[0] 
+                                fraudnet_response = zai_fraudnet_tranaction_check(fraudnet_payment_status="approved", recipient_account_number = str(bank.account_number), transaction_id= str(payment_id), send_currency=str(tobj.send_currency), send_amount=str(tobj.amount),  payment_id=str(payment_id), recipient_id=str(robj.id),recipient_country_code = str(robj.country_code), recipient_address= str(robj.building+" "+robj.street+" "+robj.city+" "+robj.state), recipient_name = str(robj.first_name+" "+robj.last_name), customer_postcode = address.postcode, customer_country_code = address.country_code, customer_dob = str(user.Date_of_birth) ,customer_mobile = str(user.mobile), customer_email = str(user.email), customer_id = str(user.customer_id), customer_fn = user.First_name, customer_ln = user.Last_name, customer_address=str(address.building+" "+address.street+" "+address.city+" "+address.state), customer_city = address.city,customer_state= address.state)
+                                # print(fraudnet_response, "fraudnet_response ===================>")
+                                if 'data' in fraudnet_response:
+                                    payment_status = update_fn_data_in_db(response=fraudnet_response, customer_id=user.customer_id, transaction_id=tobj.id)
+                                    
+                                # print("creating item") #have to check item exists or not ===================
+                                item_response = zai_create_item(seller_id=None, access_token=access_token, payment_id=payment_id, amount_reason=tobj.reason, send_amount=str(tobj.amount), zai_user_id=zai_user_id, send_currency="AUD")
+                                if 'errors' in item_response:
+                                    item_status = zai_get_item(payment_id, access_token)
+                                    if str(item_status).lower() == "pending":
+                                        amount = Transaction_details.objects.filter(transaction_id=payment_id).values('amount')
+                                        zai_update_item(send_amount=str(amount[0]['amount']), payment_id=payment_id, access_token=access_token)
+                                # print(item_response, "item created")
+                        
                     #for agreement and PayId
                     if Transaction_details.objects.filter(transaction_id=payment_id).exists():
                         # ======= getting wallet id
@@ -976,17 +1032,17 @@ class zai_transaction_webhook_View(APIView):
                         wallet_account_id = wallet_response['wallet_accounts']['id']
 
                         payment_response = zai_make_payment(item_id=payment_id, wallet_account_id=wallet_account_id, access_token=access_token)
-                        print(payment_response, "payment_response ============")
+                        # print(payment_response, "payment_response ============")
                         if 'errors' in payment_response:
-                            print(payment_response['errors'])
+                            # print(payment_response['errors'])
                             item_status = zai_get_item(payment_id, access_token)
                             if str(item_status).lower() == "completed":
                                 Transaction_details.objects.filter(transaction_id=payment_id).update(payment_status=transaction['pending_review'] ,payment_gateway_transaction_id=zai_transaction_id,   updated_at = get_current_datetime(), date=get_current_date())   
                         else:
-                            print("payment_done for ", payment_id)
+                            # print("payment_done for ", payment_id)
                             Transaction_details.objects.filter(transaction_id=payment_id).update(payment_status=transaction['pending_review'] ,payment_gateway_transaction_id=zai_transaction_id,   updated_at = get_current_datetime(), date=get_current_date())   
                         pobj = Transaction_details.objects.filter(transaction_id=payment_id)
-                        print("sending sms for payment status changed")
+                        # print("sending sms for payment status changed")
                         if str(pobj[0].send_method) == "zai_payid_per_user" or str(pobj[0].send_method) == "PayID":
                             if User.objects.filter(customer_id=pobj[0].customer_id, is_superuser=False).exists():
                                 user_obj = User.objects.filter(customer_id=pobj[0].customer_id, is_superuser=False)
@@ -996,7 +1052,7 @@ class zai_transaction_webhook_View(APIView):
                                 email_to_RA("transaction", payment_id)
                             else:
                                 send_sms_to_RA_transaction_webhook(type="transaction_webhook",data={'transaction_id':payment_id,'payment_status':pobj[0].payment_status,'customer_id':pobj[0].customer_id,'send_currency':pobj[0].send_currency.upper(), 'amount': str(pobj[0].amount), 'exchange_rate':pobj[0].exchange_rate})
-                                print("sending email  for payment status changed")
+                                # print("sending email  for payment status changed")
                                 email_to_RA("webhook_transaction", payment_id)
                             #sending transaction email receipt to customer
                             verified = User.objects.filter(customer_id=pobj[0].customer_id, is_superuser=False).values('is_verified','mobile','First_name','Last_name')
@@ -1032,7 +1088,7 @@ class zai_agreement_webhook_View(APIView):
                 CreateTextFile(file_name, body_data_json)
                 success_logs(body_data_json)
 
-                print("body_data 1 ==========",body_data_json)
+                # print("body_data 1 ==========",body_data_json)
                 data = body_data_json['data']
                 agreement_status = data['status']
                 agreement_uuid = data['agreement_uuid']
@@ -1060,7 +1116,7 @@ class zai_payto_payment_webhook_View(APIView):
     def post(self, request, format=None):
         if request.method == 'POST':
             try:       
-                print("============ agreement payment webhook 1 =======")
+                # print("============ agreement payment webhook 1 =======")
                 access_token = zai_token(request)     
                 body_data = request.body
                 body_data_json = json.loads(body_data)
@@ -1069,7 +1125,7 @@ class zai_payto_payment_webhook_View(APIView):
                 CreateTextFile(file_name, body_data_json)
                 success_logs(body_data_json)
 
-                print("body_data", body_data_json)
+                # print("body_data", body_data_json)
                 reason = "None"
                 
                 #if payment initiation request completed
@@ -1117,6 +1173,9 @@ class Create_Update_Transaction_View(APIView):
         transaction_id = request.data.get("transaction_id")
         amount = request.data.get("amount")
         recipient_id = request.data.get("recipient_id")
+
+
+        agreement_uuid =  request.data.get('agreement_uuid', None)
         
         try:
             user_serializer = UserProfileSerializer(request.user)
@@ -1127,9 +1186,10 @@ class Create_Update_Transaction_View(APIView):
                        
             if transaction_id:
                 if not Transaction_details.objects.filter(transaction_id=transaction_id, customer_id=customer_id).exists():
-                    return bad_response("Invalid transaction_id")             
+                    return bad_response("Invalid transaction_id")    
+                         
                 if amount:
-                    Transaction_details.objects.filter(transaction_id=transaction_id).update(platform="web", receive_method=str(amount['receive_method']), payout_partner = str(amount['payout_partner']), send_currency=str(amount['send_currency']).upper(), total_amount=amount['send_amount'], amount=amount['send_amount'], receive_amount= str(amount['receive_amount']), receive_currency=str(amount['receive_currency']).upper(), reason=amount['reason'], exchange_rate=amount['exchange_rate'], updated_at = get_current_datetime())       
+                    Transaction_details.objects.filter(transaction_id=transaction_id).update(platform="web", receive_method=str(amount['receive_method']), payout_partner = str(amount['payout_partner']), send_currency=str(amount['send_currency']).upper(), total_amount=amount['send_amount'], amount=amount['send_amount'], receive_amount= str(amount['receive_amount']), receive_currency=str(amount['receive_currency']).upper(), reason=amount['reason'], exchange_rate=amount['exchange_rate'], updated_at = get_current_datetime(), payment_status=transaction['incomplete'])       
                 if recipient_id:
                     if not Recipient.objects.filter(id=recipient_id, user_id=user_serializer.data['id']).exists():
                         return bad_response(message="Recipient does not exists!")
@@ -1141,6 +1201,9 @@ class Create_Update_Transaction_View(APIView):
                 tid = str(getattr(transaction_data, 'id'))   
                 transaction_id = create_payment_id(transaction_id=tid)
                 Transaction_details.objects.filter(id=tid).update(platform="web", transaction_id=transaction_id) 
+
+            if agreement_uuid:
+                Transaction_details.objects.filter(transaction_id=transaction_id).update(send_method=settings.ZAI['payto'])
 
             #check transactions account usage limit
             # resposne =  payment_usage_check(request.user.id, request.user.customer_id, transaction_id)
@@ -1166,7 +1229,7 @@ class transaction_history(APIView):
             return bad_response("User doest not exists!")
         if not is_obj_exists(Transaction_details, {'customer_id':customer_id}):
             return bad_response("You have not created any transaction yet")
-        queryset = list(Transaction_details.objects.filter(customer_id=customer_id).exclude(payment_status__iexact=str(transaction['incomplete'])).values('id', 'recipient','exchange_rate', 'date', 'tm_label','transaction_id','card_type','recipient_name','customer_id','recipient','send_currency','receive_currency','amount','send_method', 'receive_amount','receive_method', 'payment_status', 'payment_status_reason','tm_status','reason','updated_at', 'risk_score','risk_group','total_amount','discount_amount').order_by('-id'))
+        queryset = list(Transaction_details.objects.filter(customer_id=customer_id).exclude(payment_status__iexact=str(transaction['incomplete'])).values('id', 'recipient','exchange_rate', 'date', 'tm_label','transaction_id','card_type','recipient_name','customer_id','recipient','send_currency','receive_currency','amount','send_method', 'receive_amount','receive_method', 'payment_status', 'payment_status_reason','tm_status','reason','updated_at', 'risk_score','risk_group','total_amount','discount_amount').order_by('-updated_at'))
         total_amount = Transaction_details.objects.filter(customer_id = customer_id).exclude(payment_status__iexact=str(transaction['incomplete'])).aggregate(total=Sum('total_amount'))
         final_amount = Transaction_details.objects.filter(customer_id = customer_id).exclude(payment_status__iexact=str(transaction['incomplete'])).aggregate(total=Sum('amount'))
         discount_amount = Transaction_details.objects.filter(customer_id = customer_id).exclude(payment_status__iexact=str(transaction['incomplete'])).aggregate(total=Sum('discount_amount'))
@@ -1259,21 +1322,18 @@ class Transactions_usage_deatils_View(APIView):
             total_amount = amount['total']
             payment_per_annum = request.user.payment_per_annum
             value_per_annum = request.user.value_per_annum
-
-            print(payment_per_annum, "payment_per_annum")
-
             count_value = next((item[key] for item in PAYMENT_PER_ANNUM_LIST for key in item if str(payment_per_annum).lower().strip() == key.lower().strip()), None)
-           
-            print(count_value, "count value  ")
             amount_value = next((item[key] for item in VALUE_PER_ANNUM_LIST for key in item if str(value_per_annum).lower().strip() == key.lower().strip()), None)
-            print(count_value, amount_value, "count_value ------- amount_value")
-            print(count, amount, "count ==== amount ")
+            
             if count != 0:              
                 if count_value == 'unlimited':
                     unlimited = True
                     transactions_left = None
                 else:
-                    transactions_left = abs(int(count) - int(count_value))
+                    if int(count) >= int(count_value):
+                        transactions_left = 0
+                    else:
+                        transactions_left = abs(int(count) - int(count_value))
             else:
                 if count_value != 'unlimited':
                     transactions_left = count_value
@@ -1286,15 +1346,22 @@ class Transactions_usage_deatils_View(APIView):
                     unlimited = True
                     amount_left = None
                 else:
-                    amount_left = abs(float(total_amount) - float(amount_value))
+                    if total_amount is not None and amount_value is not None:
+                        if float(total_amount) >= float(amount_value):
+                            amount_left = 0
+                        else:
+                            amount_left = abs(float(total_amount) - float(amount_value))
+                    else:
+                        amount_left = 0
             else:
                 if amount_value == 'unlimited':
                     unlimited = True
                     amount_left = None
-                    print(amount_left, "amount left if unlimited")
                 else:
-                    print(amount_left, "amount left if total is none")
                     amount_left = amount_value
+            if amount_left is not None:
+                number = str(amount_left).replace(",","")
+                amount_left = int(float(number) * 100) / 100
             return success_response("success", {'transactions_left':transactions_left, 'amount_left':amount_left, 'unlimited':unlimited})
         except Exception as e:
             exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -1326,57 +1393,73 @@ class Veriff_webhook_View(APIView):
         gender=None
         body_data = request.body
         response = json.loads(body_data)
+        v_status = "pending"
+        user_data = None
 
-        CreateTextFile('veriff_webhook.txt', response)
-        success_logs(response)
+        try:
+            CreateTextFile('veriff_webhook.txt', response)
+            success_logs(response)
 
-        customer_id = None
-        print("veriff webhook response ==========",response)
-        if 'vendorData' in response and 'action' in response:
-            customer_id = response['vendorData']
-        if 'action' in response and str(response['action']).lower() == "submitted":
-            status = str(response['action']).lower()
-        if 'verification' in response:
-            if 'vendorData' in response['verification']:
-                print("vendor data exists")
+            customer_id = None
+            session_id = None
+            if 'id' in response:
+                session_id = response['id']
+            print("veriff webhook response ==========",response)
+            if 'vendorData' in response and 'action' in response:
+                customer_id = response['vendorData']
+            if 'action' in response and str(response['action']).lower() == "submitted":
+                v_status = str(response['action']).lower()
+            if 'verification' in response:
+                if 'vendorData' in response['verification']:
+                    # print("vendor data exists")
+                    customer_id = response['verification']['vendorData']
+                    v_status = response['verification']['status']
+                    application = application_check(customer_id, id_number, id_country, id_type, v_status)
+                    
+
+                # print("veriff webhook status ==========", status)
                 customer_id = response['verification']['vendorData']
-            # status = response['verification']['status']
-
-            print("veriff webhook status ==========", status)
-            customer_id = response['verification']['vendorData']
-            first_name = response['verification']['person']['firstName']
-            last_name = response['verification']['person']['lastName']
-            id_type = response['verification']['document']['type']
-            id_number = response['verification']['document']['number']
-            id_country = response['verification']['document']['country']
-            ip = response['technicalData']['ip']
-            status = response['verification']['status']
-            session_id = response['verification']['id']
-            reason = response['verification']['reason']
-            doc_valid_from = response['verification']['reason']
-            doc_valid_until = response['verification']['reason']
-            state = response['verification']['reason']
-            dob = response['verification']['person']['dateOfBirth']
-            gender = response['verification']['person']['gender']
-            # if identity data exists then passing data to application AI FN            
-            if str(status).lower() == "approved":
+                first_name = response['verification']['person']['firstName']
+                last_name = response['verification']['person']['lastName']
+                id_type = response['verification']['document']['type']
+                id_number = response['verification']['document']['number']
+                id_country = response['verification']['document']['country']
+                ip = response['technicalData']['ip']
+                session_id = response['verification']['id']
+                reason = response['verification']['reason']
+                doc_valid_from = response['verification']['reason']
+                doc_valid_until = response['verification']['reason']
+                state = response['verification']['reason']
+                dob = response['verification']['person']['dateOfBirth']
+                gender = response['verification']['person']['gender']
+                # if identity data exists then passing data to application AI FN            
+            if str(v_status).lower() == "approved":
                 status = "submitted"
-                application = application_check(customer_id, id_number, id_country, id_type, status)   
-        if User.objects.filter(customer_id=customer_id).exists():
-            User.objects.filter(customer_id=customer_id, is_superuser=False).update(is_digital_Id_verified=str(status).lower())
-        print("veriff webhook status ==========", status)
-        if 'technicalData' in response:
-            ip = response['technicalData']['ip']
-        if not Veriff.objects.filter(customer_id=customer_id).exists():
-            Veriff.objects.create(customer_id=customer_id, first_name=first_name,last_name=last_name, id_type=id_type, id_number=id_number,id_country=id_country, ip=ip, session_id=session_id, reason=reason, doc_valid_from=doc_valid_from, doc_valid_until=doc_valid_until, state=state, dob=dob, gender=gender)
-        else:
-            update_model_obj(Veriff, {'customer_id':customer_id}, {'first_name':first_name,'last_name':last_name, 'id_type':id_type, 'id_number':id_number,'id_country':id_country, 'ip':ip, 'session_id':session_id, 'reason':reason, 'doc_valid_from':doc_valid_from, 'doc_valid_until':doc_valid_until, 'state':state, 'dob':dob, 'gender':gender, 'updated_at':get_current_datetime()})
-        if str(status).lower() == "approved":
-            update_model_obj(Veriff, {'customer_id':customer_id}, {'status':"submitted"})
-            user_data = User.objects.filter(customer_id=customer_id, is_superuser=False).values()[0]
-            send_veriff_email(user_data)
-        return success_response(message="success", data=None)
-   
+            if str(v_status).lower() == "declined" or str(v_status).lower() == 'resubmission_requested' or  v_status == 'submitted':
+                status = "submitted"
+            if User.objects.filter(customer_id=customer_id).exists():
+                #User.objects.filter(customer_id=customer_id, is_superuser=False).update(is_digital_Id_verified=str(status).lower())
+                user_data = User.objects.filter(customer_id=customer_id, is_superuser=False).values()[0]
+            if 'technicalData' in response:
+                ip = response['technicalData']['ip']
+            if not Veriff.objects.filter(customer_id=customer_id).exists():
+                Veriff.objects.create(customer_id=customer_id, status=v_status, first_name=first_name,last_name=last_name, id_type=id_type, id_number=id_number,id_country=id_country, ip=ip, session_id=session_id, reason=reason, doc_valid_from=doc_valid_from, doc_valid_until=doc_valid_until, state=state, dob=dob, gender=gender)
+            else:
+                update_model_obj(Veriff, {'customer_id':customer_id}, {'status':v_status, 'first_name':first_name,'last_name':last_name, 'id_type':id_type, 'id_number':id_number,'id_country':id_country, 'ip':ip, 'session_id':session_id, 'reason':reason, 'doc_valid_from':doc_valid_from, 'doc_valid_until':doc_valid_until, 'state':state, 'dob':dob, 'gender':gender, 'updated_at':get_current_datetime()})
+               
+            if user_data and v_status == 'submitted':
+                if customer_id and session_id:
+                    upload_media_in_db(customer_id, session_id)
+                send_veriff_email(user_data)
+            return success_response(message="success", data=None)
+        except Exception as e:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            file_content = str(e)+ "in line " +str(exc_tb.tb_lineno)+" in payment_app/views"
+            CreateErrorFile(file_content)
+            error_logs(file_content)
+            return bad_response(message=str(e)+" in line "+str(exc_tb.tb_lineno))
+        
+
 ################################ Fraud.Net Webhook ################################  
 """ Fraudnet Transaction Webhook """
 class FN_webhook_View(APIView):
@@ -1404,7 +1487,7 @@ class Subscribe_newsletter_View(APIView):
             if not email or str(email).strip() == '':
                 return bad_response("Please enter email")
             url = str(BREVO_URL)+"/contacts"
-            print(url, "----------------------")
+            # print(url, "----------------------")
             payload = json.dumps({ "email": str(email).lower(), "listIds": [ int(LIST_ID) ]})
             headers = {
             'Content-Type': 'application/json',
@@ -1555,6 +1638,23 @@ class voucher_view(APIView):
             error_logs(file_content)
             return bad_response(message=str(e)+" in line "+str(exc_tb.tb_lineno))
 
+################################ Currencies List ################################  
+class get_currencies_list(APIView):
+    def post(self, request, format=None):
+        payin_list = list(currencies.objects.filter(type='payin', status='enable').values('id','currency','country','phone_code','country_code'))
+        payout_list = list(currencies.objects.filter(type='payout', status='enable').values('id','currency','country','phone_code','country_code'))
+
+        if not payin_list:
+            payin_list = SEND_CURRENCY_LIST
+        if not payout_list:
+            payout_list = RECEIVE_CURRENCY_LIST
+        data = {
+            'payin_currencies': payin_list,
+            'payout_currencies': payout_list
+        }
+        return success_response(message="success",data=data)
+
+
 ################################ Card Views (Not Using) ################################  
 """ Get Last Transaction of User """
 class last_transaction_view(APIView):
@@ -1632,6 +1732,7 @@ def zai_users(request,offset):
 
 
 
+
 #withdraw funds from zai
 def withdraw_RA_zai_funds(zai_user_id, amount, request):
     try:
@@ -1668,8 +1769,8 @@ def withdraw_RA_zai_funds(zai_user_id, amount, request):
             status = "completed"
         else:
             status = "pending"
-        if is_obj_exists(zai_admin_users, {'zai_user_id':zai_user_id}):
-            source_data = zai_admin_users.objects.filter(zai_user_id=zai_user_id).values('bank_name')
+        if is_obj_exists(zai_payout_users, {'zai_user_id':zai_user_id}):
+            source_data = zai_payout_users.objects.filter(zai_user_id=zai_user_id).values('bank_name')
             source_bank = source_data[0]['bank_name']
         else:
             source_bank = next((user['bank_name'] for user in ZAI_ADMIN_USERS if user['zai_user_id'] == zai_user_id), None)
@@ -1695,6 +1796,7 @@ def get_RA_zai_wallet(request, zai_user_id):
     headers = { 'Accept': 'application/json', 'Authorization': 'Bearer '+zai_token(request)}
     response = requests.request("GET", url, headers=headers)
     response = response.json()
+    #print("response from views payment_app=================="+response)
     return response
 
 
@@ -1732,7 +1834,7 @@ def email_transaction_receipt(transaction_id, type):
                 customer_id = customer_name[0]['customer_id']
                 customer_name = str(str(customer_name[0]['First_name'])+" "+str(customer_name[0]['Last_name']))
                 context.update(login=settings.LOGIN_LINK, support=settings.SUPPORT_CENTER_LINK,customer_name = customer_name)
-                context2.update(widophremit=settings.WIDOPH_REMIT_LINK,login=settings.LOGIN_LINK,support=settings.SUPPORT_CENTER_LINK,email=user_email, customer_id=customer_id, type="transaction",customer_name=customer_name,transaction=context2_dict)
+                context2.update(remitassure=settings.REMITASSURE_LINK,login=settings.LOGIN_LINK,support=settings.SUPPORT_CENTER_LINK,email=user_email, customer_id=customer_id, type="transaction",customer_name=customer_name,transaction=context2_dict)
                 if User_address.objects.filter(user_id=int(user_id)).exists():
                     a = User_address.objects.filter(user_id=int(user_id)).values('building','street','city','state','country')
                     customer_address = str(str(a[0]['building'])+" "+str(a[0]['street'])+" "+str(a[0]['city'])+" "+str(a[0]['state'])+" "+str(a[0]['country']))
@@ -1749,49 +1851,51 @@ def email_transaction_receipt(transaction_id, type):
                 context.update(account_number=account_number)
                 context2.update(recipient_bank=b[0]['bank_name'])
             context2.update(data= email_template_image())
-            # Render the HTML template with context
-            template = get_template('receipt.html')
-            html = template.render(context)
 
-            # Generate a PDF file from the HTML content
-            css = CSS(string='@page { size: A4; margin: 1cm }')
-            pdf_file = HTML(string=html).write_pdf(stylesheets=[css])
+            if settings.SEND_EMAIL:
+                # Render the HTML template with context
+                template = get_template('receipt.html')
+                html = template.render(context)
 
-            # Create an HTTP response with the PDF file as content, to prompt the user to download the file
-            response = HttpResponse(pdf_file, content_type='application/pdf')
-            response['Content-Disposition'] = 'attachment; filename="receipt.pdf"'
+                # Generate a PDF file from the HTML content
+                css = CSS(string='@page { size: A4; margin: 1cm }')
+                pdf_file = HTML(string=html).write_pdf(stylesheets=[css])
 
-            # Attach the PDF to the email
-            pdf_attachment = MIMEApplication(pdf_file, _subtype='pdf')
-            pdf_attachment.add_header('content-disposition', 'attachment', filename='receipt.pdf')
- 
-            msg = MIMEMultipart()
-            msg['From'] = settings.EMAIL_HOST_USER
-            msg['To'] = user_email
+                # Create an HTTP response with the PDF file as content, to prompt the user to download the file
+                response = HttpResponse(pdf_file, content_type='application/pdf')
+                response['Content-Disposition'] = 'attachment; filename="receipt.pdf"'
 
-            if str(type).lower() == "payout":
-                template2 = get_template('customer_payout.html')
-                msg['Subject'] = 'Payout Confirmation for Transaction ID '+str(transaction_id)
-            else:
-                template2 = get_template('sender_notification.html')
-                msg['Subject'] = 'WidophRemit Transaction Confirmation'
+                # Attach the PDF to the email
+                pdf_attachment = MIMEApplication(pdf_file, _subtype='pdf')
+                pdf_attachment.add_header('content-disposition', 'attachment', filename='receipt.pdf')
+    
+                msg = MIMEMultipart()
+                msg['From'] = settings.EMAIL_HOST_USER
+                msg['To'] = user_email
 
-            # Attach the PDF to the email
-            msg.attach(pdf_attachment)
+                if str(type).lower() == "payout":
+                    template2 = get_template('customer_payout.html')
+                    msg['Subject'] = 'Payout Confirmation for Transaction ID '+str(transaction_id)
+                else:
+                    template2 = get_template('sender_notification.html')
+                    msg['Subject'] = 'RemitAssure Transaction Confirmation'
 
-            # Attach the HTML content as an alternative
-            html2 = template2.render(context2)
-            html_content2 = MIMEText(html2, 'html')
-            msg.attach(html_content2)
+                # Attach the PDF to the email
+                msg.attach(pdf_attachment)
 
-            smtp_server = settings.EMAIL_HOST
-            smtp_port = settings.EMAIL_PORT  
-            smtp_username = settings.EMAIL_HOST_USER
-            smtp_password = settings.EMAIL_HOST_PASSWORD
-            with smtplib.SMTP(smtp_server, smtp_port) as server:
-                server.starttls()  # Use TLS encryption
-                server.login(smtp_username, smtp_password)
-                server.sendmail(smtp_username, user_email, msg.as_string())
+                # Attach the HTML content as an alternative
+                html2 = template2.render(context2)
+                html_content2 = MIMEText(html2, 'html')
+                msg.attach(html_content2)
+
+                smtp_server = settings.EMAIL_HOST
+                smtp_port = settings.EMAIL_PORT  
+                smtp_username = settings.EMAIL_HOST_USER
+                smtp_password = settings.EMAIL_HOST_PASSWORD
+                with smtplib.SMTP(smtp_server, smtp_port) as server:
+                    server.starttls()  # Use TLS encryption
+                    server.login(smtp_username, smtp_password)
+                    server.sendmail(smtp_username, user_email, msg.as_string())
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         file_content = str(e)+ "in line " +str(exc_tb.tb_lineno)+" in payment_app/views"
@@ -1799,6 +1903,111 @@ def email_transaction_receipt(transaction_id, type):
         error_logs(file_content)
         return bad_response(message=str(e)+" in line "+str(exc_tb.tb_lineno))
 
+
+
+
+def email_transaction_receipt_to_reciepent(transaction_id, type):
+    try:
+        context = {}
+        user_email = None
+        payment_status = None
+        context2_dict = {}
+        context2 = {}
+        # print("in here line 1907 views paymetn_app")
+        if Transaction_details.objects.filter(transaction_id=transaction_id).exists():
+            data = Transaction_details.objects.filter(transaction_id=transaction_id).values('payment_status','transaction_id','recipient_name','send_currency', 'receive_currency','amount', 'receive_amount','date', 'reason', 'exchange_rate', 'recipient','customer_id','send_method','total_amount','discount_amount','updated_at')
+            data = data[0]
+            payment_status = str(data['payment_status'])
+            date = str(data['date'])
+            date = date.replace("-","/")
+            comma =  comma_separated(send_amount=data['amount'], receive_amount=data['receive_amount'], exchange_rate=data['exchange_rate'] )
+            comma2 =  comma_separated(send_amount=data['discount_amount'], receive_amount=data['total_amount'], exchange_rate=None )
+            data['amount'] = comma['send_amount']
+            data['receive_amount'] = comma['receive_amount']
+            data['exchange_rate'] = comma['exchange_rate']
+            data['discount_amount'] = str(comma2['send_amount']).lower()
+            data['total_amount'] = comma2['receive_amount']
+            context = {'data': data}
+            context.update(date=date)
+            context2_dict = {"discount_amount": str(data['discount_amount']),"total_amount":data['total_amount'],"send_method":data['send_method'],"transaction_id":transaction_id,"send_currency":str(data['send_currency']).upper(), "payment_status":data['payment_status'], "amount":str(data['amount']), "exchange_rate": comma['exchange_rate'], "receive_amount":data['receive_amount'], "receive_currency":data['receive_currency']}
+            context2_dict.update(message="Here are the Transaction Details for Transaction ID: "+str(transaction_id))
+            context2.update(date=date)
+            if User.objects.filter(customer_id=data['customer_id'], is_superuser=False).exists():
+                customer_name = User.objects.filter(customer_id=data['customer_id'], is_superuser=False).values('email','customer_id','First_name','Last_name','id')
+                user_id = customer_name[0]['id']
+                user_email = customer_name[0]['email']
+                customer_id = customer_name[0]['customer_id']
+                customer_name = str(str(customer_name[0]['First_name'])+" "+str(customer_name[0]['Last_name']))
+                context.update(login=settings.LOGIN_LINK, support=settings.SUPPORT_CENTER_LINK,customer_name = customer_name)
+                context2.update(remitassure=settings.REMITASSURE_LINK,login=settings.LOGIN_LINK,support=settings.SUPPORT_CENTER_LINK,email=user_email, customer_id=customer_id, type="transaction",customer_name=customer_name,transaction=context2_dict)
+                if User_address.objects.filter(user_id=int(user_id)).exists():
+                    a = User_address.objects.filter(user_id=int(user_id)).values('building','street','city','state','country')
+                    customer_address = str(str(a[0]['building'])+" "+str(a[0]['street'])+" "+str(a[0]['city'])+" "+str(a[0]['state'])+" "+str(a[0]['country']))
+                    context.update(customer_address = customer_address)
+            if Recipient.objects.filter(id=data['recipient']).exists():
+                r = Recipient.objects.filter(id=data['recipient']).values('first_name','last_name','mobile','email','building','street','city','state','country')
+                recipient_address = str(str(r[0]['building'])+" "+str(r[0]['street'])+" "+str(r[0]['city'])+" "+str(r[0]['state'])+" "+str(r[0]['country']))
+                recipient_mobile = r[0]['mobile']
+                recipient_email = r[0]['email']
+                context2.update(recipient_name=str(r[0]['first_name'])+" "+str(r[0]['last_name']))
+                context.update(recipient_mobile=recipient_mobile,recipient_address = recipient_address)
+            if Recipient_bank_details.objects.filter(recipient_id=data['recipient']).exists():
+                b = Recipient_bank_details.objects.filter(recipient_id=data['recipient']).values('account_number','account_name','bank_name')
+                account_number = b[0]['account_number']
+                context.update(account_number=account_number)
+                context2.update(recipient_bank=b[0]['bank_name'])
+            context2.update(data= email_template_image())
+
+            if settings.SEND_EMAIL:
+                # Render the HTML template with context
+                template = get_template('receipt.html')
+                html = template.render(context)
+
+                # Generate a PDF file from the HTML content
+                css = CSS(string='@page { size: A4; margin: 1cm }')
+                pdf_file = HTML(string=html).write_pdf(stylesheets=[css])
+
+                # Create an HTTP response with the PDF file as content, to prompt the user to download the file
+                response = HttpResponse(pdf_file, content_type='application/pdf')
+                response['Content-Disposition'] = 'attachment; filename="receipt.pdf"'
+
+                # Attach the PDF to the email
+                pdf_attachment = MIMEApplication(pdf_file, _subtype='pdf')
+                pdf_attachment.add_header('content-disposition', 'attachment', filename='receipt.pdf')
+    
+                msg = MIMEMultipart()
+                msg['From'] = settings.EMAIL_HOST_USER
+                msg['To'] = recipient_email
+
+                if str(type).lower() == "payout":
+                    template2 = get_template('receipent_payout.html')
+                    msg['Subject'] = 'Payout Confirmation for Transaction ID '+str(transaction_id)
+                else:
+                    template2 = get_template('sender_notification.html')
+                    msg['Subject'] = 'RemitAssure Transaction Confirmation'
+
+                # Attach the PDF to the email
+                msg.attach(pdf_attachment)
+                # print("email sent to "+ recipient_email)
+                # Attach the HTML content as an alternative
+                html2 = template2.render(context2)
+                html_content2 = MIMEText(html2, 'html')
+                msg.attach(html_content2)
+
+                smtp_server = settings.EMAIL_HOST
+                smtp_port = settings.EMAIL_PORT  
+                smtp_username = settings.EMAIL_HOST_USER
+                smtp_password = settings.EMAIL_HOST_PASSWORD
+                with smtplib.SMTP(smtp_server, smtp_port) as server:
+                    server.starttls()  # Use TLS encryption
+                    server.login(smtp_username, smtp_password)
+                    server.sendmail(smtp_username, user_email, msg.as_string())
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        file_content = str(e)+ "in line " +str(exc_tb.tb_lineno)+" in payment_app/views"
+        CreateErrorFile(file_content)
+        error_logs(file_content)
+        return bad_response(message=str(e)+" in line "+str(exc_tb.tb_lineno))
 
 class Payment_Receipt_View(APIView):
     renderer_classes=[UserRenderer]
@@ -1932,8 +2141,9 @@ def application_check(customer_id, id_number, id_country, id_type, status):
         postcode = None
         state = None
         country = None
-        if str(status).lower() != "approved":
-            status = "new"
+        risk_group = "N/A"
+        # if str(status).lower() != "approved":
+        status = "new"
         if User.objects.filter(customer_id=customer_id, is_superuser=False).exists():
             obj = User.objects.filter(customer_id=customer_id, is_superuser=False).values('id','First_name','Last_name','email','mobile','Date_of_birth')
             if User_address.objects.filter(user_id=obj[0]['id']).exists():
@@ -1981,17 +2191,28 @@ def application_check(customer_id, id_number, id_country, id_type, status):
             aml_response = response.json()
             CreateTextFile('fraudnet_application_ai.txt', aml_response)
             success_logs(aml_response)
-            print(aml_response, "Application AI FN ===================")
+            # print(aml_response, "Application AI FN ===================")
             aml_pep_status = None
+            comply_adv = None
+            rule_name = None
+            risk_group = "N/A"
             if aml_response['success'] == True:
                 if 'tags' in aml_response['data']:
                     for x in aml_response['data']['tags']:
                         if str(x['name']).lower() == 'complyadv':
+                            comply_adv = x['state']
                             if x['state'] == 'no_match':
                                 aml_pep_status = False
                             elif x['state'] == "match" or x['state'] == "matched":
                                 aml_pep_status = True
+                        if str(x['type']).lower() == 'rule':
+                            rule_name = x['state']
+                risk_group = aml_response['data']['risk_group']
                 User.objects.filter(customer_id=customer_id, is_superuser=False).update(aml_pep_status=aml_pep_status)
+                if Application_ai_data.objects.filter(customer_id=customer_id).exists():
+                    Application_ai_data.objects.filter(customer_id=customer_id).update(risk_group=risk_group, risk_score=aml_response['data']['risk_score'], comply_adv=comply_adv, aml_pep_status=aml_pep_status, rule=rule_name)
+                else:
+                    Application_ai_data.objects.create(customer_id=customer_id, risk_group=risk_group, risk_score=aml_response['data']['risk_score'], comply_adv=comply_adv, aml_pep_status=aml_pep_status, rule=rule_name)
             return True
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -2069,9 +2290,33 @@ class Pending_Transactions_View(APIView):
             customer_id = user_serializer.data['customer_id']
             if not Transaction_details.objects.filter(customer_id=customer_id, payment_status=transaction['incomplete']).exists():
                 return bad_response(message="No transactions found.")             
-            data = Transaction_details.objects.filter(customer_id=customer_id, payment_status=transaction['incomplete'])
-            serializer = Transaction_details_web_Serializer(data, many=True)
-            return success_response(message="success", data=serializer.data)
+            
+            ###############################
+            from django.db.models import Case, When, Value, OuterRef, Subquery
+
+            agreement_subquery = zai_agreement_details.objects.filter(
+            zai_user_id=OuterRef('customer_id')
+            ).values('agreement_uuid')[:1]
+
+            # Queryset to annotate conditional fields
+            transactions = Transaction_details.objects.filter(customer_id=customer_id,payment_status=transaction['incomplete']).order_by('-updated_at').annotate(
+                agreement_uuid=Case(
+                    When(send_method=settings.ZAI['payto'], then=Subquery(agreement_subquery)),
+                    default=Value(None),
+                )
+            )
+
+            serializerData = Transaction_details_web_Serializer(transactions,many=True)
+
+            ###############################
+
+            ###### Old Flow#################
+            #data = Transaction_details.objects.filter(customer_id=customer_id, payment_status=transaction['incomplete'])
+            #serializer = Transaction_details_web_Serializer(data, many=True)
+            ###### Old Flow#################
+
+
+            return success_response(message="success", data=serializerData.data)
         except Exception as e:
             exc_type, exc_obj, exc_tb = sys.exc_info()
             file_content = str(e)+ "in line " +str(exc_tb.tb_lineno)+" in payment_app/views"
@@ -2723,6 +2968,7 @@ def zai_access_token(request):
    
 def zai_token(request):
     token_data = access_tokens.objects.filter(service_provider="zai").values()
+    access_token = ''
     if not token_data:
         access_token = zai_access_token(request)
         access_token = access_token['access_token']
@@ -2931,41 +3177,222 @@ from auth_app.helpers import upload_media_in_db
 
 class test_View(APIView):
 
-    def post(self, request, format=None):
+    def get(self, request, format=None):
         try:
-            data = None
-            session_id = '77a61c18-a77c-4ce2-8a15-5c026bc25354'
-        
-            # upload_media_in_db('c688882', session_id)
+            
+            # url = "https://au-0000.api.assemblypay.com/users/0364cb151509c338d9d04c861e4140c0"
 
-            # session_id = 'ce860524-1e56-4a7f-8c99-753ff5acb4eb'
-            # secret_key = '48d6200d-c0e8-4b6a-bb69-267414fd880e'  #live      
-            # signature = hmac.new(secret_key.encode('utf-8'),session_id.encode('utf-8'), digestmod=hashlib.sha256).hexdigest()
-
-            # data = signature
-
-            # print(os.getcwd())
-            # url = "https://stationapi.veriff.com/v1/media/ce860524-1e56-4a7f-8c99-753ff5acb4eb"
-
-            # payload = {}
+            # payload = json.dumps({
+            # "first_name": "Smartitude"
+            # })
             # headers = {
-            # 'X-AUTH-CLIENT': 'a1cbd614-3d1c-4e2a-b1a4-c7f24b934b4e',
-            # 'X-HMAC-SIGNATURE': '5d2e35fce11ff8ea332463cd42d3fa4f1919e4a2009d4e64379ee0f18f7e0a07'
+            # 'Authorization': 'Bearer eyJraWQiOiJ4M09hWnZIYjNyc0F1Mm1sOWJNUytKTEh6RUxUZlZlVzZUaEFWUkxPZGpFPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiJoZ2ljazE0bzJiazQ2MTBwZnR0M2tnbXV1IiwidG9rZW5fdXNlIjoiYWNjZXNzIiwic2NvcGUiOiJpbS1hdS0wM1wvMzUyODdmMzAtMjlkNi0wMTNjLWYyNDgtMGE1OGE5ZmVhYzA4OjRmYjlkZDAxLTUwOTctNGE4NC1hNzkzLTRlOTE0YTFlMThhMTozIiwiYXV0aF90aW1lIjoxNzQyNDUyMDk2LCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuYXAtc291dGhlYXN0LTIuYW1hem9uYXdzLmNvbVwvYXAtc291dGhlYXN0LTJfZlhYSlcxZDU3IiwiZXhwIjoxNzQyNDU1Njk2LCJpYXQiOjE3NDI0NTIwOTYsInZlcnNpb24iOjIsImp0aSI6IjJjMjA1MjFhLWI5MGQtNGYwZi1hZDgyLWRmY2QyMDFlMDhjZCIsImNsaWVudF9pZCI6ImhnaWNrMTRvMmJrNDYxMHBmdHQza2dtdXUifQ.jMdY6NF2QYKT107KJ2nQUMXfCX_lbqRvoIQQdA0N-Olqq8XnN-GdiJ9011DsmBpuxWdDlcF3Bp3Nj1hOqCzhYQT9xe9KtNKvrx02Ljvius9dx7bvrKoMzDFudRHyBpdSSJnzqXkpufGImmAxnjFOofpUd75BUmcV2lWCU8oc3SqmcAH_PTvtPMdQ67EeL-R3Ne_Mpd60MAgwmyu62r0PH5ZVFhn4UZQXF1k18ujfw5D0AX8dnkGc54qRNSjA_LwHAtbUrIk3nAYnxLKUky4vR-AmfcTI7jVjRjVRUwTgwJIOsBGp0PWd1KeT5QZhOAVE_2AsEtFMxbQoUYQRWUX_qQ',
+            # 'Content-Type': 'application/json'
             # }
 
-            # response = requests.request("GET", url, headers=headers, data=payload)
+            # response = requests.request("PATCH", url, headers=headers, data=payload)
             # print(response)
-            # if response.status_code == 200:
-            #     video_path = os.getcwd()  # Replace with your desired file name and path
-            #     video_content = ContentFile(b"".join(chunk for chunk in response.iter_content(chunk_size=1024)))
-            #     # Create a Video instance and save the video file
-            #     video = Video(title='Downloaded Video')
-            #     video.file.save(video_filename, video_content)
-            #     video.save()
 
-            return success_response(message=transaction['pending_review'], data=data)   
+            
+            return success_response(message="success", data=None)   
+        except Exception as e:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            file_content = str(e)+ "in line " +str(exc_tb.tb_lineno)+" in payment_app/views"
+            print(file_content)
+            CreateErrorFile(file_content)
+            return bad_response(message=str(e)+" in line "+str(exc_tb.tb_lineno))
+from django.utils.html import strip_tags
+
+def test_send_veriff_email(user_data, email):
+    try:
+        if SEND_EMAIL:
+            image_dict = email_template_image()
+            html_content = render_to_string('veriff_email.html', {'user':user_data, 'data':image_dict})
+            msg = EmailMultiAlternatives(
+                subject='New KYC Request',
+                body='New user KYC request submitted',
+                from_email= settings.EMAIL_HOST_USER,
+                to=[email],
+            )
+            send_email(html_content, msg)
+            return True
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        file_content = str(e)+ " in line " +str(exc_tb.tb_lineno)+" in auth_app/emails"
+        error_logs(file_content)
+    
+def test_mobile_send_update_tier_email_to_RA(user_data, item, email):
+    # print("send email 11111111111111111111111111",SEND_EMAIL)
+    try:
+        if SEND_EMAIL:
+            image_dict = email_template_image()
+            html_content = render_to_string('mobile_update_tier.html',{'item':item, 'user':user_data, 'data':image_dict})
+            msg = EmailMultiAlternatives(
+                subject='Update Tier Request',
+                body='Update Tier Request from customer',
+                from_email= settings.EMAIL_HOST_USER,
+                to=[email],
+
+            )
+            send_email(html_content, msg)
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        file_content = str(e)+ " in line " +str(exc_tb.tb_lineno)+" in auth_app/emails"
+        print(file_content)
+        error_logs(file_content)
+
+def test_send_update_tier_email_to_RA(user_data, item, email):
+    # print("send email 11111111111111111111111111",SEND_EMAIL)
+    try:
+        if SEND_EMAIL:
+            image_dict = email_template_image()
+            html_content = render_to_string('update_tier_request_ra.html',{'item':item, 'user':user_data, 'data':image_dict})
+            msg = EmailMultiAlternatives(
+                subject='Update Tier Request',
+                body='Update Tier Request from customer',
+                from_email= settings.EMAIL_HOST_USER,
+                to=[email],
+
+            )
+            send_email(html_content, msg)
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        file_content = str(e)+ " in line " +str(exc_tb.tb_lineno)+" in auth_app/emails"
+        print(file_content)
+        error_logs(file_content)
+
+def test_send_contact_us_email(payload, email):
+    try:
+        if settings.SEND_EMAIL == True:
+            image_dict = email_template_image()
+            html_content = render_to_string('contact_us.html',{'date':get_current_date(),'email':payload['email'],'name':payload['name'],'message':payload['message'],'data':image_dict})
+            msg = EmailMultiAlternatives(
+                subject='Email From RemitAssure',
+                body='',
+                from_email= settings.EMAIL_HOST_USER,
+                to=[email],
+            )
+            send_email(html_content, msg)
+        return {'code':200}
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        file_content = str(e)+ " in line " +str(exc_tb.tb_lineno)+" in auth_app/emails"
+        error_logs(file_content)
+        return {'code':400, 'message':str(e)}
+
+def test_email_to_RA(type, id):
+    try:
+        print(settings.SEND_EMAIL, "settings.SEND_EMAIL")
+        if settings.SEND_EMAIL == True:
+            image_dict = email_template_image()   
+            if type == "customer" and User.objects.filter(id=id).exists():
+                data = User.objects.filter(id=id).values('email','customer_id','location','mobile','created_at')[0]
+                data['created_at'] = str_to_date(data['created_at'])
+                message = "New customer with "+data['email']+" has signed up."
+                html_content = render_to_string('new_user.html', {'type':"customer",'data':image_dict, 'message':message, 'customer':data})
+            
+            elif type == "transaction" and Transaction_details.objects.filter(transaction_id=id).exists():
+                data = Transaction_details.objects.filter(transaction_id=id).values('customer_id', 'payment_status','transaction_id','recipient_name','send_currency', 'receive_currency','amount', 'receive_amount','date', 'reason', 'exchange_rate', 'recipient','customer_id','send_method','total_amount','discount_amount','updated_at')[0]
+                comma =  comma_separated(send_amount=data['amount'], receive_amount=data['receive_amount'], exchange_rate=data['exchange_rate'])
+                comma2 =  comma_separated(send_amount=data['total_amount'], receive_amount=data['discount_amount'], exchange_rate=data['discount_amount'])
+                data['total_amount'] = comma2['send_amount']
+                data['discount_amount'] = comma2['receive_amount']
+                data['amount'] = comma['send_amount']
+                data['receive_amount'] = comma['receive_amount']
+                data['exchange_rate'] = comma['exchange_rate']
+                if User.objects.filter(customer_id=data['customer_id']).exists():
+                    user_obj = User.objects.filter(customer_id=data['customer_id']).values('email')[0]
+                    message = "Customer with "+user_obj['email']+" email has created a new transaction."
+                else:
+                    message = "Customer with "+data['customer_id']+" Cust Id has created a new transaction."
+                html_content = render_to_string('admin_transaction_notification.html', {'type':"transaction",'data':image_dict, 'message':message, 'transaction':data})
+            elif type == "webhook_transaction" and Transaction_details.objects.filter(transaction_id=id).exists():
+                data = Transaction_details.objects.filter(transaction_id=id).values('customer_id', 'payment_status','transaction_id','recipient_name','send_currency', 'receive_currency','amount', 'receive_amount','date', 'reason', 'exchange_rate', 'recipient','customer_id','send_method','total_amount','discount_amount','updated_at')[0]
+                comma =  comma_separated(send_amount=data['amount'], receive_amount=data['receive_amount'], exchange_rate=data['exchange_rate'])
+                comma2 =  comma_separated(send_amount=data['total_amount'], receive_amount=data['discount_amount'], exchange_rate=data['discount_amount'])
+                data['total_amount'] = comma2['send_amount']
+                data['discount_amount'] = comma2['receive_amount']
+                data['amount'] = comma['send_amount']
+                data['receive_amount'] = comma['receive_amount']
+                data['exchange_rate'] = comma['exchange_rate']
+                message = "New Updated Payment Status"
+                html_content = render_to_string('admin_transaction_notification.html', {'type':"webhook_transaction",'data':image_dict, 'message':message, 'transaction':data})
+            html_content = html_content
+            msg = EmailMultiAlternatives(
+                subject='Notification From Remit Assure',
+                from_email= settings.EMAIL_HOST_USER,
+                to=['gurpreet@codenomad.net'],
+            )
+            send_email(html_content, msg)
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        file_content = str(e)+ " in line " +str(exc_tb.tb_lineno)+" in auth_app/emails"
+        error_logs(file_content)
+ 
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+
+import boto3
+from botocore.exceptions import NoCredentialsError
+from django.conf import settings
+
+def upload_to_s3(file, object_name=None):
+    s3 = boto3.client(
+        's3',
+        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+        region_name=settings.AWS_REGION
+    )
+    try:
+        bucket_name = settings.AWS_STORAGE_BUCKET_NAME
+        object_name = object_name or file.name
+        # Debugging: print the bucket name and object name
+        # print(f"Uploading to bucket: {bucket_name} with object name: {object_name}")
+        
+        # Upload to S3
+        s3.upload_fileobj(file, bucket_name, object_name)
+        
+        # Return the file URL
+        file_url = f"https://{bucket_name}.s3.{settings.AWS_REGION}.amazonaws.com/{object_name}"
+        return file_url
+    
+    except NoCredentialsError:
+        print("AWS credentials not available.")
+        return None
+    except Exception as e:
+        # Print the error to help debug the issue
+        print(f"Unexpected error: {e}")
+        return None
+
+class upload_document(APIView):
+    def post(self, request, format=None):
+        file = request.FILES['file']
+        
+        # Upload to S3
+        file_url = upload_to_s3(file)
+        # print(file_url, "---------")
+        return JsonResponse({"message": "File uploaded successfully!", "file_url": file_url}, status=200)
+
+class CustomerTypes(APIView):
+     def get(self, request, format=None):
+        try:
+            return success_response(message="Customer Types Fetched Successfully", data=CUSTOMER_TYPES)   
         except Exception as e:
             exc_type, exc_obj, exc_tb = sys.exc_info()
             file_content = str(e)+ "in line " +str(exc_tb.tb_lineno)+" in payment_app/views"
             CreateErrorFile(file_content)
-            return bad_response(message=str(e)+" in line "+str(exc_tb.tb_lineno))
+            error_logs(file_content)
+            return success_response(message="Customer Types Fetched Successfully", data=[{"text":"Individual", "value":"individual"},{"text":"Business", "value":"business"}])
+            #return bad_response(message=str(e)+" in line "+str(exc_tb.tb_lineno))
+
+
+# Uploading to bucket: remitassure with object name: cars_data
+# Unexpected error: An error occurred (SignatureDoesNotMatch) when calling the PutObject operation: The request signature we calculated does not match the signature you provided. Check your key and signing method.
+# None ---------
+# [04/Dec/2024 00:33:47] "POST /payment/upload-document/ HTTP/1.1" 200 60
+# Uploading to bucket: remitassure with object name: logo.png
+# Unexpected error: An error occurred (SignatureDoesNotMatch) when calling the PutObject operation: The request signature we calculated does not match the signature you provided. Check your key and signing method.
+# None ---------
+# [04/Dec/2024 00:34:12] "POST /payment/upload-document/ HTTP/1.1" 200 60
+

@@ -10,8 +10,8 @@ class RecipientSerializer(serializers.ModelSerializer):
 class Recipient_list_Serializer(serializers.ModelSerializer):
     class Meta:
         model= Recipient
-        fields=['id','first_name','middle_name','last_name','email','mobile','flat','building',
-                    'street', 'city','state','country', 'country_code', 'postcode','update_profile','transfer_now','address']
+        fields=['id','first_name','middle_name','last_name','email','flat','building',
+                    'street', 'city','state','country', 'country_code', 'postcode','update_profile','transfer_now','address', 'account_type']
 
 class Recipient_bank_details_Serializer(serializers.ModelSerializer):
     class Meta:
@@ -24,10 +24,13 @@ class Recipient_bank_details_Serializer(serializers.ModelSerializer):
           }
 
 class Transaction_details_web_Serializer(serializers.ModelSerializer):
+    agreement_uuid = serializers.SerializerMethodField()
     class Meta:
         model= Transaction_details
-        fields=['id', 'updated_at', 'rule','aml_pep_status','recipient_name','total_amount','discount_amount','recipient','exchange_rate', 'date', 'tm_label','transaction_id','card_type','recipient_name','customer_id','recipient','send_currency','receive_currency','amount','send_method', 'receive_amount','receive_method', 'payout_partner','payment_status', 'payment_status_reason','tm_status','reason','created_at', 'risk_score','risk_group']
-
+        fields=['id', 'updated_at', 'rule','aml_pep_status','recipient_name','total_amount','discount_amount','recipient','exchange_rate', 'date', 'tm_label','transaction_id','card_type','recipient_name','customer_id','recipient','send_currency','receive_currency','amount','send_method', 'receive_amount','receive_method', 'payout_partner','payment_status', 'payment_status_reason','tm_status','reason','created_at', 'risk_score','risk_group','agreement_uuid']
+    def get_agreement_uuid(self, obj):
+    # obj.agreement_uuid is added using annotate in your queryset
+        return getattr(obj, 'agreement_uuid', None)
 
 class stripe_create_card_details_Serializer(serializers.ModelSerializer):
     class Meta:
@@ -64,9 +67,14 @@ class Forex_Serializer(serializers.ModelSerializer):
 class Update_Recipient_Serializer(serializers.ModelSerializer):
     class Meta:
         model= Recipient
-        fields=['id','first_name','middle_name','last_name','email','mobile','flat','building','street', 'city','state','country', 'country_code', 'postcode','update_profile','transfer_now','address']
+        fields=['id','first_name','middle_name','last_name','email','flat','building','street', 'city','state','country', 'country_code', 'postcode','update_profile','transfer_now','address', 'account_type']
 
 class Update_Recipient_Bank_Serializer(serializers.ModelSerializer):
     class Meta:
         model= Recipient_bank_details
         fields=['bank_name','account_name', 'account_number','recipient_id']
+
+class Update_Recipient_Business_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model= Recipient_business_details
+        fields=['business_name','business_nature', 'registration_date','registration_number','registration_country','business_address','recipient_id']

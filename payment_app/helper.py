@@ -74,7 +74,7 @@ def is_birthday_coupon_used(user_id, birthday_type_id):
         exc_type, exc_obj, exc_tb = sys.exc_info()
         file_content = str(e)+ " in line " +str(exc_tb.tb_lineno)+" in payment_app/helpers"
         error_logs(file_content)
-        return str(e)+" in line "+str(exc_tb.tb_lineno)
+        return None
 
 """ Get birthday coupon """
 def get_birthday_coupon(user_id, referral_id, discount):
@@ -91,7 +91,7 @@ def get_birthday_coupon(user_id, referral_id, discount):
         exc_type, exc_obj, exc_tb = sys.exc_info()
         file_content = str(e)+ " in line " +str(exc_tb.tb_lineno)+" in payment_app/helpers"
         error_logs(file_content)
-        return str(e)+" in line "+str(exc_tb.tb_lineno)
+        return None
 
 """ Checking is coupon active or expired """
 def is_coupon_expired(status, start_date, end_date):
@@ -111,7 +111,7 @@ def is_coupon_expired(status, start_date, end_date):
         exc_type, exc_obj, exc_tb = sys.exc_info()
         file_content = str(e)+ " in line " +str(exc_tb.tb_lineno)+" in payment_app/helpers"
         error_logs(file_content)
-        return str(e)+" in line "+str(exc_tb.tb_lineno)  
+        return None  
     
 ################################ Zai  ################################  
 """ Search user email in zai to get zai user id """
@@ -126,7 +126,7 @@ def zai_search_email_id(access_token, email):
         exc_type, exc_obj, exc_tb = sys.exc_info()
         file_content = str(e)+ " in line " +str(exc_tb.tb_lineno)+" in payment_app/helpers"
         error_logs(file_content)
-        return str(e)+" in line "+str(exc_tb.tb_lineno)  
+        return None  
     
 """ Create user in zai """
 def zai_create_user(access_token, customer_id, email, mobile, fn, ln):
@@ -152,7 +152,7 @@ def zai_create_user(access_token, customer_id, email, mobile, fn, ln):
         exc_type, exc_obj, exc_tb = sys.exc_info()
         file_content = str(e)+ " in line " +str(exc_tb.tb_lineno)+" in payment_app/helpers"
         error_logs(file_content)
-        return str(e)+" in line "+str(exc_tb.tb_lineno)  
+        return None  
 
 """ Upate Zai User """   
 def zai_update_user(access_token, zai_user_id, first_name, last_name, iso_code, user_address, state, city):
@@ -174,7 +174,7 @@ def zai_update_user(access_token, zai_user_id, first_name, last_name, iso_code, 
         exc_type, exc_obj, exc_tb = sys.exc_info()
         file_content = str(e)+ " in line " +str(exc_tb.tb_lineno)+" in payment_app/helpers"
         error_logs(file_content)
-        return str(e)+" in line "+str(exc_tb.tb_lineno)  
+        return None  
     
 """ returning zai error """
 def zai_error(response):
@@ -192,7 +192,7 @@ def zai_error(response):
         exc_type, exc_obj, exc_tb = sys.exc_info()
         file_content = str(e)+ " in line " +str(exc_tb.tb_lineno)+" in payment_app/helpers"
         error_logs(file_content)
-        return str(e)+" in line "+str(exc_tb.tb_lineno)  
+        return None  
     
 """ Get user wallet id """
 def zai_get_user_wallet(access_token, zai_user_id):
@@ -206,7 +206,7 @@ def zai_get_user_wallet(access_token, zai_user_id):
         exc_type, exc_obj, exc_tb = sys.exc_info()
         file_content = str(e)+ " in line " +str(exc_tb.tb_lineno)+" in payment_app/helpers"
         error_logs(file_content)
-        return str(e)+" in line "+str(exc_tb.tb_lineno)  
+        return None  
     
 """ Get virtual account """
 def zai_virtual_account_list(access_token, wallet_account_id):
@@ -220,7 +220,7 @@ def zai_virtual_account_list(access_token, wallet_account_id):
         exc_type, exc_obj, exc_tb = sys.exc_info()
         file_content = str(e)+ " in line " +str(exc_tb.tb_lineno)+" in payment_app/helpers"
         error_logs(file_content)
-        return str(e)+" in line "+str(exc_tb.tb_lineno)  
+        return None  
     
 """ Create Bank Account """
 def create_zai_bank_account(access_token, user_id, bank_name, account_name, account_number, routing_number, account_type, holder_type):
@@ -248,7 +248,7 @@ def create_zai_bank_account(access_token, user_id, bank_name, account_name, acco
         file_content = str(e)+ " in line " +str(exc_tb.tb_lineno)+" in payment_app/helpers"
         error_logs(file_content)
         print(file_content)
-        return str(e)+" in line "+str(exc_tb.tb_lineno)  
+        return None  
 
 """ Create virtual account """
 def zai_create_virtual_account(access_token, wallet_account_id):
@@ -262,7 +262,7 @@ def zai_create_virtual_account(access_token, wallet_account_id):
         exc_type, exc_obj, exc_tb = sys.exc_info()
         file_content = str(e)+ " in line " +str(exc_tb.tb_lineno)+" in payment_app/helpers"
         error_logs(file_content)
-        return str(e)+" in line "+str(exc_tb.tb_lineno)  
+        return None  
     
 """ Creating payid in zai """
 def zai_create_payid(customer_id):
@@ -273,18 +273,18 @@ def zai_create_payid(customer_id):
         exc_type, exc_obj, exc_tb = sys.exc_info()
         file_content = str(e)+ " in line " +str(exc_tb.tb_lineno)+" in payment_app/helpers"
         error_logs(file_content)
-        return str(e)+" in line "+str(exc_tb.tb_lineno)  
+        return None  
     
 """ Register Payid in zai api """
-def zai_register_payid_peruser(access_token, virtual_account_id, payid, customer_id):
+def zai_register_payid_peruser(access_token, virtual_account_id, payid, customer_id, first_name, last_name):
     try:
         url = settings.ZAI_URL_ACCOUNT+"/virtual_accounts/"+virtual_account_id+"/pay_ids"
         payload = json.dumps({
         "pay_id": payid,
         "type": "EMAIL",
         "details": {
-            "pay_id_name": customer_id,
-            "owner_legal_name": customer_id
+            "pay_id_name": str(first_name)+" "+str(last_name),
+            "owner_legal_name": str(first_name)+" "+str(last_name)
         }
         })
         headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer '+access_token  }
@@ -363,13 +363,13 @@ def zai_validate_payto_agreement(payid_type, fn, ln, user_email, access_token, z
                 }
                 },
                 "creditor_info": {
-                "ultimate_creditor_name": "WidophRemit"
+                "ultimate_creditor_name": "RemitAssure"
                 },
                 "payment_initiator_info": {
                 "initiator_id": settings.ABN_NO,
                 "initiator_id_type_code": "AUBN",
-                "initiator_legal_name": "WidophRemit",
-                "initiator_name": "WidophRemit"
+                "initiator_legal_name": "RemitAssure",
+                "initiator_name": "RemitAssure"
                 },
                 "payment_terms": {
                 "payment_amount_info": {
@@ -410,13 +410,13 @@ def zai_validate_payto_agreement(payid_type, fn, ln, user_email, access_token, z
                 }
                 },
                 "creditor_info": {
-                "ultimate_creditor_name": "WidophRemit",
+                "ultimate_creditor_name": "RemitAssure",
                 },
                 "payment_initiator_info": {
                 "initiator_id": settings.ABN_NO,
                 "initiator_id_type_code": "AUBN",
-                "initiator_legal_name": "WidophRemit",
-                "initiator_name": "WidophRemit"
+                "initiator_legal_name": "RemitAssure",
+                "initiator_name": "RemitAssure"
                 },
                 "payment_terms": {
                 "payment_amount_info": {
@@ -495,6 +495,7 @@ def zai_get_agreement_details(agreement_uuid,access_token):
 """ Zai Agreement payment initiate request """
 def zai_initiate_payment(access_token, agreement_uuid, send_amount, payment_id, reason):
     try:
+        # print(agreement_uuid, send_amount, payment_id, reason, "===============")
         if '.' in str(send_amount):
             send_amount = float(send_amount)*100
         else:       
@@ -517,7 +518,7 @@ def zai_initiate_payment(access_token, agreement_uuid, send_amount, payment_id, 
         }
         response = requests.request("POST", url, headers=headers, data=payload)
         response = response.json()
-        print(response, "payment initiate api response ======================")
+        # print(response, "payment initiate api response ======================")
         return response
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -715,7 +716,7 @@ def discount_calculation(transaction_id, discount_amount, update):
         discount_amount = comma_value(discount_amount)
         total_amount = comma_value(total_amount)
         if update == True:
-            Transaction_details.objects.filter(transaction_id=transaction_id).update(total_amount=total_amount, amount = final_amount, discount_amount=discount_amount)
+            Transaction_details.objects.filter(transaction_id=transaction_id).update(total_amount=replace_comma(total_amount), amount=replace_comma(final_amount), discount_amount=replace_comma(discount_amount))
         return {'total_amount':total_amount, 'discount_amount':discount_amount, 'final_amount':final_amount}
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -775,6 +776,15 @@ def CreateErrorFile(file_content):
 
 def CreateTextFile(file_name, file_content):
     file_content = json.dumps(file_content)
+    file_path = os.path.join(settings.MEDIA_ROOT, file_name)
+    with open(file_path, 'a') as text_file:
+        text_file.write('\n\n' + "Date: ============>  "+ str(get_current_date()))
+        text_file.write('\n\n' + file_content)
+    return True
+
+def CreateCronJobFile(file_content):
+    file_content = json.dumps(file_content)
+    file_name = 'cronjo.txt'
     file_path = os.path.join(settings.MEDIA_ROOT, file_name)
     with open(file_path, 'a') as text_file:
         text_file.write('\n\n' + "Date: ============>  "+ str(get_current_date()))

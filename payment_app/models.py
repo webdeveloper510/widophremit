@@ -1,6 +1,22 @@
 from django.db import models
 from auth_app.models import *
 
+
+class currencies(models.Model):
+    type = models.CharField(max_length=300, null=True, blank=True)
+    country = models.CharField(max_length=300, null=True, blank=True)
+    currency =  models.CharField(max_length=300, null=True, blank=True)
+    currency_symbol =  models.CharField(max_length=300, null=True, blank=True)
+    phone_code =  models.CharField(max_length=300, null=True, blank=True)
+    country_code =  models.CharField(max_length=300, null=True, blank=True)
+    status =  models.CharField(max_length=300, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
+
+    class Meta:
+           verbose_name_plural = "RemitAssure Currencies List"
+
+
 class Recipient(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     first_name = models.CharField(max_length=250, null=True, blank=True)
@@ -19,7 +35,10 @@ class Recipient(models.Model):
     update_profile = models.CharField(max_length=90, null=True, blank=True)
     transfer_now = models.CharField(max_length=90, null=True, blank=True)
     address = models.TextField(null=True, blank=True)
+    delete = models.BooleanField(default=False)
 
+    account_type = models.CharField(max_length=250, null=True, default="individual")
+   
     def __str__(self):
         return "{}".format(self.id)
 
@@ -33,9 +52,25 @@ class Recipient_bank_details(models.Model):
     account_number = models.CharField(max_length=90)
     swift_code = models.CharField(max_length=90, null=True, blank=True)
     bank_address = models.TextField(max_length=300, null=True, blank=True)
-    
+    delete = models.BooleanField(default=False)
+
     class Meta:
            verbose_name_plural = "Recipient Bank Details"
+
+class Recipient_business_details(models.Model):
+    recipient = models.ForeignKey(Recipient, on_delete=models.CASCADE)
+    business_name = models.CharField(max_length=25,null=True, blank=True)
+    business_nature = models.CharField(max_length=25,null=True, blank=True)
+    registration_date = models.CharField(max_length=90,null=True, blank=True)
+    registration_number = models.CharField(max_length=25,null=True, blank=True)
+    registration_country = models.CharField(max_length=250,null=True, blank=True)
+    business_address = models.CharField(max_length=300,null=True, blank=True)
+    delete = models.BooleanField(default=False)
+
+    class Meta:
+           verbose_name_plural = "Recipient Business Details"
+
+
 
 class Transaction_details(models.Model):
     customer_id = models.CharField(max_length=90)
@@ -71,7 +106,8 @@ class Transaction_details(models.Model):
     paid_amount = models.CharField(max_length=250, blank=True, null=True)
     app_version = models.CharField(max_length=250, blank=True, null=True)
     platform =models.CharField(max_length=250, blank=True, null=True)
-    
+    currency = models.ForeignKey(currencies, on_delete=models.PROTECT, null=True, blank=True )
+
     class Meta:
            verbose_name_plural = "Transaction Details"
 
@@ -211,7 +247,9 @@ class zai_payid_details(models.Model):
     bsb_code = models.CharField(max_length = 150)
     account_number = models.CharField(max_length = 150)
     transaction_id = models.CharField(max_length = 150)
-
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
     class Meta:
            verbose_name_plural = "Zai payid"
 
@@ -237,6 +275,11 @@ class payment_status_details(models.Model):
 
 class withdraw_zai_funds(models.Model):
     type = models.CharField(max_length=300, null=True, blank=True)
+    transaction_type = models.CharField(max_length=300, null=True, blank=True)
+    bank_bic_code = models.CharField(max_length=300, null=True, blank=True)
+    transferor = models.CharField(max_length=300, null=True, blank=True)
+    creditor_agent_instruction = models.CharField(max_length=300, null=True, blank=True)
+    transaction_id = models.CharField(max_length=300, null=True, blank=True)
     source_id = models.CharField(max_length=300, null=True, blank=True)
     receiver_id = models.CharField(max_length=300, null=True, blank=True)
     destination_id = models.CharField(max_length=300, null=True, blank=True)
@@ -251,17 +294,7 @@ class withdraw_zai_funds(models.Model):
     class Meta:
            verbose_name_plural = "Withdraw Zai Funds Detail"
 
-class zai_admin_users(models.Model):
-    zai_user_id = models.CharField(max_length=300, null=True, blank=True)
-    zai_email = models.CharField(max_length=300, null=True, blank=True)
-    wallet_id =  models.CharField(max_length=300, null=True, blank=True)
-    bank_name =  models.CharField(max_length=300, null=True, blank=True)
-    bank_id =  models.CharField(max_length=300, null=True, blank=True)
-    date = models.DateField(auto_now_add=True)
-    created_at = models.DateTimeField(auto_now_add=True)
 
-    class Meta:
-           verbose_name_plural = "Zai WidophRemit Users"
 
 from django.conf import settings
 
@@ -308,8 +341,20 @@ class referral_meta(models.Model):
     class Meta:
            verbose_name_plural = "Referral Meta"
 
+class zai_admin_users(models.Model):
+    zai_user_id = models.CharField(max_length=300, null=True, blank=True)
+    zai_email = models.CharField(max_length=300, null=True, blank=True)
+    wallet_id =  models.CharField(max_length=300, null=True, blank=True)
+    bank_name =  models.CharField(max_length=300, null=True, blank=True)
+    bank_id =  models.CharField(max_length=300, null=True, blank=True)
+    date = models.DateField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+           verbose_name_plural = "Zai RemitAssure Users"
+           
 class zai_payout_users(models.Model):
+    type = models.CharField(max_length=300, null=True, blank=True)   
     zai_user_id = models.CharField(max_length=300, null=True, blank=True)
     zai_email = models.CharField(max_length=300, null=True, blank=True)
     nick_name = models.CharField(max_length=300, null=True, blank=True)
@@ -321,6 +366,8 @@ class zai_payout_users(models.Model):
     routing_number = models.CharField(max_length=300, null=True, blank=True)   
     wallet_id =  models.CharField(max_length=300, null=True, blank=True)
     bank_id =  models.CharField(max_length=300, null=True, blank=True)
+    account_type =  models.CharField(max_length=300, null=True, blank=True)
+    holder_type =  models.CharField(max_length=300, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -328,9 +375,11 @@ class zai_payout_users(models.Model):
            verbose_name_plural = "Zai Payout Accounts"
 
 class austrac_reports(models.Model):
-    transaction_id = models.CharField(max_length=350, null=True, blank=True)
-    type = models.CharField(max_length=350, null=True, blank=True)
+    batch_no = models.CharField(max_length=350, null=True, blank=True)
+    reference_no = models.CharField(max_length=350, null=True, blank=True)
     filename = models.CharField(max_length=350, null=True, blank=True)
+    type = models.CharField(max_length=350, null=True, blank=True)
+    transactions_count = models.IntegerField(null=True, blank=True, default=0)
     file = models.FileField(upload_to='austrac/', blank=True, null=True)
     path = models.CharField(max_length=350, null=True, blank=True)
     status = models.CharField(max_length=350, null=True, blank=True, default='pending')
@@ -344,3 +393,15 @@ class austrac_reports(models.Model):
         if self.file and not self.path:
             self.path = settings.BASE_URL+self.file.url
             super(austrac_reports, self).save(*args, **kwargs)
+
+class austrac_reports_detail(models.Model):
+    austrac_reports_id = models.ForeignKey(austrac_reports, on_delete=models.CASCADE)
+    reference_no = models.CharField(max_length=350, null=True, blank=True)
+    transaction_id = models.CharField(max_length=350, null=True, blank=True)
+    type = models.CharField(max_length=350, null=True, blank=True)
+    status = models.CharField(max_length=350, null=True, blank=True, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True, blank=True)
+
+    class Meta:
+        verbose_name_plural = "Austrac Reports Detail"
