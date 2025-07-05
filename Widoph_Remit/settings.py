@@ -585,8 +585,8 @@ REFERRED_TO_AMOUNT = 25 #invited to
 
 #custom otp for custom users to login with custom mobiles and emails
 CUSTOM_OTP = "902300"
-CUSTOM_MOBILES = []
-CUSTOM_EMAILS = []
+CUSTOM_MOBILES = ["+61123456789"]
+CUSTOM_EMAILS = ["madhav@gmail.com"]
 CUSTOMER_TYPES = [
   {"text":"Individual", "value":"individual"},
   {"text":"Business", "value":"business"}
