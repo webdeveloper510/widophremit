@@ -2262,7 +2262,12 @@ class Veriff_view(APIView):
     permission_classes=[IsAuthenticated]
 
     def post(self, request, format=None):
-
+        return Response({'code':"200", 'message':"success",'data':{
+            "first_name":"john",
+            "last_name":"de",
+            "email":"john@yopmail.com",
+            "status":True,
+            }})
         user_data=User.objects.get(id=request.user.id)
         url = settings.VERIFF_SESSION_URL
         api_key = settings.VERIFF_API_KEY
