@@ -12,8 +12,8 @@ load_dotenv()
 
 # HOST = "TEST"
 # HOST = "DEV"
-# HOST= "DEV"
-HOST= "LOCAL"
+HOST= "DEV"
+# HOST= "LOCAL"
 
 if HOST == "TEST":
   SEND_OTP = False
