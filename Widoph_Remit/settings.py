@@ -12,7 +12,8 @@ load_dotenv()
 
 # HOST = "TEST"
 # HOST = "DEV"
-HOST= "DEV"
+# HOST= "DEV"
+HOST= "LOCAL"
 
 if HOST == "TEST":
   SEND_OTP = False
@@ -297,6 +298,7 @@ elif HOST == "DEV":
   "http://54.151.50.98:8001",
   "http://54.151.50.98",
   "http://localhost:3000",
+  "http://localhost:5173",
   ]
   
   BASE_URL= "http://54.151.50.98:8000"
